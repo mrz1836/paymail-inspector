@@ -1,0 +1,31 @@
+# Fast runner (trick from @y0ssar1an) (out-dated)
+sudo: false
+
+# Language of deployment
+language: go
+
+# Version
+go:
+ - 1.14.x
+
+# Environment variables
+env:
+ - GO111MODULE=on
+
+# Only clone the most recent commit
+git:
+ depth: 1
+
+# Notifications off
+notifications:
+ email: false
+
+# Before we run scripts
+before_script:
+ - go get -u golang.org/x/lint/golint
+
+# Run scripts in parallel
+script:
+ - golint
+ - go vet
+ - go test -short -v ./...
