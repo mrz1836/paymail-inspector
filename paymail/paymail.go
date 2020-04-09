@@ -31,6 +31,9 @@ func ExtractParts(paymailInput string) (domain, address string) {
 		// Force all domain names to lowercase
 		domain = strings.ToLower(parts[1])
 
+		// Combine the address back
+		address = parts[0] + "@" + domain
+
 	} else {
 		// Force all domain names to lowercase and trim spaces
 		domain = strings.TrimSpace(strings.ToLower(paymailInput))
