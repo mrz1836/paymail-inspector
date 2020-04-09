@@ -1,3 +1,6 @@
+/*
+Package paymail encapsulates all the paymail methods and defaults
+*/
 package paymail
 
 import (

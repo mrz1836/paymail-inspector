@@ -23,8 +23,8 @@ const (
 // rootCmd represents the base command when called without any sub-commands
 var rootCmd = &cobra.Command{
 	Use:     configDefault,
-	Short:   "Inspect paymail domains or addresses",
-	Long:    `This CLI tool can help you inspect a paymail domain or paymail address`,
+	Short:   "Inspect, validate or resolve paymail domains and addresses",
+	Long:    `This CLI tool can help you inspect, validate or resolve a paymail domain/address`,
 	Version: "0.0.1",
 }
 
@@ -38,6 +38,8 @@ func Execute() {
 }
 
 func init() {
+
+	// Load the configuration
 	cobra.OnInitialize(initConfig)
 
 	// Add config option

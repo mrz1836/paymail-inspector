@@ -1,5 +1,5 @@
 # paymail-inspector
-**paymail-inspector** is a CLI tool for inspecting paymail addresses and domains
+**paymail-inspector** is a CLI tool for inspecting, validating and resolving paymail addresses and domains
 
 [![Go](https://img.shields.io/github/go-mod/go-version/mrz1836/paymail-inspector)](https://golang.org/)
 [![Build Status](https://travis-ci.com/mrz1836/paymail-inspector.svg?branch=master)](https://travis-ci.com/mrz1836/paymail-inspector)
@@ -53,13 +53,20 @@ $ go mod tidy
 ## Documentation
 You can view the generated [documentation here](https://godoc.org/github.com/mrz1836/paymail-inspector).
 
+Also checkout the [official paymail specifications](http://bsvalias.org/index.html). Additional information can also be found via [MoneyButton's documentation](https://docs.moneybutton.com/docs/paymail-overview.html)
+
 ### Features
-- [x] Validate any domain or paymail address
-- [x] Check the SRV record, DNSSEC and SSL for the target domain
-- [x] Check for required capabilities (pki, paymentDestination)
-- [x] Validate the pki response
-- [x] List paymail capabilities
-- [ ] Resolve a paymail address
+- [x] Validate any paymail domain or paymail address
+- [x] Customize the validation requirements via application flags
+- [x] Validate the SRV record, DNSSEC and SSL for the target domain
+- [x] Validation for required capabilities (`pki`, `paymentDestination`)
+- [x] List paymail capabilities ([.well-known/bsvalias](http://bsvalias.org/02-02-capability-discovery.html))
+- [x] Validate the `pki` response (brfc: [0c4339ef99c2](http://bsvalias.org/03-public-key-infrastructure.html))
+- [ ] Resolve a paymail address (brfc: [759684b1a19a](http://bsvalias.org/04-01-basic-address-resolution.html))
+- [ ] Sender validation (brfc: [6745385c3fc0](http://bsvalias.org/04-02-sender-validation.html))
+- [ ] Receiver approvals (brfc: [3d7c2ca83a46](http://bsvalias.org/04-03-receiver-approvals.html))
+- [ ] PayTo protocol prefix (brfc: [7bd25e5a1fc6](http://bsvalias.org/04-04-payto-protocol-prefix.html))
+- [ ] Verify public key owner (brfc: [a9f510c16bde](http://bsvalias.org/05-verify-public-key-owner.html))
 
 ## Examples & Tests
 All unit tests and [examples](examples/examples.go) run via [Travis CI](https://travis-ci.com/mrz1836/paymail-inspector) and uses [Go version 1.14.x](https://golang.org/doc/go1.14). View the [deployment configuration file](.travis.yml).
@@ -93,7 +100,7 @@ View the [examples](examples/examples.go)
 
 Inspiration and code snippets from [dnssec](https://github.com/binaryfigments/dnssec) and [check-ssl](https://github.com/wycore/check-ssl)
 
-Utilized [terminalizer](https://terminalizer.com/) to record cool gifs!
+Utilized [terminalizer](https://terminalizer.com/) to record example gifs
 
 View the [contributing guidelines](CONTRIBUTING.md) and follow the [code of conduct](CODE_OF_CONDUCT.md).
 
