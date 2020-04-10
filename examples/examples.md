@@ -1,4 +1,4 @@
-## Paymail Inspector Examples
+## Paymail Inspector: Examples & Docs
 Below are some examples using **paymail-inspector**
 
 #### View All Commands (Help)

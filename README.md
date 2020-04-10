@@ -53,7 +53,7 @@ $ go mod tidy
 ```
 
 ## Documentation
-You can view the generated [documentation here](examples/examples.md).
+You can view the [examples and documentation](examples/examples.md).
 
 Also checkout the [official paymail specifications](http://bsvalias.org/index.html).
 Additional information can also be found via [MoneyButton's documentation](https://docs.moneybutton.com/docs/paymail-overview.html).
