@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/mitchellh/go-homedir"
+	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/mrz1836/paymail-inspector/paymail"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -21,10 +22,9 @@ var (
 
 // Defaults for the application
 const (
-	configDefault     = "paymail-inspector"  // Config file and application name
-	defaultDomainName = "moneybutton.com"    // Used in examples
-	defaultNameServer = "8.8.8.8"            // Default DNS NameServer
-	logPrefix         = "paymail-inspector:" // Prefix for the logs in the CLI application output
+	configDefault     = "paymail-inspector" // Config file and application name
+	defaultDomainName = "moneybutton.com"   // Used in examples
+	defaultNameServer = "8.8.8.8"           // Default DNS NameServer
 )
 
 // rootCmd represents the base command when called without any sub-commands
@@ -46,6 +46,9 @@ func Execute() {
 
 func init() {
 
+	// Set chalker application prefix
+	chalker.SetPrefix("paymail-inspector:")
+
 	// Load the configuration
 	cobra.OnInitialize(initConfig)
 
@@ -53,7 +56,8 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "config file (default is $HOME/."+configDefault+".yaml)")
 
 	// Add a bsvalias version to target
-	rootCmd.PersistentFlags().StringVar(&bsvAliasVersion, "bsvalias", paymail.DefaultBsvAliasVersion, "The bsvalias version (default is "+paymail.DefaultBsvAliasVersion+")")
+	rootCmd.PersistentFlags().StringVar(&bsvAliasVersion, "bsvalias", paymail.DefaultBsvAliasVersion, "The bsvalias version")
+
 }
 
 // initConfig reads in config file and ENV variables if set.
