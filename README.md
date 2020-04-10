@@ -1,4 +1,5 @@
-# paymail-inspector
+<img src=".github/IMAGES/paymail-inspector.png" height="250" alt="Paymail Inspector">
+
 **paymail-inspector** is a CLI tool for inspecting, validating and resolving paymail addresses and domains
 
 [![Go](https://img.shields.io/github/go-mod/go-version/mrz1836/paymail-inspector)](https://golang.org/)
