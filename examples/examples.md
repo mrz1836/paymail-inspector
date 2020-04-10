@@ -5,7 +5,13 @@ Below are some examples using **paymail-inspector**
 ```bash
 $ paymail-inspector -h
 ```
-<img src="../.github/IMAGES/help-command.gif?raw=true" alt="Help Command">
+<img src="../.github/IMAGES/help-command.gif?raw=true&v=1" alt="Help Command">
+
+Global flags for the entire application
+```
+  --bsvalias string   The bsvalias version (default: 1.0)
+  --config string     config file (default is $HOME/.paymail-inspector.yaml)
+```
 
 ___
 
@@ -13,15 +19,15 @@ ___
 ```bash
 $ paymail-inspector capabilities moneybutton.com
 ```
-<img src="../.github/IMAGES/capabilities-command.gif?raw=true" alt="Capabilities Command">
+<img src="../.github/IMAGES/capabilities-command.gif?raw=true&v=1" alt="Capabilities Command">
 
 ___
 
 #### Resolve Paymail Address (by Paymail)
 ```bash
-$ paymail-inspector resolve this@address.com
+$ paymail-inspector resolve mrz@moneybutton.com
 ```
-<img src="../.github/IMAGES/resolve-command.gif?raw=true" alt="Resolve Command">
+<img src="../.github/IMAGES/resolve-command.gif?raw=true&v=1" alt="Resolve Command">
 
 Custom flags for creating the "sender request":
 ```
@@ -39,7 +45,7 @@ ___
 ```bash
 $ paymail-inspector validate moneybutton.com --priority 1 --skip-dnssec
 ```
-<img src="../.github/IMAGES/validate-command.gif?raw=true" alt="Validate Command">
+<img src="../.github/IMAGES/validate-command.gif?raw=true&v=1" alt="Validate Command">
 
 Custom flags for configuring the validation (enable/disable checks)
 ```

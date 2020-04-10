@@ -48,7 +48,7 @@ This CLI tool can help you inspect, validate or resolve a paymail domain/address
 
 Feel free to contribute via Github
 `,
-	Version: "0.0.6",
+	Version: "0.0.7",
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -69,7 +69,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "config file (default is $HOME/."+configDefault+".yaml)")
 
 	// Add a bsvalias version to target
-	rootCmd.PersistentFlags().String(flagBsvAlias, paymail.DefaultBsvAliasVersion, fmt.Sprintf("The %s version (default: %s)", flagBsvAlias, paymail.DefaultBsvAliasVersion))
+	rootCmd.PersistentFlags().String(flagBsvAlias, paymail.DefaultBsvAliasVersion, fmt.Sprintf("The %s version", flagBsvAlias))
 	er(viper.BindPFlag(flagBsvAlias, rootCmd.PersistentFlags().Lookup(flagBsvAlias)))
 }
 
