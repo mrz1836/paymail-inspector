@@ -16,7 +16,37 @@ const (
 	defaultDnsPort           = "53"  // Default port for DNS / NameServer checks
 	defaultNameServerNetwork = "udp" // Default for NS dialer
 	defaultTimeout           = 5     // In seconds
-	maxSRVRecords            = 1     // Given by paymail specs
+	defaultUserAgent         = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36"
+	maxSRVRecords            = 1        // Given by paymail specs
+	pubKeyLength             = 66       // Required length for a valid PubKey
+	typeBool                 = "bool"   // For bool detection
+	typeString               = "string" // For string detection
+)
+
+/*
+http://bsvalias.org/02-01-host-discovery.html
+
+Service	  bsvalias
+Proto	  tcp
+Name	  <domain>.<tld>.
+TTL	      3600 (see notes)
+Class	  IN
+Priority  10
+Weight	  10
+Port	  443
+Target	  <endpoint-discovery-host>
+
+Max SRV Records:  1
+*/
+
+// Public defaults for paymail specs
+const (
+	DefaultBsvAliasVersion = "1.0"      // Default version number for bsvalias
+	DefaultPort            = 443        // Default port (from specs)
+	DefaultPriority        = 10         // Default priority (from specs)
+	DefaultProtocol        = "tcp"      // Default protocol (from specs)
+	DefaultServiceName     = "bsvalias" // Default service name (from specs)
+	DefaultWeight          = 10         // Default weight (from specs)
 )
 
 // ExtractParts will check if it's a domain or address and extract the parts
