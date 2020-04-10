@@ -21,6 +21,7 @@ ___
 ```bash
 $ paymail-inspector resolve this@address.com --sender-handle you@yourdomain.com
 ```
+<img src="../.github/IMAGES/resolve-command.gif?raw=true" height="350" width="500" alt="Resolve Command">
 
 Custom flags for creating the "sender request":
 ```
@@ -36,8 +37,9 @@ ___
 
 #### Validate Paymail Setup (by Paymail or Domain)
 ```bash
-$ paymail-inspector validate moneybutton.com
+$ paymail-inspector validate moneybutton.com --priority 1 --skip-dnssec
 ```
+<img src="../.github/IMAGES/validate-command.gif?raw=true" height="350" width="500" alt="Validate Command">
 
 Custom flags for configuring the validation (enable/disable checks)
 ```
