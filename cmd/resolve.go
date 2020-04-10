@@ -141,9 +141,9 @@ var resolveCmd = &cobra.Command{
 
 		// Success!
 		chalker.Log(chalker.SUCCESS, "address resolution successful")
-		chalker.Log(chalker.SUCCESS, fmt.Sprintf("pubkey: %s", pki.PubKey))
-		chalker.Log(chalker.SUCCESS, fmt.Sprintf("output hash: %s", resolution.Output))
-		chalker.Log(chalker.SUCCESS, fmt.Sprintf("address: %s", resolution.Address))
+		chalker.Log(chalker.INFO, fmt.Sprintf("pubkey: %s", pki.PubKey))
+		chalker.Log(chalker.INFO, fmt.Sprintf("output hash: %s", resolution.Output))
+		chalker.Log(chalker.INFO, fmt.Sprintf("address: %s", resolution.Address))
 	},
 }
 
