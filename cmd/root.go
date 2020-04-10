@@ -33,7 +33,7 @@ var rootCmd = &cobra.Command{
 	Use:     configDefault,
 	Short:   "Inspect, validate or resolve paymail domains and addresses",
 	Long:    `This CLI tool can help you inspect, validate or resolve a paymail domain/address`,
-	Version: "0.0.4",
+	Version: "0.0.5",
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
