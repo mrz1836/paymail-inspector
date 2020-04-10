@@ -34,7 +34,6 @@ func Error(body string) error {
 
 // Log chalks stuff to console, returns nothing
 func Log(level string, body string) {
-
 	switch level {
 	case INFO:
 		fmt.Printf("%s%s%s%s%s\n", chalk.Cyan, chalk.Dim.TextStyle(logPrefix), spacer, body, chalk.Reset)
