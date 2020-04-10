@@ -76,9 +76,9 @@ var capabilitiesCmd = &cobra.Command{
 				chalker.Log(chalker.INFO, fmt.Sprintf("%s: %-28v %s: %s", chalk.White.Color("capability"), chalk.Cyan.Color(key), chalk.White.Color("target"), chalk.Yellow.Color(fmt.Sprintf("%s", val))))
 			} else if valType == "bool" { // See: http://bsvalias.org/04-02-sender-validation.html
 				if val.(bool) {
-					chalker.Log(chalker.INFO, fmt.Sprintf("%s: %-28v is      %s\n", chalk.White.Color("capability"), chalk.Cyan.Color(key), chalk.Green.Color("enabled")))
+					chalker.Log(chalker.INFO, fmt.Sprintf("%s: %-28v is      %s", chalk.White.Color("capability"), chalk.Cyan.Color(key), chalk.Green.Color("enabled")))
 				} else {
-					chalker.Log(chalker.INFO, fmt.Sprintf("%s: %-28v is      %s\n", chalk.White.Color("capability"), chalk.Cyan.Color(key), chalk.Magenta.Color("disabled")))
+					chalker.Log(chalker.INFO, fmt.Sprintf("%s: %-28v is      %s", chalk.White.Color("capability"), chalk.Cyan.Color(key), chalk.Magenta.Color("disabled")))
 				}
 			}
 		}
