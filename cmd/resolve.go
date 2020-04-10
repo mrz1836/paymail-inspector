@@ -26,7 +26,7 @@ var resolveCmd = &cobra.Command{
 	Long:       `Resolves a paymail address into a hex-encoded Bitcoin script and address`,
 	Aliases:    []string{"resolution", "address_resolution"},
 	SuggestFor: []string{"address", "destination"},
-	Example:    "resolve this@address.com --sender-handle you@yourdomain.com",
+	Example:    "resolve this@address.com",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return fmt.Errorf("%s requires either a paymail address\n", logPrefix)
@@ -46,21 +46,27 @@ var resolveCmd = &cobra.Command{
 			return
 		}
 
-		// Validate the email format for the paymail address (paymail addresses follow conventional email requirements)
+		// Validate the format for the paymail address (paymail addresses follow conventional email requirements)
 		if ok, err := validate.IsValidEmail(paymailAddress, false); err != nil {
-			fmt.Printf("%s paymail address failed email format validation: %s\n", logPrefix, err.Error())
+			fmt.Printf("%s paymail address failed format validation: %s\n", logPrefix, err.Error())
 			return
 		} else if !ok {
-			fmt.Printf("%s paymail address failed email format validation: %s\n", logPrefix, "unknown reason")
+			fmt.Printf("%s paymail address failed format validation: %s\n", logPrefix, "unknown reason")
 			return
 		}
 
-		// Validate the email format for the given handle
+		// No sender handle given? (set to the receiver's paymail address)
+		if len(senderHandle) == 0 {
+			senderHandle = paymailAddress
+			fmt.Printf("%s --sender-handle not set, using: %s\n", logPrefix, paymailAddress)
+		}
+
+		// Validate the format for the given handle
 		if ok, err := validate.IsValidEmail(senderHandle, false); err != nil {
-			fmt.Printf("%s sender handle failed email format validation: %s\n", logPrefix, err.Error())
+			fmt.Printf("%s sender handle failed format validation: %s\n", logPrefix, err.Error())
 			return
 		} else if !ok {
-			fmt.Printf("%s sender handle failed email format validation: %s\n", logPrefix, "unknown reason")
+			fmt.Printf("%s sender handle failed format validation: %s\n", logPrefix, "unknown reason")
 			return
 		}
 
@@ -148,8 +154,7 @@ func init() {
 	resolveCmd.Flags().StringVarP(&purpose, "purpose", "p", "", "Purpose for the transaction")
 
 	// Set the sender's handle for the sender request
-	resolveCmd.Flags().StringVar(&senderHandle, "sender-handle", "", "(Required) The sender's paymail handle")
-	_ = resolveCmd.MarkFlagRequired("sender-handle")
+	resolveCmd.Flags().StringVar(&senderHandle, "sender-handle", "", "The sender's paymail handle (if not given it will be the receivers address)")
 
 	// Set the sender's name for the sender request
 	resolveCmd.Flags().StringVarP(&senderName, "sender-name", "n", "", "The sender's name")

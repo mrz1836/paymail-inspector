@@ -19,7 +19,7 @@ ___
 
 #### Resolve Paymail Address (by Paymail)
 ```bash
-$ paymail-inspector resolve this@address.com --sender-handle you@yourdomain.com
+$ paymail-inspector resolve this@address.com
 ```
 <img src="../.github/IMAGES/resolve-command.gif?raw=true" height="350" width="500" alt="Resolve Command">
 
@@ -28,7 +28,7 @@ Custom flags for creating the "sender request":
   -a, --amount uint            Amount in satoshis for the payment request
   -h, --help                   help for resolve
   -p, --purpose string         Purpose for the transaction
-      --sender-handle string   (Required) The sender's paymail handle
+      --sender-handle string   The sender's paymail handle (if not given it will be the receivers address)
   -n, --sender-name string     The sender's name
   -s, --signature string       The signature of the entire request
 ```

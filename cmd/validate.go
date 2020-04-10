@@ -50,12 +50,12 @@ var validateCmd = &cobra.Command{
 		if len(paymailAddress) > 0 {
 			fmt.Printf("%s paymail address detected: %s\n", logPrefix, paymailAddress)
 
-			// Validate the email format for the paymail address (paymail addresses follow conventional email requirements)
+			// Validate the format for the paymail address (paymail addresses follow conventional email requirements)
 			if ok, err := validate.IsValidEmail(paymailAddress, false); err != nil {
-				fmt.Printf("%s paymail address failed email format validation: %s\n", logPrefix, err.Error())
+				fmt.Printf("%s paymail address failed format validation: %s\n", logPrefix, err.Error())
 				return
 			} else if !ok {
-				fmt.Printf("%s paymail address failed email format validation: %s\n", logPrefix, "unknown reason")
+				fmt.Printf("%s paymail address failed format validation: %s\n", logPrefix, "unknown reason")
 				return
 			}
 
