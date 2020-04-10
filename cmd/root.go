@@ -11,7 +11,6 @@ import (
 	"github.com/mrz1836/paymail-inspector/paymail"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/ttacon/chalk"
 )
 
 // The config file if used
@@ -51,10 +50,10 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	// Add config option
-	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", chalk.Cyan.Color("config file (default is $HOME/."+configDefault+".yaml)"))
+	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "config file (default is $HOME/."+configDefault+".yaml)")
 
 	// Add a bsvalias version to target
-	rootCmd.PersistentFlags().StringVar(&bsvAliasVersion, "bsvalias", paymail.DefaultBsvAliasVersion, chalk.Cyan.Color("The bsvalias version"))
+	rootCmd.PersistentFlags().StringVar(&bsvAliasVersion, "bsvalias", paymail.DefaultBsvAliasVersion, "The bsvalias version")
 }
 
 // initConfig reads in config file and ENV variables if set.

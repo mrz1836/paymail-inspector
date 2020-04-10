@@ -7,6 +7,7 @@ import (
 	"github.com/mrz1836/go-validate"
 	"github.com/mrz1836/paymail-inspector/paymail"
 	"github.com/spf13/cobra"
+	"github.com/ttacon/chalk"
 )
 
 // Default flag values
@@ -33,126 +34,126 @@ var validateCmd = &cobra.Command{
 	SuggestFor: []string{"valid", "check", "lookup"},
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
-			return fmt.Errorf("%s requires either a domain or paymail address\n", logPrefix)
+			return fmt.Errorf("%s requires either a domain or paymail address\n", chalk.Dim.TextStyle(logPrefix))
 		} else if len(args) > 1 {
-			return fmt.Errorf("%s validate only supports one domain or address at a time\n", logPrefix)
+			return fmt.Errorf("%s validate only supports one domain or address at a time\n", chalk.Dim.TextStyle(logPrefix))
 		}
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 
-		fmt.Printf("%s starting validation... found args: %s\n", logPrefix, args)
+		fmt.Printf("%s starting validation... found args: %s\n", chalk.Dim.TextStyle(logPrefix), args)
 
 		// Extract the parts given
 		domain, paymailAddress := paymail.ExtractParts(args[0])
 
 		// Are we an address?
 		if len(paymailAddress) > 0 {
-			fmt.Printf("%s paymail address detected: %s\n", logPrefix, paymailAddress)
+			fmt.Printf("%s paymail address detected: %s\n", chalk.Dim.TextStyle(logPrefix), paymailAddress)
 
 			// Validate the format for the paymail address (paymail addresses follow conventional email requirements)
 			if ok, err := validate.IsValidEmail(paymailAddress, false); err != nil {
-				fmt.Printf("%s paymail address failed format validation: %s\n", logPrefix, err.Error())
+				fmt.Printf("%s paymail address failed format validation: %s\n", chalk.Dim.TextStyle(logPrefix), err.Error())
 				return
 			} else if !ok {
-				fmt.Printf("%s paymail address failed format validation: %s\n", logPrefix, "unknown reason")
+				fmt.Printf("%s paymail address failed format validation: %s\n", chalk.Dim.TextStyle(logPrefix), "unknown reason")
 				return
 			}
 
 		} else {
-			fmt.Printf("%s domain detected: %s\n", logPrefix, domain)
+			fmt.Printf("%s domain detected: %s\n", chalk.Dim.TextStyle(logPrefix), domain)
 		}
 
 		// Check for a real domain (require at least one period)
 		if !strings.Contains(domain, ".") {
-			fmt.Printf("%s domain name is invalid: %s\n", logPrefix, domain)
+			fmt.Printf("%s%s domain name is invalid: %s%s\n", chalk.Magenta, chalk.Dim.TextStyle(logPrefix), domain, chalk.Reset)
 			return
 		} else if !validate.IsValidDNSName(domain) { // Basic DNS check (not a REAL domain name check)
-			fmt.Printf("%s domain name failed DNS check: %s\n", logPrefix, domain)
+			fmt.Printf("%s%s domain name failed DNS check: %s%s\n", chalk.Magenta, chalk.Dim.TextStyle(logPrefix), domain, chalk.Reset)
 			return
 		}
 
 		// Get the SRV record
-		fmt.Printf("%s getting SRV record...\n", logPrefix)
+		fmt.Printf("%s getting SRV record...\n", chalk.Dim.TextStyle(logPrefix))
 		srv, err := paymail.GetSRVRecord(serviceName, protocol, domain, nameServer)
 		if err != nil {
-			fmt.Printf("%s error getting SRV record: %s\n", logPrefix, err.Error())
+			fmt.Printf("%s%s error getting SRV record: %s%s\n", chalk.Magenta, chalk.Dim.TextStyle(logPrefix), err.Error(), chalk.Reset)
 			return
 		}
 
 		// Validate the SRV record for the domain name (using all flags or default values)
 		if err = paymail.ValidateSRVRecord(srv, nameServer, port, priority, weight); err != nil {
-			fmt.Printf("%s failed validating SRV record: %s\n", logPrefix, err.Error())
+			fmt.Printf("%s%s failed validating SRV record: %s%s\n", chalk.Magenta, chalk.Dim.TextStyle(logPrefix), err.Error(), chalk.Reset)
 			return
 		}
 
 		// Success message
-		fmt.Printf("%s SRV record passed all validations (target, port, priority, weight)\n", logPrefix)
-		fmt.Printf("%s target record found: %s\n", logPrefix, srv.Target)
+		fmt.Printf("%s%s SRV record passed all validations (target, port, priority, weight)\n", chalk.Green, chalk.Dim.TextStyle(logPrefix))
+		fmt.Printf("%s target record found: %s%s\n", chalk.Dim.TextStyle(logPrefix), srv.Target, chalk.Reset)
 
 		// Validate the DNSSEC if the flag is true
 		if !skipDnsCheck {
-			fmt.Printf("%s checking %s for DNSSEC validation...\n", logPrefix, srv.Target)
+			fmt.Printf("%s checking %s for DNSSEC validation...\n", chalk.Dim.TextStyle(logPrefix), srv.Target)
 
 			if result := paymail.CheckDNSSEC(srv.Target, nameServer); result.DNSSEC {
-				fmt.Printf("%s DNSSEC found and valid and found %d DS record(s)\n", logPrefix, result.Answer.DSRecordCount)
+				fmt.Printf("%s%s DNSSEC found and valid and found %d DS record(s)%s\n", chalk.Green, chalk.Dim.TextStyle(logPrefix), result.Answer.DSRecordCount, chalk.Reset)
 			} else {
-				fmt.Printf("%s DNSSEC not found or invalid for %s\n", logPrefix, result.Domain)
+				fmt.Printf("%s%s DNSSEC not found or invalid for %s%s\n", chalk.Magenta, chalk.Dim.TextStyle(logPrefix), result.Domain, chalk.Reset)
 				if len(result.ErrorMessage) > 0 {
-					fmt.Printf("%s error checking DNSSEC: %s\n", logPrefix, result.ErrorMessage)
+					fmt.Printf("%s%s error checking DNSSEC: %s%s\n", chalk.Magenta, chalk.Dim.TextStyle(logPrefix), result.ErrorMessage, chalk.Reset)
 				}
 				return
 			}
 		} else {
-			fmt.Printf("%s skipping DNSSEC check for %s\n", logPrefix, srv.Target)
+			fmt.Printf("%s skipping DNSSEC check for %s\n", chalk.Dim.TextStyle(logPrefix), srv.Target)
 		}
 
 		// Validate that there is SSL on the target
 		if !skipSSLCheck {
-			fmt.Printf("%s checking %s for SSL validation...\n", logPrefix, srv.Target)
+			fmt.Printf("%s checking %s for SSL validation...\n", chalk.Dim.TextStyle(logPrefix), srv.Target)
 
 			var valid bool
 			if valid, err = paymail.CheckSSL(srv.Target, nameServer); err != nil {
-				fmt.Printf("%s error checking SSL: %s\n", logPrefix, err.Error())
+				fmt.Printf("%s%s error checking SSL: %s%s\n", chalk.Magenta, chalk.Dim.TextStyle(logPrefix), err.Error(), chalk.Reset)
 				return
 			} else if !valid {
-				fmt.Printf("%s SSL is not valid or not found\n", logPrefix)
+				fmt.Printf("%s%s SSL is not valid or not found%s\n", chalk.Magenta, chalk.Dim.TextStyle(logPrefix), chalk.Reset)
 				return
 			}
-			fmt.Printf("%s SSL found and valid\n", logPrefix)
+			fmt.Printf("%s%s SSL found and valid%s\n", chalk.Green, chalk.Dim.TextStyle(logPrefix), chalk.Reset)
 		} else {
-			fmt.Printf("%s skipping SSL check for %s\n", logPrefix, srv.Target)
+			fmt.Printf("%s skipping SSL check for %s\n", chalk.Dim.TextStyle(logPrefix), srv.Target)
 		}
 
 		// Now lookup the capabilities
-		fmt.Printf("%s getting capabilities...\n", logPrefix)
+		fmt.Printf("%s getting capabilities...\n", chalk.Dim.TextStyle(logPrefix))
 		var capabilities *paymail.CapabilitiesResponse
 		if capabilities, err = paymail.GetCapabilities(srv.Target, int(srv.Port)); err != nil {
-			fmt.Printf("%s get capabilities failed: %s\n", logPrefix, err.Error())
+			fmt.Printf("%s%s get capabilities failed: %s%s\n", chalk.Magenta, chalk.Dim.TextStyle(logPrefix), err.Error(), chalk.Reset)
 			return
 		}
 
 		// Check the version
 		if capabilities.BsvAlias != bsvAliasVersion {
-			fmt.Printf("%s capabilities bsvalias version mismatch, expected: %s but got: %s\n", logPrefix, bsvAliasVersion, capabilities.BsvAlias)
+			fmt.Printf("%s%s capabilities bsvalias version mismatch, expected: %s but got: %s%s\n", chalk.Magenta, chalk.Dim.TextStyle(logPrefix), bsvAliasVersion, capabilities.BsvAlias, chalk.Reset)
 			return
 		}
 
 		// Show some basic results
-		fmt.Printf("%s bsvalias version: %s\n", logPrefix, capabilities.BsvAlias)
-		fmt.Printf("%s total capabilities found: %d\n", logPrefix, len(capabilities.Capabilities))
+		fmt.Printf("%s%s bsvalias version: %s%s\n", chalk.Cyan, chalk.Dim.TextStyle(logPrefix), capabilities.BsvAlias, chalk.Reset)
+		fmt.Printf("%s total capabilities found: %d\n", chalk.Dim.TextStyle(logPrefix), len(capabilities.Capabilities))
 
 		// Missing required capabilities?
 		if len(capabilities.Pki) == 0 {
-			fmt.Printf("%s missing required capability: %s\n", logPrefix, paymail.CapabilityPki)
+			fmt.Printf("%s%s missing required capability: %s%s\n", chalk.Yellow, chalk.Dim.TextStyle(logPrefix), paymail.CapabilityPki, chalk.Reset)
 			return
 		} else if len(capabilities.PaymentDestination) == 0 {
-			fmt.Printf("%s missing required capability: %s\n", logPrefix, paymail.CapabilityPaymentDestination)
+			fmt.Printf("%s%s missing required capability: %s%s\n", chalk.Yellow, chalk.Dim.TextStyle(logPrefix), paymail.CapabilityPaymentDestination, chalk.Reset)
 			return
 		}
 
 		// Passed the capabilities check
-		fmt.Printf("%s found required %s and %s capabilities\n", logPrefix, paymail.CapabilityPki, paymail.CapabilityPaymentDestination)
+		fmt.Printf("%s%s found required %s and %s capabilities%s\n", chalk.Cyan, chalk.Dim.TextStyle(logPrefix), paymail.CapabilityPki, paymail.CapabilityPaymentDestination, chalk.Reset)
 
 		// Only if we have an address (extra validations)
 		if len(paymailAddress) > 0 {
@@ -161,21 +162,21 @@ var validateCmd = &cobra.Command{
 			parts := strings.Split(paymailAddress, "@")
 
 			// Get the PKI for the given address
-			fmt.Printf("%s getting PKI...\n", logPrefix)
+			fmt.Printf("%s getting PKI...\n", chalk.Dim.TextStyle(logPrefix))
 			var pki *paymail.PKIResponse
 			if pki, err = paymail.GetPKI(capabilities.Pki, parts[0], domain); err != nil {
-				fmt.Printf("%s get PKI failed: %s\n", logPrefix, err.Error())
+				fmt.Printf("%s%s get PKI failed: %s%s\n", chalk.Magenta, logPrefix, err.Error(), chalk.Reset)
 				return
 			}
 
 			// Check the version
 			if pki.BsvAlias != bsvAliasVersion {
-				fmt.Printf("%s pki bsvalias version mismatch, expected: %s but got: %s\n", logPrefix, bsvAliasVersion, capabilities.BsvAlias)
+				fmt.Printf("%s%s pki bsvalias version mismatch, expected: %s but got: %s%s\n", chalk.Magenta, chalk.Dim.TextStyle(logPrefix), bsvAliasVersion, capabilities.BsvAlias, chalk.Reset)
 				return
 			}
 
 			// Found the paymail address
-			fmt.Printf("%s fetching PKI was successful - found PubKey: %s\n", logPrefix, pki.PubKey)
+			fmt.Printf("%s%s fetching PKI was successful - found PubKey: %s%s\n", chalk.Green, chalk.Dim.TextStyle(logPrefix), pki.PubKey, chalk.Reset)
 		}
 	},
 }
