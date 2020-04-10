@@ -2,10 +2,15 @@ package paymail
 
 import (
 	"bytes"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/bitcoinsv/bsvd/chaincfg"
+	"github.com/bitcoinsv/bsvd/txscript"
+	"github.com/bitcoinsv/bsvutil"
 )
 
 /*
@@ -32,6 +37,7 @@ type AddressResolutionRequest struct {
 
 // AddressResolutionResponse is the response frm the request
 type AddressResolutionResponse struct {
+	Address   string `json:"address"`             // Legacy BSV address derived from the output hash
 	Output    string `json:"output"`              // hex-encoded Bitcoin script, which the sender MUST use during the construction of a payment transaction
 	Signature string `json:"signature,omitempty"` // This is used if SenderValidation is enforced
 }
@@ -95,6 +101,36 @@ func AddressResolution(resolutionUrl, alias, domain string, senderRequest *Addre
 		err = fmt.Errorf("missing an output value")
 		return
 	}
+
+	// Decode the hex string into bytes
+	var script []byte
+	if script, err = hex.DecodeString(response.Output); err != nil {
+		return
+	}
+
+	// Extract the components from the script
+	var addresses []bsvutil.Address
+	if _, addresses, _, err = txscript.ExtractPkScriptAddrs(script, &chaincfg.MainNetParams); err != nil {
+		return
+	}
+
+	// Missing an address?
+	if len(addresses) == 0 {
+		err = fmt.Errorf("invalid output hash, missing an address")
+		return
+	}
+
+	// Extract the address from the pubkey hash
+	var address *bsvutil.LegacyAddressPubKeyHash
+	if address, err = bsvutil.NewLegacyAddressPubKeyHash(addresses[0].ScriptAddress(), &chaincfg.MainNetParams); err != nil {
+		return
+	} else if address == nil {
+		err = fmt.Errorf("failed in NewLegacyAddressPubKeyHash, address was nil")
+		return
+	}
+
+	// Use the encoded version of the address
+	response.Address = address.EncodeAddress()
 
 	return
 }

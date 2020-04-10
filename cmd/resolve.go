@@ -123,9 +123,9 @@ var resolveCmd = &cobra.Command{
 		}
 
 		// Success!
-		fmt.Printf("%s resolution successful - output returned: %s\n", logPrefix, resolution.Output)
-
-		// todo: get the BSV address from the output
+		fmt.Printf("%s address resolution successful\n", logPrefix)
+		fmt.Printf("%s output hash: %s\n", logPrefix, resolution.Output)
+		fmt.Printf("%s address: %s\n", logPrefix, resolution.Address)
 	},
 }
 
