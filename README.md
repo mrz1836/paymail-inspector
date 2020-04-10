@@ -44,6 +44,8 @@ $ go mod tidy
 ```
 
 ### Package Dependencies
+- bitcoinsv's [bsvd](https://github.com/bitcoinsv/bsvd) for BSV script functionality
+- bitcoinsv's [bsvutil](https://github.com/bitcoinsv/bsvutil) for BSV address utilities
 - miekg's [dns](https://github.com/miekg/dns) package for advanced DNS functionality
 - mitchellh's [go-homedir](https://github.com/mitchellh/go-homedir) to find the home directory
 - MrZ's [go-validate](https://github.com/mrz1836/go-validate) for domain/email/ip validations
@@ -65,8 +67,10 @@ Also checkout the [official paymail specifications](http://bsvalias.org/index.ht
 - [x] Resolve a paymail address (brfc: [759684b1a19a](http://bsvalias.org/04-01-basic-address-resolution.html))
 - [ ] Sender validation (brfc: [6745385c3fc0](http://bsvalias.org/04-02-sender-validation.html))
 - [ ] Receiver approvals (brfc: [3d7c2ca83a46](http://bsvalias.org/04-03-receiver-approvals.html))
-- [ ] PayTo protocol prefix (brfc: [7bd25e5a1fc6](http://bsvalias.org/04-04-payto-protocol-prefix.html))
+- [x] PayTo protocol prefix (brfc: [7bd25e5a1fc6](http://bsvalias.org/04-04-payto-protocol-prefix.html))
 - [ ] Verify public key owner (brfc: [a9f510c16bde](http://bsvalias.org/05-verify-public-key-owner.html))
+- [ ] P2P Transactions (brfc: [5f1323cddf31](https://docs.moneybutton.com/docs/paymail-06-p2p-transactions.html))
+- [ ] P2P Payment Destination (brfc: [2a40af698840](https://docs.moneybutton.com/docs/paymail-07-p2p-payment-destination.html))
 
 ## Examples & Tests
 All unit tests and [examples](examples/examples.go) run via [Travis CI](https://travis-ci.com/mrz1836/paymail-inspector) and uses [Go version 1.14.x](https://golang.org/doc/go1.14). View the [deployment configuration file](.travis.yml).
