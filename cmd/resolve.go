@@ -8,6 +8,7 @@ import (
 	"github.com/mrz1836/go-validate"
 	"github.com/mrz1836/paymail-inspector/paymail"
 	"github.com/spf13/cobra"
+	"github.com/ttacon/chalk"
 )
 
 // Flags for the resolve command
@@ -29,9 +30,9 @@ var resolveCmd = &cobra.Command{
 	Example:    "resolve this@address.com --sender-handle you@yourdomain.com",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
-			return fmt.Errorf("%s requires either a paymail address\n", logPrefix)
+			return fmt.Errorf("%s%s requires either a paymail address%s\n", chalk.Red, logPrefix, chalk.Reset)
 		} else if len(args) > 1 {
-			return fmt.Errorf("%s validate only supports one address at a time\n", logPrefix)
+			return fmt.Errorf("%s%s validate only supports one address at a time%s\n", chalk.Red, logPrefix, chalk.Reset)
 		}
 		return nil
 	},
@@ -42,34 +43,34 @@ var resolveCmd = &cobra.Command{
 
 		// Did we get a paymail address?
 		if len(paymailAddress) == 0 {
-			fmt.Printf("%s paymail address not found or invalid\n", logPrefix)
+			fmt.Printf("%s%s paymail address not found or invalid%s\n", chalk.Red, logPrefix, chalk.Reset)
 			return
 		}
 
 		// Validate the email format for the paymail address (paymail addresses follow conventional email requirements)
 		if ok, err := validate.IsValidEmail(paymailAddress, false); err != nil {
-			fmt.Printf("%s paymail address failed email format validation: %s\n", logPrefix, err.Error())
+			fmt.Printf("%s%s paymail address failed email format validation: %s%s\n", chalk.Red, logPrefix, err.Error(), chalk.Reset)
 			return
 		} else if !ok {
-			fmt.Printf("%s paymail address failed email format validation: %s\n", logPrefix, "unknown reason")
+			fmt.Printf("%s%s paymail address failed email format validation: %s%s\n", chalk.Red, logPrefix, "unknown reason", chalk.Reset)
 			return
 		}
 
 		// Validate the email format for the given handle
 		if ok, err := validate.IsValidEmail(senderHandle, false); err != nil {
-			fmt.Printf("%s sender handle failed email format validation: %s\n", logPrefix, err.Error())
+			fmt.Printf("%s%s sender handle failed email format validation: %s%s\n", chalk.Red, logPrefix, err.Error(), chalk.Reset)
 			return
 		} else if !ok {
-			fmt.Printf("%s sender handle failed email format validation: %s\n", logPrefix, "unknown reason")
+			fmt.Printf("%s%s sender handle failed email format validation: %s%s\n", chalk.Red, logPrefix, "unknown reason", chalk.Reset)
 			return
 		}
 
 		// Check for a real domain (require at least one period)
 		if !strings.Contains(domain, ".") {
-			fmt.Printf("%s domain name is invalid: %s\n", logPrefix, domain)
+			fmt.Printf("%s%s domain name is invalid: %s%s\n", chalk.Red, logPrefix, domain, chalk.Reset)
 			return
 		} else if !validate.IsValidDNSName(domain) { // Basic DNS check (not a REAL domain name check)
-			fmt.Printf("%s domain name failed DNS check: %s\n", logPrefix, domain)
+			fmt.Printf("%s%s domain name failed DNS check: %s%s\n", chalk.Red, logPrefix, domain, chalk.Reset)
 			return
 		}
 
@@ -77,7 +78,7 @@ var resolveCmd = &cobra.Command{
 		fmt.Printf("%s getting SRV record...\n", logPrefix)
 		srv, err := paymail.GetSRVRecord(serviceName, protocol, domain, nameServer)
 		if err != nil {
-			fmt.Printf("%s get SRV record failed: %s\n", logPrefix, err.Error())
+			fmt.Printf("%s%s get SRV record failed: %s%s\n", chalk.Red, logPrefix, err.Error(), chalk.Reset)
 			return
 		}
 
@@ -85,19 +86,19 @@ var resolveCmd = &cobra.Command{
 		fmt.Printf("%s getting capabilities...\n", logPrefix)
 		var capabilities *paymail.CapabilitiesResponse
 		if capabilities, err = paymail.GetCapabilities(srv.Target, int(srv.Port)); err != nil {
-			fmt.Printf("%s get capabilities failed: %s\n", logPrefix, err.Error())
+			fmt.Printf("%s%s get capabilities failed: %s%s\n", chalk.Red, logPrefix, err.Error(), chalk.Reset)
 			return
 		}
 
 		// Check the version
 		if capabilities.BsvAlias != bsvAliasVersion {
-			fmt.Printf("%s capabilities bsvalias version mismatch, expected: %s but got: %s\n", logPrefix, bsvAliasVersion, capabilities.BsvAlias)
+			fmt.Printf("%s%s capabilities bsvalias version mismatch, expected: %s but got: %s%s\n", chalk.Red, logPrefix, bsvAliasVersion, capabilities.BsvAlias, chalk.Reset)
 			return
 		}
 
 		// Do we have the capability?
 		if len(capabilities.PaymentDestination) == 0 {
-			fmt.Printf("%s missing a required capability: %s\n", logPrefix, paymail.CapabilityPaymentDestination)
+			fmt.Printf("%s%s missing a required capability: %s%s\n", chalk.Red, logPrefix, paymail.CapabilityPaymentDestination, chalk.Reset)
 			return
 		}
 
@@ -108,7 +109,7 @@ var resolveCmd = &cobra.Command{
 		fmt.Printf("%s getting PKI...\n", logPrefix)
 		var pki *paymail.PKIResponse
 		if pki, err = paymail.GetPKI(capabilities.Pki, parts[0], domain); err != nil {
-			fmt.Printf("%s get PKI failed: %s\n", logPrefix, err.Error())
+			fmt.Printf("%s%s get PKI failed: %s%s\n", chalk.Red, logPrefix, err.Error(), chalk.Reset)
 			return
 		}
 
@@ -126,15 +127,15 @@ var resolveCmd = &cobra.Command{
 		fmt.Printf("%s resolving address...\n", logPrefix)
 		var resolution *paymail.AddressResolutionResponse
 		if resolution, err = paymail.AddressResolution(capabilities.PaymentDestination, parts[0], domain, senderRequest); err != nil {
-			fmt.Printf("%s address resolution failed: %s\n", logPrefix, err.Error())
+			fmt.Printf("%s%s address resolution failed: %s%s\n", chalk.Red, logPrefix, err.Error(), chalk.Reset)
 			return
 		}
 
 		// Success!
-		fmt.Printf("%s address resolution successful\n", logPrefix)
-		fmt.Printf("%s pubkey: %s\n", logPrefix, pki.PubKey)
+		fmt.Printf("%s%s address resolution successful%s\n", chalk.Green, logPrefix, chalk.Reset)
+		fmt.Printf("%s%s pubkey: %s\n", chalk.Cyan, logPrefix, pki.PubKey)
 		fmt.Printf("%s output hash: %s\n", logPrefix, resolution.Output)
-		fmt.Printf("%s address: %s\n", logPrefix, resolution.Address)
+		fmt.Printf("%s address: %s%s\n", logPrefix, resolution.Address, chalk.Reset)
 	},
 }
 
@@ -142,18 +143,19 @@ func init() {
 	rootCmd.AddCommand(resolveCmd)
 
 	// Set the amount for the sender request
-	resolveCmd.Flags().Uint64VarP(&amount, "amount", "a", 0, "Amount in satoshis for the payment request")
+	resolveCmd.Flags().Uint64VarP(&amount, "amount", "a", 0, chalk.Cyan.Color("Amount in satoshis for the payment request"))
 
 	// Set the purpose for the sender request
-	resolveCmd.Flags().StringVarP(&purpose, "purpose", "p", "", "Purpose for the transaction")
+	resolveCmd.Flags().StringVarP(&purpose, "purpose", "p", "", chalk.Cyan.Color("Purpose for the transaction"))
 
 	// Set the sender's handle for the sender request
-	resolveCmd.Flags().StringVar(&senderHandle, "sender-handle", "", "(Required) The sender's paymail handle")
+	resolveCmd.Flags().StringVar(&senderHandle, "sender-handle", "", chalk.Cyan.Color("The sender's paymail handle")+" "+chalk.Red.Color("Required"))
 	_ = resolveCmd.MarkFlagRequired("sender-handle")
 
 	// Set the sender's name for the sender request
-	resolveCmd.Flags().StringVarP(&senderName, "sender-name", "n", "", "The sender's name")
+	resolveCmd.Flags().StringVarP(&senderName, "sender-name", "n", "", chalk.Cyan.Color("The sender's name"))
 
 	// Set the signature of the entire request
-	resolveCmd.Flags().StringVarP(&signature, "signature", "s", "", "The signature of the entire request")
+	resolveCmd.Flags().StringVarP(&signature, "signature", "s", "", chalk.Cyan.Color("The signature of the entire request"))
+	fmt.Printf("%+v", resolveCmd.Flags())
 }
