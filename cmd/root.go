@@ -33,10 +33,22 @@ const (
 
 // rootCmd represents the base command when called without any sub-commands
 var rootCmd = &cobra.Command{
-	Use:     configDefault,
-	Short:   "Inspect, validate or resolve paymail domains and addresses",
-	Long:    `This CLI tool can help you inspect, validate or resolve a paymail domain/address`,
-	Version: "0.0.5",
+	Use:   configDefault,
+	Short: "Inspect, validate or resolve paymail domains and addresses",
+	Long: `
+__________                             .__.__    .___                                     __                
+\______   \_____  ___.__. _____ _____  |__|  |   |   | ____   ____________   ____   _____/  |_  ___________ 
+ |     ___/\__  \<   |  |/     \\__  \ |  |  |   |   |/    \ /  ___/\____ \_/ __ \_/ ___\   __\/  _ \_  __ \
+ |    |     / __ \\___  |  Y Y  \/ __ \|  |  |__ |   |   |  \\___ \ |  |_> >  ___/\  \___|  | (  <_> )  | \/
+ |____|    (____  / ____|__|_|  (____  /__|____/ |___|___|  /____  >|   __/ \___  >\___  >__|  \____/|__|   
+                \/\/          \/     \/                   \/     \/ |__|        \/     \/
+Author: MrZ © 2020 github.com/mrz1836/paymail-validator
+
+This CLI tool can help you inspect, validate or resolve a paymail domain/address.
+
+Feel free to contribute via Github
+`,
+	Version: "0.0.6",
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
