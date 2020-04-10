@@ -10,6 +10,8 @@
 [![standard-readme compliant](https://img.shields.io/badge/standard--readme-OK-green.svg?style=flat)](https://github.com/RichardLitt/standard-readme)
 [![GoDoc](https://godoc.org/github.com/mrz1836/paymail-inspector?status.svg&style=flat)](https://godoc.org/github.com/mrz1836/paymail-inspector)
 
+<img src=".github/IMAGES/capabilities-command-zoomed.gif?raw=true" height="350" width="500" alt="Capabilities Command">
+
 ## Table of Contents
 - [Installation](#installation)
 - [Documentation](#documentation)
