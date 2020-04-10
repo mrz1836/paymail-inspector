@@ -60,6 +60,9 @@ func GetSRVRecord(service, protocol, domainName, nameServer string) (srv *net.SR
 	// Only return the first record (in case multiple are returned)
 	srv = records[0]
 
+	// Remove any period on the end
+	srv.Target = strings.TrimSuffix(srv.Target, ".")
+
 	return
 }
 

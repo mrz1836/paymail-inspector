@@ -81,9 +81,6 @@ var resolveCmd = &cobra.Command{
 			return
 		}
 
-		// Remove last character if period (comes from DNS records)
-		srv.Target = strings.TrimSuffix(srv.Target, ".")
-
 		// Get the capabilities for the given domain
 		fmt.Printf("%s getting capabilities...\n", logPrefix)
 		var capabilities *paymail.CapabilitiesResponse

@@ -86,18 +86,15 @@ var validateCmd = &cobra.Command{
 			return
 		}
 
-		// Remove last character if period (comes from DNS records)
-		target := strings.TrimSuffix(srv.Target, ".")
-
 		// Success message
 		fmt.Printf("%s SRV record passed all validations (target, port, priority, weight)\n", logPrefix)
-		fmt.Printf("%s target record found: %s\n", logPrefix, target)
+		fmt.Printf("%s target record found: %s\n", logPrefix, srv.Target)
 
 		// Validate the DNSSEC if the flag is true
 		if !skipDnsCheck {
-			fmt.Printf("%s checking %s for DNSSEC validation...\n", logPrefix, target)
+			fmt.Printf("%s checking %s for DNSSEC validation...\n", logPrefix, srv.Target)
 
-			if result := paymail.CheckDNSSEC(target, nameServer); result.DNSSEC {
+			if result := paymail.CheckDNSSEC(srv.Target, nameServer); result.DNSSEC {
 				fmt.Printf("%s DNSSEC found and valid and found %d DS record(s)\n", logPrefix, result.Answer.DSRecordCount)
 			} else {
 				fmt.Printf("%s DNSSEC not found or invalid for %s\n", logPrefix, result.Domain)
@@ -107,15 +104,15 @@ var validateCmd = &cobra.Command{
 				return
 			}
 		} else {
-			fmt.Printf("%s skipping DNSSEC check for %s\n", logPrefix, target)
+			fmt.Printf("%s skipping DNSSEC check for %s\n", logPrefix, srv.Target)
 		}
 
 		// Validate that there is SSL on the target
 		if !skipSSLCheck {
-			fmt.Printf("%s checking %s for SSL validation...\n", logPrefix, target)
+			fmt.Printf("%s checking %s for SSL validation...\n", logPrefix, srv.Target)
 
 			var valid bool
-			if valid, err = paymail.CheckSSL(target, nameServer); err != nil {
+			if valid, err = paymail.CheckSSL(srv.Target, nameServer); err != nil {
 				fmt.Printf("%s error checking SSL: %s\n", logPrefix, err.Error())
 				return
 			} else if !valid {
@@ -124,7 +121,7 @@ var validateCmd = &cobra.Command{
 			}
 			fmt.Printf("%s SSL found and valid\n", logPrefix)
 		} else {
-			fmt.Printf("%s skipping SSL check for %s\n", logPrefix, target)
+			fmt.Printf("%s skipping SSL check for %s\n", logPrefix, srv.Target)
 		}
 
 		// Now lookup the capabilities
