@@ -21,10 +21,9 @@ var (
 
 // Defaults for the application
 const (
-	configDefault     = "paymail-inspector"  // Config file and application name
-	defaultDomainName = "moneybutton.com"    // Used in examples
-	defaultNameServer = "8.8.8.8"            // Default DNS NameServer
-	logPrefix         = "paymail-inspector:" // Prefix for the logs in the CLI application output
+	configDefault     = "paymail-inspector" // Config file and application name
+	defaultDomainName = "moneybutton.com"   // Used in examples
+	defaultNameServer = "8.8.8.8"           // Default DNS NameServer
 )
 
 // rootCmd represents the base command when called without any sub-commands
