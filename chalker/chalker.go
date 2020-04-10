@@ -19,8 +19,8 @@ var (
 	spacer    string
 )
 
-// Prefix for the logs in the CLI application output
-func setPrefix(prefix string) {
+// SetPrefix for the logs in the CLI application output
+func SetPrefix(prefix string) {
 	logPrefix = prefix
 	if len(logPrefix) > 0 {
 		spacer = " "
