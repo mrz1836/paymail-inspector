@@ -62,7 +62,7 @@ Also checkout the [official paymail specifications](http://bsvalias.org/index.ht
 - [x] Validation for required capabilities (`pki`, `paymentDestination`)
 - [x] List paymail capabilities ([.well-known/bsvalias](http://bsvalias.org/02-02-capability-discovery.html))
 - [x] Validate the `pki` response (brfc: [0c4339ef99c2](http://bsvalias.org/03-public-key-infrastructure.html))
-- [ ] Resolve a paymail address (brfc: [759684b1a19a](http://bsvalias.org/04-01-basic-address-resolution.html))
+- [x] Resolve a paymail address (brfc: [759684b1a19a](http://bsvalias.org/04-01-basic-address-resolution.html))
 - [ ] Sender validation (brfc: [6745385c3fc0](http://bsvalias.org/04-02-sender-validation.html))
 - [ ] Receiver approvals (brfc: [3d7c2ca83a46](http://bsvalias.org/04-03-receiver-approvals.html))
 - [ ] PayTo protocol prefix (brfc: [7bd25e5a1fc6](http://bsvalias.org/04-04-payto-protocol-prefix.html))
