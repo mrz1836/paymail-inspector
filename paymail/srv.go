@@ -84,7 +84,7 @@ func ValidateSRVRecord(srv *net.SRV, nameServer string, port, priority, weight i
 
 	// Check the basics of the SRV record
 	if len(srv.Target) == 0 {
-		err = fmt.Errorf("target is invalid or empty") // todo: validate the domain name
+		err = fmt.Errorf("target is invalid or empty")
 		return
 	} else if srv.Port != uint16(port) {
 		err = fmt.Errorf("port %d does not match %d", srv.Port, port)
