@@ -5,4 +5,4 @@ Below are some examples using **paymail-inspector**
 ```bash
 $ paymail-inspector -h
 ```
-<img src=".github/IMAGES/help-command.gif?raw=true" height="250" alt="Help Command">
+<img src="../.github/IMAGES/help-command.gif?raw=true" height="250" alt="Help Command">
