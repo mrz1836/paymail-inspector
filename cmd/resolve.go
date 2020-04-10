@@ -101,6 +101,17 @@ var resolveCmd = &cobra.Command{
 			return
 		}
 
+		// Get the alias of the address
+		parts := strings.Split(paymailAddress, "@")
+
+		// Get the PKI for the given address
+		fmt.Printf("%s getting PKI...\n", logPrefix)
+		var pki *paymail.PKIResponse
+		if pki, err = paymail.GetPKI(capabilities.Pki, parts[0], domain); err != nil {
+			fmt.Printf("%s get PKI failed: %s\n", logPrefix, err.Error())
+			return
+		}
+
 		// Setup the request body
 		senderRequest := &paymail.AddressResolutionRequest{
 			Amount:       amount,
@@ -110,9 +121,6 @@ var resolveCmd = &cobra.Command{
 			SenderName:   senderName,
 			Signature:    signature,
 		}
-
-		// Get the alias of the address
-		parts := strings.Split(paymailAddress, "@")
 
 		// Resolve the address from a given paymail
 		fmt.Printf("%s resolving address...\n", logPrefix)
@@ -124,6 +132,7 @@ var resolveCmd = &cobra.Command{
 
 		// Success!
 		fmt.Printf("%s address resolution successful\n", logPrefix)
+		fmt.Printf("%s pubkey: %s\n", logPrefix, pki.PubKey)
 		fmt.Printf("%s output hash: %s\n", logPrefix, resolution.Output)
 		fmt.Printf("%s address: %s\n", logPrefix, resolution.Address)
 	},
