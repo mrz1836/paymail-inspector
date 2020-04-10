@@ -26,22 +26,12 @@
 **paymail-inspector** requires a [supported release of Go](https://golang.org/doc/devel/release.html#policy).
 ```bash
 $ go get -u github.com/mrz1836/paymail-inspector
+$ go install github.com/mrz1836/paymail-inspector
 ```
 
 #### Run the Application
 ```bash
 $ paymail-inspector -h
-```
-
-#### Reinstall (after making modifications)
-```bash
-$ go install github.com/mrz1836/paymail-inspector
-```
-
-#### Upgrade Dependencies
-```bash
-$ go get -u ./...
-$ go mod tidy
 ```
 
 ### Package Dependencies
@@ -53,10 +43,17 @@ $ go mod tidy
 - spf13's [cobra](https://github.com/spf13/cobra) for easy CLI application development
 - spf13's [viper](https://github.com/spf13/viper) for easy application configuration
 
+#### Upgrade Dependencies
+```bash
+$ go get -u ./...
+$ go mod tidy
+```
+
 ## Documentation
 You can view the generated [documentation here](https://godoc.org/github.com/mrz1836/paymail-inspector).
 
-Also checkout the [official paymail specifications](http://bsvalias.org/index.html). Additional information can also be found via [MoneyButton's documentation](https://docs.moneybutton.com/docs/paymail-overview.html)
+Also checkout the [official paymail specifications](http://bsvalias.org/index.html).
+Additional information can also be found via [MoneyButton's documentation](https://docs.moneybutton.com/docs/paymail-overview.html).
 
 ### Features
 - [x] Validate any paymail domain or paymail address
@@ -74,7 +71,7 @@ Also checkout the [official paymail specifications](http://bsvalias.org/index.ht
 - [ ] P2P Payment Destination (brfc: [2a40af698840](https://docs.moneybutton.com/docs/paymail-07-p2p-payment-destination.html))
 
 ## Examples & Tests
-All unit tests and [examples](examples/examples.go) run via [Travis CI](https://travis-ci.com/mrz1836/paymail-inspector) and uses [Go version 1.14.x](https://golang.org/doc/go1.14). View the [deployment configuration file](.travis.yml).
+All unit tests and [examples](examples/examples.md) run via [Travis CI](https://travis-ci.com/mrz1836/paymail-inspector) and uses [Go version 1.14.x](https://golang.org/doc/go1.14). View the [deployment configuration file](.travis.yml).
 
 Run all tests (including integration tests)
 ```bash
@@ -92,7 +89,7 @@ $ go test ./... -v -test.short
 Read more about this Go project's [code standards](CODE_STANDARDS.md).
 
 ## Usage
-View the [examples](examples/examples.go)
+View the [examples](examples/examples.md)
 
 ## Maintainers
 
