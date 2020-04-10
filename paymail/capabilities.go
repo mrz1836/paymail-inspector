@@ -21,17 +21,17 @@ Default:
 
 // Known capabilities for detecting functionality
 const (
-	CapabilityBasicAddressResolution = "759684b1a19a"       // Core capability brfc: 759684b1a19a (required from specs)
-	CapabilityP2PPaymentDestination  = "2a40af698840"       // Optional - brfc: 2a40af698840 (moneybutton spec)
-	CapabilityP2PTransactions        = "5f1323cddf31"       // Optional - brfc: 5f1323cddf31 (moneybutton spec)
-	CapabilityPaymentDestination     = "paymentDestination" // Core capability brfc: 759684b1a19a (required from specs)
-	CapabilityPayToProtocolPrefix    = "7bd25e5a1fc6"       // Optional - brfc: 7bd25e5a1fc6
-	CapabilityPki                    = "pki"                // Core capability brfc: 0c4339ef99c2 (required from specs)
-	CapabilityPkiAlternate           = "0c4339ef99c2"       // Core capability brfc: 0c4339ef99c2 (required from specs)
-	CapabilityPublicProfile          = "f12f968c92d6"       // Optional - brfc: f12f968c92d6
-	CapabilityReceiverApprovals      = "3d7c2ca83a46"       // Optional - brfc: 3d7c2ca83a46
-	CapabilitySenderValidation       = "6745385c3fc0"       // Optional - brfc: 6745385c3fc0
-	CapabilityVerifyPublicKeyOwner   = "a9f510c16bde"       // Optional - brfc: a9f510c16bde
+	CapabilityBasicAddressResolution = "759684b1a19a"       // (Alternate) - link: http://bsvalias.org/04-01-basic-address-resolution.html
+	CapabilityP2PPaymentDestination  = "2a40af698840"       // (Optional) - link: https://docs.moneybutton.com/docs/paymail-07-p2p-payment-destination.html
+	CapabilityP2PTransactions        = "5f1323cddf31"       // (Optional) - link: https://docs.moneybutton.com/docs/paymail-06-p2p-transactions.html
+	CapabilityPaymentDestination     = "paymentDestination" // (Required) (brfc: 759684b1a19a) - link: http://bsvalias.org/04-01-basic-address-resolution.html
+	CapabilityPayToProtocolPrefix    = "7bd25e5a1fc6"       // (Optional) - link: http://bsvalias.org/04-04-payto-protocol-prefix.html
+	CapabilityPki                    = "pki"                // (Required) (brfc: 0c4339ef99c2) - link: http://bsvalias.org/03-public-key-infrastructure.html
+	CapabilityPkiAlternate           = "0c4339ef99c2"       // (Alternate) - link: http://bsvalias.org/03-public-key-infrastructure.html
+	CapabilityPublicProfile          = "f12f968c92d6"       // (Optional) - link: unknown
+	CapabilityReceiverApprovals      = "3d7c2ca83a46"       // (Optional) - link: http://bsvalias.org/04-03-receiver-approvals.html
+	CapabilitySenderValidation       = "6745385c3fc0"       // (Optional) - link: http://bsvalias.org/04-02-sender-validation.html
+	CapabilityVerifyPublicKeyOwner   = "a9f510c16bde"       // (Optional) - link: http://bsvalias.org/05-verify-public-key-owner.html
 )
 
 // CapabilitiesResponse is the result returned (plus some custom features)
