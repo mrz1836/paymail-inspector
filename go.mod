@@ -3,6 +3,9 @@ module github.com/mrz1836/paymail-inspector
 go 1.14
 
 require (
+	github.com/bitcoinsv/bsvd v0.0.0-20190609155523-4c29707f7173
+	github.com/bitcoinsv/bsvlog v0.0.0-20181216181007-cb81b076bf2e // indirect
+	github.com/bitcoinsv/bsvutil v0.0.0-20181216182056-1d77cf353ea9
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/miekg/dns v1.1.29
 	github.com/mitchellh/go-homedir v1.1.0
