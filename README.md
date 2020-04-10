@@ -7,7 +7,7 @@
 [![Report](https://goreportcard.com/badge/github.com/mrz1836/paymail-inspector?style=flat&v=1)](https://goreportcard.com/report/github.com/mrz1836/paymail-inspector)
 [![Release](https://img.shields.io/github/release-pre/mrz1836/paymail-inspector.svg?style=flat&v=1)](https://github.com/mrz1836/paymail-inspector/releases)
 [![standard-readme compliant](https://img.shields.io/badge/standard--readme-OK-green.svg?style=flat)](https://github.com/RichardLitt/standard-readme)
-[![GoDoc](https://godoc.org/github.com/mrz1836/paymail-inspector?status.svg&style=flat)](https://godoc.org/github.com/mrz1836/paymail-inspector)
+[![GoDoc](https://godoc.org/github.com/mrz1836/paymail-inspector?status.svg&style=flat)](examples/examples.md)
 
 > **paymail-inspector** is a CLI tool for inspecting, validating or resolving paymail addresses and domains
 
@@ -53,7 +53,7 @@ $ go mod tidy
 ```
 
 ## Documentation
-You can view the generated [documentation here](https://godoc.org/github.com/mrz1836/paymail-inspector).
+You can view the generated [documentation here](examples/examples.md).
 
 Also checkout the [official paymail specifications](http://bsvalias.org/index.html).
 Additional information can also be found via [MoneyButton's documentation](https://docs.moneybutton.com/docs/paymail-overview.html).
