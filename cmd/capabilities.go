@@ -73,7 +73,7 @@ var capabilitiesCmd = &cobra.Command{
 		for key, val := range capabilities.Capabilities {
 			valType := reflect.TypeOf(val).String()
 			if valType == "string" {
-				chalker.Log(chalker.INFO, fmt.Sprintf("%s %s: %-28v %s: %s", chalk.White.Color("capability"), chalk.Cyan.Color(key), chalk.White.Color("target"), chalk.Yellow.Color(fmt.Sprintf("%s", val))))
+				chalker.Log(chalker.INFO, fmt.Sprintf("%s: %-28v %s: %s", chalk.White.Color("capability"), chalk.Cyan.Color(key), chalk.White.Color("target"), chalk.Yellow.Color(fmt.Sprintf("%s", val))))
 			} else if valType == "bool" { // See: http://bsvalias.org/04-02-sender-validation.html
 				if val.(bool) {
 					chalker.Log(chalker.INFO, fmt.Sprintf("%s: %-28v is      %s\n", chalk.White.Color("capability"), chalk.Cyan.Color(key), chalk.Green.Color("enabled")))

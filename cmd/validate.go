@@ -69,7 +69,7 @@ var validateCmd = &cobra.Command{
 			chalker.Log(chalker.ERROR, fmt.Sprintf("domain name is invalid: %s", domain))
 			return
 		} else if !validate.IsValidDNSName(domain) { // Basic DNS check (not a REAL domain name check)
-			chalker.Log(chalker.ERROR, fmt.Sprintf("domain name failed DNS check: %", domain))
+			chalker.Log(chalker.ERROR, fmt.Sprintf("domain name failed DNS check: %s", domain))
 			return
 		}
 
@@ -83,7 +83,7 @@ var validateCmd = &cobra.Command{
 
 		// Validate the SRV record for the domain name (using all flags or default values)
 		if err = paymail.ValidateSRVRecord(srv, nameServer, port, priority, weight); err != nil {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("%s failed validating SRV record: %s", err.Error()))
+			chalker.Log(chalker.ERROR, fmt.Sprintf("failed validating SRV record: %s", err.Error()))
 			return
 		}
 
@@ -153,7 +153,7 @@ var validateCmd = &cobra.Command{
 		}
 
 		// Passed the capabilities check
-		chalker.Log(chalker.INFO, fmt.Sprintf("found required %s and %s capabilities%s", paymail.CapabilityPki, paymail.CapabilityPaymentDestination))
+		chalker.Log(chalker.INFO, fmt.Sprintf("found required %s and %s capabilities", paymail.CapabilityPki, paymail.CapabilityPaymentDestination))
 
 		// Only if we have an address (extra validations)
 		if len(paymailAddress) > 0 {
