@@ -5,7 +5,7 @@ Below are some examples using **paymail-inspector**
 ```bash
 $ paymail-inspector -h
 ```
-<img src="../.github/IMAGES/help-command.gif?raw=true" height="350" width="500" alt="Help Command">
+<img src="../.github/IMAGES/help-command.gif?raw=true" alt="Help Command">
 
 ___
 
@@ -13,7 +13,7 @@ ___
 ```bash
 $ paymail-inspector capabilities moneybutton.com
 ```
-<img src="../.github/IMAGES/capabilities-command.gif?raw=true" height="350" width="500" alt="Capabilities Command">
+<img src="../.github/IMAGES/capabilities-command.gif?raw=true" alt="Capabilities Command">
 
 ___
 
@@ -21,7 +21,7 @@ ___
 ```bash
 $ paymail-inspector resolve this@address.com
 ```
-<img src="../.github/IMAGES/resolve-command.gif?raw=true" height="350" width="500" alt="Resolve Command">
+<img src="../.github/IMAGES/resolve-command.gif?raw=true" alt="Resolve Command">
 
 Custom flags for creating the "sender request":
 ```
@@ -39,7 +39,7 @@ ___
 ```bash
 $ paymail-inspector validate moneybutton.com --priority 1 --skip-dnssec
 ```
-<img src="../.github/IMAGES/validate-command.gif?raw=true" height="350" width="500" alt="Validate Command">
+<img src="../.github/IMAGES/validate-command.gif?raw=true" alt="Validate Command">
 
 Custom flags for configuring the validation (enable/disable checks)
 ```

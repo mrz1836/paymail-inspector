@@ -116,7 +116,7 @@ $ go test ./... -v -test.short
 Read more about this Go project's [code standards](CODE_STANDARDS.md).
 
 ## Usage
-View all the [examples](examples/examples.md)
+View all the [examples](examples/examples.md) and see the [commands above](#commands)
 
 ## Maintainers
 
