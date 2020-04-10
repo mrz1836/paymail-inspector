@@ -97,7 +97,7 @@ var resolveCmd = &cobra.Command{
 
 		// Do we have the capability?
 		if len(capabilities.PaymentDestination) == 0 {
-			fmt.Printf("%s missing a required capabilitiy: %s\n", logPrefix, paymail.CapabilityPaymentDestination)
+			fmt.Printf("%s missing a required capability: %s\n", logPrefix, paymail.CapabilityPaymentDestination)
 			return
 		}
 

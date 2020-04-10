@@ -2,15 +2,14 @@
 
 **paymail-inspector** is a CLI tool for inspecting, validating and resolving paymail addresses and domains
 
-[![Go](https://img.shields.io/github/go-mod/go-version/mrz1836/paymail-inspector)](https://golang.org/)
-[![Build Status](https://travis-ci.com/mrz1836/paymail-inspector.svg?branch=master)](https://travis-ci.com/mrz1836/paymail-inspector)
-[![Report](https://goreportcard.com/badge/github.com/mrz1836/paymail-inspector?style=flat)](https://goreportcard.com/report/github.com/mrz1836/paymail-inspector)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/0b377a0d1dde4b6ba189545aa7ee2e17)](https://www.codacy.com/app/mrz1818/paymail-inspector?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=mrz1836/paymail-inspector&amp;utm_campaign=Badge_Grade)
-[![Release](https://img.shields.io/github/release-pre/mrz1836/paymail-inspector.svg?style=flat)](https://github.com/mrz1836/paymail-inspector/releases)
+[![Go](https://img.shields.io/github/go-mod/go-version/mrz1836/paymail-inspector?v=1)](https://golang.org/)
+[![Build Status](https://travis-ci.com/mrz1836/paymail-inspector.svg?branch=master&v=1)](https://travis-ci.com/mrz1836/paymail-inspector)
+[![Report](https://goreportcard.com/badge/github.com/mrz1836/paymail-inspector?style=flat&v=1)](https://goreportcard.com/report/github.com/mrz1836/paymail-inspector)
+[![Release](https://img.shields.io/github/release-pre/mrz1836/paymail-inspector.svg?style=flat&v=1)](https://github.com/mrz1836/paymail-inspector/releases)
 [![standard-readme compliant](https://img.shields.io/badge/standard--readme-OK-green.svg?style=flat)](https://github.com/RichardLitt/standard-readme)
 [![GoDoc](https://godoc.org/github.com/mrz1836/paymail-inspector?status.svg&style=flat)](https://godoc.org/github.com/mrz1836/paymail-inspector)
 
-<img src=".github/IMAGES/capabilities-command-zoomed.gif?raw=true" height="350" width="500" alt="Capabilities Command">
+<img src=".github/IMAGES/capabilities-command-zoomed.gif?raw=true" alt="Capabilities Command">
 
 ## Table of Contents
 - [Installation](#installation)
