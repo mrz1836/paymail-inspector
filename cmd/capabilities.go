@@ -85,7 +85,4 @@ var capabilitiesCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(capabilitiesCmd)
-
-	// Custom port for the SRV record (target address)
-	capabilitiesCmd.Flags().IntVarP(&port, "port", "p", paymail.DefaultPort, "Port that is found in the SRV record")
 }
