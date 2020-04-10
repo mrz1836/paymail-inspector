@@ -16,8 +16,7 @@ import (
 
 // The config file if used
 var (
-	configFile      string
-	bsvAliasVersion string
+	configFile string
 )
 
 // Defaults for the application
@@ -25,6 +24,11 @@ const (
 	configDefault     = "paymail-inspector" // Config file and application name
 	defaultDomainName = "moneybutton.com"   // Used in examples
 	defaultNameServer = "8.8.8.8"           // Default DNS NameServer
+)
+
+// These are keys for known flags that are used in the configuration
+const (
+	flagBsvAlias = "bsvalias"
 )
 
 // rootCmd represents the base command when called without any sub-commands
@@ -38,10 +42,7 @@ var rootCmd = &cobra.Command{
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	er(rootCmd.Execute())
 }
 
 func init() {
@@ -56,8 +57,16 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "config file (default is $HOME/."+configDefault+".yaml)")
 
 	// Add a bsvalias version to target
-	rootCmd.PersistentFlags().StringVar(&bsvAliasVersion, "bsvalias", paymail.DefaultBsvAliasVersion, "The bsvalias version")
+	rootCmd.PersistentFlags().String(flagBsvAlias, paymail.DefaultBsvAliasVersion, fmt.Sprintf("The %s version (default: %s)", flagBsvAlias, paymail.DefaultBsvAliasVersion))
+	er(viper.BindPFlag(flagBsvAlias, rootCmd.PersistentFlags().Lookup(flagBsvAlias)))
+}
 
+// er is a basic helper method to catch errors loading the application
+func er(err error) {
+	if err != nil {
+		fmt.Println("Error:", err.Error())
+		os.Exit(1)
+	}
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -70,10 +79,7 @@ func initConfig() {
 
 		// Find home directory.
 		home, err := homedir.Dir()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		er(err)
 
 		// Search config in home directory with name "."+configDefault (without extension).
 		viper.AddConfigPath(home)
@@ -84,6 +90,6 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+		chalker.Log(chalker.INFO, fmt.Sprintf("loaded config file: %s", viper.ConfigFileUsed()))
 	}
 }

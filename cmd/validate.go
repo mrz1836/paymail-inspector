@@ -8,6 +8,7 @@ import (
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/mrz1836/paymail-inspector/paymail"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // Default flag values
@@ -134,13 +135,13 @@ var validateCmd = &cobra.Command{
 		}
 
 		// Check the version
-		if capabilities.BsvAlias != bsvAliasVersion {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("capabilities bsvalias version mismatch, expected: %s but got: %s", bsvAliasVersion, capabilities.BsvAlias))
+		if capabilities.BsvAlias != viper.GetString(flagBsvAlias) {
+			chalker.Log(chalker.ERROR, fmt.Sprintf("capabilities %s version mismatch, expected: %s but got: %s", flagBsvAlias, viper.GetString(flagBsvAlias), capabilities.BsvAlias))
 			return
 		}
 
 		// Show some basic results
-		chalker.Log(chalker.INFO, fmt.Sprintf("bsvalias version: %s", capabilities.BsvAlias))
+		chalker.Log(chalker.INFO, fmt.Sprintf("%s version: %s", flagBsvAlias, capabilities.BsvAlias))
 		chalker.Log(chalker.DEFAULT, fmt.Sprintf("total capabilities found: %d", len(capabilities.Capabilities)))
 
 		// Missing required capabilities?
@@ -171,8 +172,8 @@ var validateCmd = &cobra.Command{
 			}
 
 			// Check the version
-			if pki.BsvAlias != bsvAliasVersion {
-				chalker.Log(chalker.ERROR, fmt.Sprintf("pki bsvalias version mismatch, expected: %s but got: %s", bsvAliasVersion, capabilities.BsvAlias))
+			if pki.BsvAlias != viper.GetString(flagBsvAlias) {
+				chalker.Log(chalker.ERROR, fmt.Sprintf("pki %s version mismatch, expected: %s but got: %s", flagBsvAlias, viper.GetString(flagBsvAlias), capabilities.BsvAlias))
 				return
 			}
 

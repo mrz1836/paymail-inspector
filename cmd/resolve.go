@@ -9,6 +9,7 @@ import (
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/mrz1836/paymail-inspector/paymail"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // Flags for the resolve command
@@ -97,8 +98,8 @@ var resolveCmd = &cobra.Command{
 		}
 
 		// Check the version
-		if capabilities.BsvAlias != bsvAliasVersion {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("capabilities bsvalias version mismatch, expected: %s but got: %s", bsvAliasVersion, capabilities.BsvAlias))
+		if capabilities.BsvAlias != viper.GetString(flagBsvAlias) {
+			chalker.Log(chalker.ERROR, fmt.Sprintf("capabilities %s version mismatch, expected: %s but got: %s", flagBsvAlias, viper.GetString(flagBsvAlias), capabilities.BsvAlias))
 			return
 		}
 
@@ -157,7 +158,6 @@ func init() {
 
 	// Set the sender's handle for the sender request
 	resolveCmd.Flags().StringVar(&senderHandle, "sender-handle", "", "Sender's paymail handle. Required by bsvalias spec. Receiver paymail used if not specified.")
-	_ = resolveCmd.MarkFlagRequired("sender-handle")
 
 	// Set the sender's name for the sender request
 	resolveCmd.Flags().StringVarP(&senderName, "sender-name", "n", "", "The sender's name")

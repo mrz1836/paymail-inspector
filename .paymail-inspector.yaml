@@ -1,0 +1,5 @@
+# Example configuration
+# Move this file to your home directory: ~/
+
+# Global Flag - Set the bsvalias version to target
+bsvalias: "1.0"

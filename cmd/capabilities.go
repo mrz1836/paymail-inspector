@@ -9,6 +9,7 @@ import (
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/mrz1836/paymail-inspector/paymail"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"github.com/ttacon/chalk"
 )
 
@@ -60,13 +61,13 @@ var capabilitiesCmd = &cobra.Command{
 		}
 
 		// Check the version
-		if capabilities.BsvAlias != bsvAliasVersion {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("capabilities bsvalias version mismatch, expected: %s but got: %s", bsvAliasVersion, capabilities.BsvAlias))
+		if capabilities.BsvAlias != viper.GetString(flagBsvAlias) {
+			chalker.Log(chalker.ERROR, fmt.Sprintf("capabilities %s version mismatch, expected: %s but got: %s", flagBsvAlias, viper.GetString(flagBsvAlias), capabilities.BsvAlias))
 			return
 		}
 
 		// Show basic results
-		chalker.Log(chalker.INFO, fmt.Sprintf("bsvalias version: %s", capabilities.BsvAlias))
+		chalker.Log(chalker.INFO, fmt.Sprintf("%s version: %s", flagBsvAlias, capabilities.BsvAlias))
 		chalker.Log(chalker.SUCCESS, fmt.Sprintf("%d capabilities found:", len(capabilities.Capabilities)))
 
 		// Show all the found capabilities
