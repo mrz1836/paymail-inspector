@@ -45,6 +45,7 @@ $ paymail-inspector -h
 - MrZ's [go-validate](https://github.com/mrz1836/go-validate) for domain/email/ip validations
 - spf13's [cobra](https://github.com/spf13/cobra) for easy CLI application development
 - spf13's [viper](https://github.com/spf13/viper) for easy application configuration
+- ttacon's [chalk](https://github.com/ttacon/chalk) for colorful logs
 
 #### Upgrade Dependencies
 ```bash
@@ -97,9 +98,9 @@ View the [examples](examples/examples.md)
 
 ## Maintainers
 
-| [<img src="https://github.com/mrz1836.png" height="50" alt="MrZ" />](https://github.com/mrz1836) |
-|:---:|
-| [MrZ](https://github.com/mrz1836) |
+| [<img src="https://github.com/mrz1836.png" height="50" alt="MrZ" />](https://github.com/mrz1836) | [<img src="https://github.com/rohenaz.png" height="50" alt="Satchmo" />](https://github.com/rohenaz) |
+|:---:|:---:|
+| [MrZ](https://github.com/mrz1836) | [Satchmo](https://github.com/rohenaz) |
 
 
 ## Contributing
