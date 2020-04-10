@@ -11,7 +11,7 @@
 
 > **paymail-inspector** is a CLI tool for inspecting, validating or resolving paymail addresses and domains
 
-<img src=".github/IMAGES/capabilities-command-zoomed.gif?raw=true" alt="Capabilities Command">
+<img src=".github/IMAGES/paymail-inspector.gif?raw=true" alt="Paymail Commands">
 
 ## Table of Contents
 - [Installation](#installation)
@@ -37,20 +37,20 @@ $ go install github.com/mrz1836/paymail-inspector
 $ paymail-inspector -h
 ```
 
-### Package Dependencies
-- bitcoinsv's [bsvd](https://github.com/bitcoinsv/bsvd) for BSV script functionality
-- bitcoinsv's [bsvutil](https://github.com/bitcoinsv/bsvutil) for BSV address utilities
-- miekg's [dns](https://github.com/miekg/dns) package for advanced DNS functionality
-- mitchellh's [go-homedir](https://github.com/mitchellh/go-homedir) to find the home directory
-- MrZ's [go-validate](https://github.com/mrz1836/go-validate) for domain/email/ip validations
-- spf13's [cobra](https://github.com/spf13/cobra) for easy CLI application development
-- spf13's [viper](https://github.com/spf13/viper) for easy application configuration
-- ttacon's [chalk](https://github.com/ttacon/chalk) for colorful logs
-
-#### Upgrade Dependencies
+#### Available Commands
+- **capabilities** will list the available capabilities of the paymail domain ([view example](examples/examples.md))
 ```bash
-$ go get -u ./...
-$ go mod tidy
+$ paymail-inspector capabilities moneybutton.com
+```
+
+- **resolve** will return the `pubkey`, `output hash` and `address` for a given paymail address ([view example](examples/examples.md))
+```bash
+$ paymail-inspector resolve mrz@moneybutton.com
+```
+
+- **validate** will attempt to validate a paymail service for DNSSEC, SSL, SRV and other required properties ([view example](examples/examples.md))
+```bash
+$ paymail-inspector validate moneybutton.com --priority 1 --skip-dnssec
 ```
 
 ## Documentation
@@ -75,6 +75,25 @@ Additional information can also be found via [MoneyButton's documentation](https
 - [ ] P2P Transactions (brfc: [5f1323cddf31](https://docs.moneybutton.com/docs/paymail-06-p2p-transactions.html))
 - [ ] P2P Payment Destination (brfc: [2a40af698840](https://docs.moneybutton.com/docs/paymail-07-p2p-payment-destination.html))
 
+### Package Dependencies
+- bitcoinsv's [bsvd](https://github.com/bitcoinsv/bsvd) for BSV script functionality
+- bitcoinsv's [bsvutil](https://github.com/bitcoinsv/bsvutil) for BSV address utilities
+- miekg's [dns](https://github.com/miekg/dns) package for advanced DNS functionality
+- mitchellh's [go-homedir](https://github.com/mitchellh/go-homedir) to find the home directory
+- MrZ's [go-validate](https://github.com/mrz1836/go-validate) for domain/email/ip validations
+- spf13's [cobra](https://github.com/spf13/cobra) for easy CLI application development
+- spf13's [viper](https://github.com/spf13/viper) for easy application configuration
+- ttacon's [chalk](https://github.com/ttacon/chalk) for colorful logs
+
+#### Upgrade Dependencies
+```bash
+$ go get -u ./...
+$ go mod tidy
+```
+
+#### Custom Configuration
+The file should be located in your `$HOME` folder and named `.paymail-inspector.yaml`. View the [example config file](.paymail-inspector.yaml).
+
 ## Examples & Tests
 All unit tests and [examples](examples/examples.md) run via [Travis CI](https://travis-ci.com/mrz1836/paymail-inspector) and uses [Go version 1.14.x](https://golang.org/doc/go1.14). View the [deployment configuration file](.travis.yml).
 
@@ -84,9 +103,8 @@ $ cd ../paymail-inspector
 $ go test ./... -v
 ```
 
-Run tests (excluding integration tests)
+Run tests (_excluding_ integration tests)
 ```bash
-$ cd ../paymail-inspector
 $ go test ./... -v -test.short
 ```
 
@@ -94,7 +112,7 @@ $ go test ./... -v -test.short
 Read more about this Go project's [code standards](CODE_STANDARDS.md).
 
 ## Usage
-View the [examples](examples/examples.md)
+View all the [examples](examples/examples.md)
 
 ## Maintainers
 
