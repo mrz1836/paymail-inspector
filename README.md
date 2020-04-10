@@ -37,28 +37,32 @@ $ go install github.com/mrz1836/paymail-inspector
 $ paymail-inspector -h
 ```
 
-#### Available Commands
-- **capabilities** will list the available capabilities of the paymail domain ([view example](examples/examples.md))
+## Commands
+
+### capabilities
+Lists the available capabilities of the paymail domain ([view example](examples/examples.md#get-capabilities-by-domain))
 ```bash
 $ paymail-inspector capabilities moneybutton.com
 ```
 
-- **resolve** will return the `pubkey`, `output hash` and `address` for a given paymail address ([view example](examples/examples.md))
+### resolve
+Returns the `pubkey`, `output hash` and `address` for a given paymail address ([view example](examples/examples.md#resolve-paymail-address-by-paymail))
 ```bash
 $ paymail-inspector resolve mrz@moneybutton.com
 ```
 
-- **validate** will attempt to validate a paymail service for DNSSEC, SSL, SRV and other required properties ([view example](examples/examples.md))
+### validate
+Attempts to validate a paymail service for DNSSEC, SSL, SRV and other required properties ([view example](examples/examples.md#validate-paymail-setup-by-paymail-or-domain))
 ```bash
 $ paymail-inspector validate moneybutton.com --priority 1 --skip-dnssec
 ```
 
 ## Documentation
-You can view the [examples and documentation](examples/examples.md).
+Get started with the [examples](examples/examples.md). View the generated [godocs](https://pkg.go.dev/github.com/mrz1836/paymail-inspector?tab=subdirectories).
 
-Also checkout the [official paymail specifications](http://bsvalias.org/index.html).
+This application was built using the [official paymail specifications](http://bsvalias.org/index.html).
 
-Additional information can also be found via [MoneyButton's documentation](https://docs.moneybutton.com/docs/paymail-overview.html).
+Additional paymail information can also be found via [MoneyButton's documentation](https://docs.moneybutton.com/docs/paymail-overview.html).
 
 ### Features
 - [x] Validate any paymail domain or paymail address
