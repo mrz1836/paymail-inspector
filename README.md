@@ -1,6 +1,6 @@
 <img src=".github/IMAGES/paymail-inspector.png" height="250" alt="Paymail Inspector">
 
-**paymail-inspector** is a CLI tool for inspecting, validating and resolving paymail addresses and domains
+# Paymail Inspector
 
 [![Go](https://img.shields.io/github/go-mod/go-version/mrz1836/paymail-inspector?v=1)](https://golang.org/)
 [![Build Status](https://travis-ci.com/mrz1836/paymail-inspector.svg?branch=master&v=1)](https://travis-ci.com/mrz1836/paymail-inspector)
@@ -8,6 +8,8 @@
 [![Release](https://img.shields.io/github/release-pre/mrz1836/paymail-inspector.svg?style=flat&v=1)](https://github.com/mrz1836/paymail-inspector/releases)
 [![standard-readme compliant](https://img.shields.io/badge/standard--readme-OK-green.svg?style=flat)](https://github.com/RichardLitt/standard-readme)
 [![GoDoc](https://godoc.org/github.com/mrz1836/paymail-inspector?status.svg&style=flat)](https://godoc.org/github.com/mrz1836/paymail-inspector)
+
+> **paymail-inspector** is a CLI tool for inspecting, validating or resolving paymail addresses and domains
 
 <img src=".github/IMAGES/capabilities-command-zoomed.gif?raw=true" alt="Capabilities Command">
 
