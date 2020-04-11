@@ -1,3 +1,6 @@
+/*
+Package chalker is a logging interface for the commands->stdout and uses the chalk package
+*/
 package chalker
 
 import (
@@ -6,12 +9,13 @@ import (
 	"github.com/ttacon/chalk"
 )
 
+// Logging types
 const (
 	DEFAULT = "default"
-	INFO    = "info"
-	WARN    = "warn"
-	SUCCESS = "success"
 	ERROR   = "error"
+	INFO    = "info"
+	SUCCESS = "success"
+	WARN    = "warn"
 )
 
 var (
