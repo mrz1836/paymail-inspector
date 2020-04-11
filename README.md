@@ -29,7 +29,7 @@
 **paymail-inspector** requires a [supported release of Go](https://golang.org/doc/devel/release.html#policy).
 ```bash
 $ go get -u github.com/mrz1836/paymail-inspector
-$ go install github.com/mrz1836/paymail-inspector
+$ make install
 ```
 
 #### Run the Application
@@ -94,8 +94,7 @@ Additional paymail information can also be found via [MoneyButton's documentatio
 
 #### Upgrade Dependencies
 ```bash
-$ go get -u ./...
-$ go mod tidy
+$ make update
 ```
 
 #### Custom Configuration
@@ -107,7 +106,7 @@ All unit tests and [examples](examples/examples.md) run via [Travis CI](https://
 Run all tests (including integration tests)
 ```bash
 $ cd ../paymail-inspector
-$ go test ./... -v
+$ make test
 ```
 
 Run tests (_excluding_ integration tests)

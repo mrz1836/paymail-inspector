@@ -2,6 +2,7 @@ COVER=go tool cover
 
 test:
 	go vet
+	golint
 	go test ./... -v
 
 install:
