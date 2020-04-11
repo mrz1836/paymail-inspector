@@ -67,6 +67,6 @@ ___
 
 #### Verify Public Key Owner
 ```bash
-$ paymail-inspector verify mrz@moneybutton.com 035668e03de9ebd78ca6905ea5b36c4a33e050a790fae7a0b2e039857f6d66e17b
+$ paymail-inspector verify mrz@moneybutton.com 02ead23149a1e33df17325ec7a7ba9e0b20c674c57c630f527d69b866aa9b65b10
 ```
-<img src="../.github/IMAGES/verify-command.gif?raw=true&v=1" alt="Verify Command">
+<img src="../.github/IMAGES/verify-command.gif?raw=true&v=2" alt="Verify Command">

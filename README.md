@@ -60,7 +60,7 @@ $ paymail-inspector validate moneybutton.com --priority 1 --skip-dnssec
 ### verify
 Attempts to verify a given paymail is associated to a given pubkey ([view example](examples/examples.md#verify-public-key-owner))
 ```bash
-$ paymail-inspector verify mrz@moneybutton.com 035668e03de9ebd78ca6905ea5b36c4a33e050a790fae7a0b2e039857f6d66e17b
+$ paymail-inspector verify mrz@moneybutton.com 02ead23149a1e33df17325ec7a7ba9e0b20c674c57c630f527d69b866aa9b65b10
 ```
 
 ## Documentation
