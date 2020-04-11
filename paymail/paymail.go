@@ -12,10 +12,13 @@ import (
 
 // Defaults for paymail functions
 const (
-	defaultDeadline          = 5     // In seconds
 	defaultDnsPort           = "53"  // Default port for DNS / NameServer checks
+	defaultDnsTimeout        = 5     // In seconds
 	defaultNameServerNetwork = "udp" // Default for NS dialer
-	defaultTimeout           = 5     // In seconds
+	defaultSSLDeadline       = 10    // In seconds
+	defaultSSLTimeout        = 10    // In seconds
+	defaultGetTimeout        = 15    // In seconds
+	defaultPostTimeout       = 15    // In seconds
 	defaultUserAgent         = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36"
 	maxSRVRecords            = 1        // Given by paymail specs
 	typeBool                 = "bool"   // For bool detection
@@ -80,7 +83,7 @@ func customResolver(nameServer, useNetwork string) net.Resolver {
 		PreferGo: true,
 		Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
 			d := net.Dialer{
-				Timeout: time.Second * defaultTimeout,
+				Timeout: time.Second * defaultDnsTimeout,
 			}
 			return d.DialContext(ctx, useNetwork, nameServer+":"+defaultDnsPort)
 		},

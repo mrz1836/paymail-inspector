@@ -19,7 +19,7 @@ var capabilitiesCmd = &cobra.Command{
 	Use:     "capabilities",
 	Short:   "Get the capabilities of the paymail domain",
 	Long:    `This command will return the capabilities for a given paymail domain`,
-	Aliases: []string{"abilities", "discover"},
+	Aliases: []string{"c", "abilities"},
 	Example: "capabilities " + defaultDomainName,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
@@ -46,7 +46,11 @@ var capabilitiesCmd = &cobra.Command{
 		// Get the capabilities
 		capabilities, err := getCapabilities(domain)
 		if err != nil {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("error: %s", err.Error()))
+			if strings.Contains(err.Error(), "context deadline exceeded") {
+				chalker.Log(chalker.WARN, fmt.Sprintf("no capabilities found for: %s", domain))
+			} else {
+				chalker.Log(chalker.ERROR, fmt.Sprintf("error: %s", err.Error()))
+			}
 			return
 		}
 

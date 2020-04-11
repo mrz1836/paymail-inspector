@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/bitcoinsv/bsvd/chaincfg"
 	"github.com/bitcoinsv/bsvd/txscript"
@@ -66,9 +67,14 @@ func AddressResolution(resolutionUrl, alias, domain string, senderRequest *Addre
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("User-Agent", defaultUserAgent)
 
+	// Set the client
+	client := http.Client{
+		Timeout: defaultPostTimeout * time.Second,
+	}
+
 	// Fire the request
 	var resp *http.Response
-	if resp, err = http.DefaultClient.Do(req); err != nil {
+	if resp, err = client.Do(req); err != nil {
 		return
 	}
 

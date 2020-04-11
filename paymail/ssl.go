@@ -29,8 +29,8 @@ func CheckSSL(host, nameServer string) (valid bool, err error) {
 
 		// Set the dialer
 		dialer := net.Dialer{
-			Timeout:  time.Duration(defaultTimeout) * time.Second,
-			Deadline: time.Now().Add(time.Duration(defaultDeadline) * time.Second),
+			Timeout:  time.Duration(defaultSSLTimeout) * time.Second,
+			Deadline: time.Now().Add(time.Duration(defaultSSLDeadline) * time.Second),
 		}
 
 		// Set the connection

@@ -33,8 +33,8 @@ var validateCmd = &cobra.Command{
 				By default, this will check for a SRV record, DNSSEC and SSL for the domain. 
 				Finally, it will list the capabilities for the target and resolve any address given as well.`,
 	Example:    "validate " + defaultDomainName,
-	Aliases:    []string{"check", "inspect"},
-	SuggestFor: []string{"valid", "check", "lookup"},
+	Aliases:    []string{"val", "check"},
+	SuggestFor: []string{"valid", "lookup"},
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return chalker.Error("requires either a domain or paymail address")
@@ -131,7 +131,7 @@ var validateCmd = &cobra.Command{
 				chalker.Log(chalker.ERROR, fmt.Sprintf("error checking SSL: %s", err.Error()))
 				return
 			} else if !valid {
-				chalker.Log(chalker.ERROR, "SSL is not valid or not found")
+				chalker.Log(chalker.ERROR, "zero SSL certificates found (or timed out)")
 				return
 			}
 			chalker.Log(chalker.SUCCESS, fmt.Sprintf("SSL found and valid for: %s", checkDomain))
@@ -142,7 +142,11 @@ var validateCmd = &cobra.Command{
 		// Get the capabilities
 		var capabilities *paymail.CapabilitiesResponse
 		if capabilities, err = getCapabilities(domain); err != nil {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("error: %s", err.Error()))
+			if strings.Contains(err.Error(), "context deadline exceeded") {
+				chalker.Log(chalker.WARN, fmt.Sprintf("no capabilities found for: %s", domain))
+			} else {
+				chalker.Log(chalker.ERROR, fmt.Sprintf("error: %s", err.Error()))
+			}
 			return
 		}
 

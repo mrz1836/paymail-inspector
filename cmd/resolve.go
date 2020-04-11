@@ -28,7 +28,7 @@ var resolveCmd = &cobra.Command{
 	Use:        "resolve",
 	Short:      "Resolves a paymail address",
 	Long:       `Resolves a paymail address into a hex-encoded Bitcoin script and address`,
-	Aliases:    []string{"resolution"},
+	Aliases:    []string{"r", "resolution"},
 	SuggestFor: []string{"address", "destination", "payment", "addressing"},
 	Example:    "resolve this@address.com",
 	Args: func(cmd *cobra.Command, args []string) error {
@@ -90,7 +90,11 @@ var resolveCmd = &cobra.Command{
 		// Get the capabilities
 		capabilities, err := getCapabilities(domain)
 		if err != nil {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("error: %s", err.Error()))
+			if strings.Contains(err.Error(), "context deadline exceeded") {
+				chalker.Log(chalker.WARN, fmt.Sprintf("no capabilities found for: %s", domain))
+			} else {
+				chalker.Log(chalker.ERROR, fmt.Sprintf("error: %s", err.Error()))
+			}
 			return
 		}
 
@@ -120,10 +124,13 @@ var resolveCmd = &cobra.Command{
 				// Get the capabilities
 				senderCapabilities, getErr := getCapabilities(senderDomain)
 				if getErr != nil {
-					chalker.Log(chalker.ERROR, fmt.Sprintf("error: %s", getErr.Error()))
+					if strings.Contains(getErr.Error(), "context deadline exceeded") {
+						chalker.Log(chalker.WARN, fmt.Sprintf("no capabilities found for: %s", domain))
+					} else {
+						chalker.Log(chalker.ERROR, fmt.Sprintf("error: %s", getErr.Error()))
+					}
 					return
 				}
-
 				// Does the paymail provider have the capability?
 				if len(senderCapabilities.Pki) == 0 {
 					chalker.Log(chalker.ERROR, fmt.Sprintf("--sender-handle missing a required capability: %s", paymail.CapabilityPaymentDestination))

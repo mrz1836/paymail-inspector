@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 )
 
 /*
@@ -42,9 +43,14 @@ func VerifyPubKey(verifyUrl, alias, domain, pubKey string) (response *VerifyPubK
 	// Set the headers (standard user agent so it cannot be blocked)
 	req.Header.Set("User-Agent", defaultUserAgent)
 
+	// Set the client
+	client := http.Client{
+		Timeout: defaultGetTimeout * time.Second,
+	}
+
 	// Fire the request
 	var resp *http.Response
-	if resp, err = http.DefaultClient.Do(req); err != nil {
+	if resp, err = client.Do(req); err != nil {
 		return
 	}
 
