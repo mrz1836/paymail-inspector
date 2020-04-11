@@ -31,7 +31,7 @@ $ paymail-inspector resolve mrz@moneybutton.com
 ```
 <img src="../.github/IMAGES/resolve-command.gif?raw=true&v=1" alt="Resolve Command">
 
-Custom flags for creating the "sender request":
+Custom flags for resolving or starting a payment request
 ```
   -a, --amount uint            Amount in satoshis for the payment request
   -h, --help                   help for resolve
@@ -60,6 +60,7 @@ Custom flags for configuring the validation (enable/disable checks)
   -s, --service string      Service name in the SRV record (default "bsvalias")
   -d, --skip-dnssec         Skip checking DNSSEC of the target
       --skip-ssl            Skip checking SSL of the target
+      --skip-srv            Skip checking SRV record of the main domain
   -w, --weight int          Weight value that is found in the SRV record (default 10)
 ```
 

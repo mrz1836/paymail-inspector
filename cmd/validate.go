@@ -2,13 +2,14 @@ package cmd
 
 import (
 	"fmt"
+	"net"
 	"strings"
 
 	"github.com/mrz1836/go-validate"
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/mrz1836/paymail-inspector/paymail"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
+	"github.com/ttacon/chalk"
 )
 
 // Default flag values
@@ -19,6 +20,7 @@ var (
 	protocol     string
 	serviceName  string
 	skipDnsCheck bool
+	skipSrvCheck bool
 	skipSSLCheck bool
 	weight       int
 )
@@ -43,17 +45,17 @@ var validateCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 
-		chalker.Log(chalker.DEFAULT, fmt.Sprintf("starting validation... found args: %s", args))
-
 		// Extract the parts given
 		domain, paymailAddress := paymail.ExtractParts(args[0])
+		var err error
+		var ok bool
 
 		// Are we an address?
 		if len(paymailAddress) > 0 {
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("paymail address detected: %s", paymailAddress))
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("paymail detected: %s", chalk.Cyan.Color(paymailAddress)))
 
 			// Validate the format for the paymail address (paymail addresses follow conventional email requirements)
-			if ok, err := validate.IsValidEmail(paymailAddress, false); err != nil {
+			if ok, err = validate.IsValidEmail(paymailAddress, false); err != nil {
 				chalker.Log(chalker.ERROR, fmt.Sprintf("paymail address failed format validation: %s", err.Error()))
 				return
 			} else if !ok {
@@ -62,7 +64,7 @@ var validateCmd = &cobra.Command{
 			}
 
 		} else {
-			chalker.Log(chalker.INFO, fmt.Sprintf("domain detected: %s", domain))
+			chalker.Log(chalker.INFO, fmt.Sprintf("domain detected: %s", chalk.Cyan.Color(domain)))
 		}
 
 		// Check for a real domain (require at least one period)
@@ -74,29 +76,40 @@ var validateCmd = &cobra.Command{
 			return
 		}
 
+		// Used for future checks
+		checkDomain := domain
+
 		// Get the SRV record
-		chalker.Log(chalker.DEFAULT, "getting SRV record...")
-		srv, err := paymail.GetSRVRecord(serviceName, protocol, domain, nameServer)
-		if err != nil {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("error getting SRV record: %s", err.Error()))
-			return
-		}
+		if !skipSrvCheck {
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("getting SRV record for: %s...", chalk.Cyan.Color(domain)))
 
-		// Validate the SRV record for the domain name (using all flags or default values)
-		if err = paymail.ValidateSRVRecord(srv, nameServer, port, priority, weight); err != nil {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("failed validating SRV record: %s", err.Error()))
-			return
-		}
+			var srv *net.SRV
+			srv, err = paymail.GetSRVRecord(serviceName, protocol, domain, nameServer)
+			if err != nil {
+				chalker.Log(chalker.ERROR, fmt.Sprintf("error getting SRV record: %s", err.Error()))
+				return
+			}
 
-		// Success message
-		chalker.Log(chalker.SUCCESS, "SRV record passed all validations (target, port, priority, weight)")
-		chalker.Log(chalker.INFO, fmt.Sprintf("target record found: %s", srv.Target))
+			// Validate the SRV record for the domain name (using all flags or default values)
+			if err = paymail.ValidateSRVRecord(srv, nameServer, port, priority, weight); err != nil {
+				chalker.Log(chalker.ERROR, fmt.Sprintf("failed validating SRV record: %s", err.Error()))
+				return
+			}
+
+			checkDomain = srv.Target
+
+			// Success message
+			chalker.Log(chalker.SUCCESS, "SRV record passed all validations (target, port, priority, weight)")
+			chalker.Log(chalker.INFO, fmt.Sprintf("target record found: %s", chalk.Cyan.Color(srv.Target)))
+		} else {
+			chalker.Log(chalker.WARN, fmt.Sprintf("skipping SRV record check for: %s", chalk.Cyan.Color(checkDomain)))
+		}
 
 		// Validate the DNSSEC if the flag is true
 		if !skipDnsCheck {
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("checking %s for DNSSEC validation...", srv.Target))
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("checking %s for DNSSEC validation...", chalk.Cyan.Color(checkDomain)))
 
-			if result := paymail.CheckDNSSEC(srv.Target, nameServer); result.DNSSEC {
+			if result := paymail.CheckDNSSEC(checkDomain, nameServer); result.DNSSEC {
 				chalker.Log(chalker.SUCCESS, fmt.Sprintf("DNSSEC found and valid and found %d DS record(s)", result.Answer.DSRecordCount))
 			} else {
 				chalker.Log(chalker.ERROR, fmt.Sprintf("DNSSEC not found or invalid for %s", result.Domain))
@@ -106,79 +119,56 @@ var validateCmd = &cobra.Command{
 				return
 			}
 		} else {
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("skipping DNSSEC check for %s", srv.Target))
+			chalker.Log(chalker.WARN, fmt.Sprintf("skipping DNSSEC check for: %s", chalk.Cyan.Color(checkDomain)))
 		}
 
 		// Validate that there is SSL on the target
 		if !skipSSLCheck {
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("checking %s for SSL validation...", srv.Target))
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("checking %s for SSL validation...", chalk.Cyan.Color(checkDomain)))
 
 			var valid bool
-			if valid, err = paymail.CheckSSL(srv.Target, nameServer); err != nil {
+			if valid, err = paymail.CheckSSL(checkDomain, nameServer); err != nil {
 				chalker.Log(chalker.ERROR, fmt.Sprintf("error checking SSL: %s", err.Error()))
 				return
 			} else if !valid {
 				chalker.Log(chalker.ERROR, "SSL is not valid or not found")
 				return
 			}
-			chalker.Log(chalker.SUCCESS, "SSL found and valid")
+			chalker.Log(chalker.SUCCESS, fmt.Sprintf("SSL found and valid for: %s", checkDomain))
 		} else {
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("skipping SSL check for %s", srv.Target))
+			chalker.Log(chalker.WARN, fmt.Sprintf("skipping SSL check for: %s", chalk.Cyan.Color(checkDomain)))
 		}
 
-		// Now lookup the capabilities
-		chalker.Log(chalker.DEFAULT, fmt.Sprintf("getting capabilities from %s...", srv.Target))
+		// Get the capabilities
 		var capabilities *paymail.CapabilitiesResponse
-		if capabilities, err = paymail.GetCapabilities(srv.Target, int(srv.Port)); err != nil {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("get capabilities failed: %s", err.Error()))
+		if capabilities, err = getCapabilities(domain); err != nil {
+			chalker.Log(chalker.ERROR, fmt.Sprintf("error: %s", err.Error()))
 			return
 		}
-
-		// Check the version
-		if capabilities.BsvAlias != viper.GetString(flagBsvAlias) {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("capabilities %s version mismatch, expected: %s but got: %s", flagBsvAlias, viper.GetString(flagBsvAlias), capabilities.BsvAlias))
-			return
-		}
-
-		// Show some basic results
-		chalker.Log(chalker.INFO, fmt.Sprintf("%s version: %s", flagBsvAlias, capabilities.BsvAlias))
-		chalker.Log(chalker.DEFAULT, fmt.Sprintf("total capabilities found: %d", len(capabilities.Capabilities)))
 
 		// Missing required capabilities?
 		if len(capabilities.Pki) == 0 {
 			chalker.Log(chalker.WARN, fmt.Sprintf("missing required capability: %s", paymail.CapabilityPki))
-			return
 		} else if len(capabilities.PaymentDestination) == 0 {
 			chalker.Log(chalker.WARN, fmt.Sprintf("missing required capability: %s", paymail.CapabilityPaymentDestination))
-			return
+		} else if len(capabilities.Pki) > 0 && len(capabilities.PaymentDestination) > 0 {
+			chalker.Log(chalker.SUCCESS, fmt.Sprintf("found required capabilities: [%s] [%s]", paymail.CapabilityPki, paymail.CapabilityPaymentDestination))
 		}
 
-		// Passed the capabilities check
-		chalker.Log(chalker.INFO, fmt.Sprintf("found required %s and %s capabilities", paymail.CapabilityPki, paymail.CapabilityPaymentDestination))
-
-		// Only if we have an address (extra validations)
-		if len(paymailAddress) > 0 {
+		// Only if we have an address (basic validation that the address exists)
+		if len(paymailAddress) > 0 && len(capabilities.Pki) > 0 {
 
 			// Get the alias of the address
 			parts := strings.Split(paymailAddress, "@")
 
 			// Get the PKI for the given address
-			chalker.Log(chalker.DEFAULT, "getting PKI...")
-
 			var pki *paymail.PKIResponse
-			if pki, err = paymail.GetPKI(capabilities.Pki, parts[0], domain); err != nil {
-				chalker.Log(chalker.ERROR, fmt.Sprintf("get PKI failed: %s", err.Error()))
+			if pki, err = getPki(capabilities.Pki, parts[0], parts[1]); err != nil {
+				chalker.Log(chalker.ERROR, fmt.Sprintf("error: %s", err.Error()))
 				return
+			} else if pki != nil {
+				chalker.Log(chalker.SUCCESS, fmt.Sprintf("found paymail: %s@%s's pubkey: %s", parts[0], parts[1], pki.PubKey))
 			}
-
-			// Check the version
-			if pki.BsvAlias != viper.GetString(flagBsvAlias) {
-				chalker.Log(chalker.ERROR, fmt.Sprintf("pki %s version mismatch, expected: %s but got: %s", flagBsvAlias, viper.GetString(flagBsvAlias), capabilities.BsvAlias))
-				return
-			}
-
-			// Found the paymail address
-			chalker.Log(chalker.SUCCESS, fmt.Sprintf("fetching PKI was successful - found PubKey: %s", pki.PubKey))
 		}
 	},
 }
@@ -204,9 +194,12 @@ func init() {
 	// Custom weight for the SRV record
 	validateCmd.Flags().IntVarP(&weight, "weight", "w", paymail.DefaultWeight, "Weight value that is found in the SRV record")
 
+	// Run the SRV check on the domain
+	validateCmd.Flags().BoolVar(&skipSrvCheck, "skip-srv", false, "Skip checking SRV record of the main domain")
+
 	// Run the DNSSEC check on the target domain
-	validateCmd.Flags().BoolVarP(&skipDnsCheck, "skip-dnssec", "d", false, "Skip checking DNSSEC of the target")
+	validateCmd.Flags().BoolVarP(&skipDnsCheck, "skip-dnssec", "d", false, "Skip checking DNSSEC of the target domain")
 
 	// Run the SSL check on the target domain
-	validateCmd.Flags().BoolVar(&skipSSLCheck, "skip-ssl", false, "Skip checking SSL of the target")
+	validateCmd.Flags().BoolVar(&skipSSLCheck, "skip-ssl", false, "Skip checking SSL of the target domain")
 }

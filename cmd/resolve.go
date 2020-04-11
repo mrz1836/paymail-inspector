@@ -9,7 +9,7 @@ import (
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/mrz1836/paymail-inspector/paymail"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
+	"github.com/ttacon/chalk"
 )
 
 // Flags for the resolve command
@@ -29,7 +29,7 @@ var resolveCmd = &cobra.Command{
 	Short:      "Resolves a paymail address",
 	Long:       `Resolves a paymail address into a hex-encoded Bitcoin script and address`,
 	Aliases:    []string{"resolution"},
-	SuggestFor: []string{"address", "destination", "send"},
+	SuggestFor: []string{"address", "destination", "payment", "addressing"},
 	Example:    "resolve this@address.com",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
@@ -42,6 +42,8 @@ var resolveCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		// Extract the parts given
+		var senderDomain string
+		senderDomain, senderHandle = paymail.ExtractParts(senderHandle)
 		domain, paymailAddress := paymail.ExtractParts(args[0])
 
 		// Did we get a paymail address?
@@ -59,49 +61,36 @@ var resolveCmd = &cobra.Command{
 			return
 		}
 
-		// No sender handle given? (set to the receiver's paymail address)
+		// No sender handle given? (default: set to the receiver's paymail address)
 		if len(senderHandle) == 0 {
-			senderHandle = paymailAddress
 			chalker.Log(chalker.WARN, fmt.Sprintf("--sender-handle not set, using: %s", paymailAddress))
+			senderHandle = paymailAddress
+			senderDomain, senderHandle = paymail.ExtractParts(senderHandle)
+		} else { // Sender handle is set (basic validation)
+
+			// Validate the format for the given handle
+			if ok, err := validate.IsValidEmail(senderHandle, false); err != nil {
+				chalker.Log(chalker.ERROR, fmt.Sprintf("--sender-handle failed format validation: %s", err.Error()))
+				return
+			} else if !ok {
+				chalker.Log(chalker.ERROR, "--sender-handle failed format validation: unknown reason")
+				return
+			}
+
+			// Check for a real domain (require at least one period)
+			if !strings.Contains(senderDomain, ".") {
+				chalker.Log(chalker.ERROR, fmt.Sprintf("--sender-handle domain name is invalid: %s", senderDomain))
+				return
+			} else if !validate.IsValidDNSName(senderDomain) { // Basic DNS check (not a REAL domain name check)
+				chalker.Log(chalker.ERROR, fmt.Sprintf("--sender-handle domain name failed DNS check: %s", senderDomain))
+				return
+			}
 		}
 
-		// Validate the format for the given handle
-		if ok, err := validate.IsValidEmail(senderHandle, false); err != nil {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("sender handle failed format validation: %s", err.Error()))
-			return
-		} else if !ok {
-			chalker.Log(chalker.ERROR, "sender handle failed format validation: unknown reason")
-			return
-		}
-
-		// Check for a real domain (require at least one period)
-		if !strings.Contains(domain, ".") {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("domain name is invalid: %s", domain))
-			return
-		} else if !validate.IsValidDNSName(domain) { // Basic DNS check (not a REAL domain name check)
-			chalker.Log(chalker.ERROR, fmt.Sprintf("domain name failed DNS check: %s", domain))
-			return
-		}
-
-		// Get the details from the SRV record
-		chalker.Log(chalker.DEFAULT, "getting SRV record...")
-		srv, err := paymail.GetSRVRecord(serviceName, protocol, domain, nameServer)
+		// Get the capabilities
+		capabilities, err := getCapabilities(domain)
 		if err != nil {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("get SRV record failed: %s", err.Error()))
-			return
-		}
-
-		// Get the capabilities for the given domain
-		chalker.Log(chalker.DEFAULT, fmt.Sprintf("getting capabilities from %s...", srv.Target))
-		var capabilities *paymail.CapabilitiesResponse
-		if capabilities, err = paymail.GetCapabilities(srv.Target, int(srv.Port)); err != nil {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("get capabilities failed: %s", err.Error()))
-			return
-		}
-
-		// Check the version
-		if capabilities.BsvAlias != viper.GetString(flagBsvAlias) {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("capabilities %s version mismatch, expected: %s but got: %s", flagBsvAlias, viper.GetString(flagBsvAlias), capabilities.BsvAlias))
+			chalker.Log(chalker.ERROR, fmt.Sprintf("error: %s", err.Error()))
 			return
 		}
 
@@ -118,62 +107,44 @@ var resolveCmd = &cobra.Command{
 
 			// Required if flag is enforced
 			if len(signature) == 0 {
-				chalker.Log(chalker.ERROR, fmt.Sprintf("missing required field: %s", "signature"))
-				return
+				chalker.Log(chalker.ERROR, fmt.Sprintf("missing required flag: %s - see the help section: -h", "--signature"))
+
+				// todo: generate a real signature if possible
+				chalker.Log(chalker.WARN, fmt.Sprintf("attempting to fake a signature for: %s...", senderHandle))
+				signature, _ = RandomHex(64)
 			}
 
-			// Only if it's not to our self (from above)
+			// Only if it's not the same (set from above ^^)
 			if senderHandle != paymailAddress {
 
-				// Extract the parts given
-				_, senderHandle = paymail.ExtractParts(senderHandle)
-
-				// Get the details from the SRV record
-				chalker.Log(chalker.DEFAULT, "getting sender-handle SRV record...")
-				senderSrv, sendErr := paymail.GetSRVRecord(serviceName, protocol, domain, nameServer)
-				if sendErr != nil {
-					chalker.Log(chalker.ERROR, fmt.Sprintf("get sender-handle SRV record failed: %s", sendErr.Error()))
-					return
-				}
-
-				// Get the capabilities for the given domain
-				chalker.Log(chalker.DEFAULT, fmt.Sprintf("getting sender-handle capabilities from %s...", senderSrv.Target))
-				var senderCapabilities *paymail.CapabilitiesResponse
-				if senderCapabilities, err = paymail.GetCapabilities(senderSrv.Target, int(senderSrv.Port)); err != nil {
-					chalker.Log(chalker.ERROR, fmt.Sprintf("get sender-handle capabilities failed: %s", err.Error()))
-					return
-				}
-
-				// Check the version
-				if senderCapabilities.BsvAlias != viper.GetString(flagBsvAlias) {
-					chalker.Log(chalker.ERROR, fmt.Sprintf("sender-handle capabilities %s version mismatch, expected: %s but got: %s", flagBsvAlias, viper.GetString(flagBsvAlias), capabilities.BsvAlias))
+				// Get the capabilities
+				senderCapabilities, getErr := getCapabilities(senderDomain)
+				if getErr != nil {
+					chalker.Log(chalker.ERROR, fmt.Sprintf("error: %s", getErr.Error()))
 					return
 				}
 
 				// Does the paymail provider have the capability?
-				if len(senderCapabilities.PaymentDestination) == 0 {
-					chalker.Log(chalker.ERROR, fmt.Sprintf("sender-handle missing a required capability: %s", paymail.CapabilityPaymentDestination))
+				if len(senderCapabilities.Pki) == 0 {
+					chalker.Log(chalker.ERROR, fmt.Sprintf("--sender-handle missing a required capability: %s", paymail.CapabilityPaymentDestination))
 					return
 				}
 
 				// Get the alias of the address
-				parts := strings.Split(paymailAddress, "@")
+				parts := strings.Split(senderHandle, "@")
 
 				// Get the PKI for the given address
 				var senderPki *paymail.PKIResponse
-				chalker.Log(chalker.DEFAULT, "getting PKI...")
-				if senderPki, err = paymail.GetPKI(capabilities.Pki, parts[0], domain); err != nil {
-					chalker.Log(chalker.ERROR, fmt.Sprintf("get sender-handle PKI failed: %s", err.Error()))
+				if senderPki, err = getPki(senderCapabilities.Pki, parts[0], parts[1]); err != nil {
+					chalker.Log(chalker.ERROR, fmt.Sprintf("error: %s", err.Error()))
 					return
-				}
-				if len(senderPki.PubKey) == 0 {
-					chalker.Log(chalker.ERROR, fmt.Sprintf("failed getting pubkey for: %s", senderPki.Handle))
-					return
+				} else if senderPki != nil {
+					chalker.Log(chalker.INFO, fmt.Sprintf("--sender-handle %s@%s's pubkey: %s", parts[0], parts[1], chalk.Cyan.Color(senderPki.PubKey)))
 				}
 			}
 
-			// todo: validate or generate the signature (if possible)
 			// once completed, the full sender validation will be complete
+			chalker.Log(chalker.SUCCESS, "send request pre-validation: passed")
 		}
 
 		// Get the alias of the address
@@ -181,12 +152,9 @@ var resolveCmd = &cobra.Command{
 
 		// Get the PKI for the given address
 		var pki *paymail.PKIResponse
-		if !skipPki {
-			chalker.Log(chalker.DEFAULT, "getting PKI...")
-			if pki, err = paymail.GetPKI(capabilities.Pki, parts[0], domain); err != nil {
-				chalker.Log(chalker.ERROR, fmt.Sprintf("get PKI failed: %s", err.Error()))
-				return
-			}
+		if pki, err = getPki(capabilities.Pki, parts[0], domain); err != nil {
+			chalker.Log(chalker.ERROR, fmt.Sprintf("error: %s", err.Error()))
+			return
 		}
 
 		// Setup the request body
@@ -200,10 +168,10 @@ var resolveCmd = &cobra.Command{
 		}
 
 		// Resolve the address from a given paymail
-		chalker.Log(chalker.DEFAULT, "resolving address...")
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("resolving address: %s...", chalk.Cyan.Color(parts[0]+"@"+domain)))
 
-		var resolution *paymail.AddressResolutionResponse
-		if resolution, err = paymail.AddressResolution(capabilities.PaymentDestination, parts[0], domain, senderRequest); err != nil {
+		var resolutionResponse *paymail.AddressResolutionResponse
+		if resolutionResponse, err = paymail.AddressResolution(capabilities.PaymentDestination, parts[0], domain, senderRequest); err != nil {
 			chalker.Log(chalker.ERROR, fmt.Sprintf("address resolution failed: %s", err.Error()))
 			return
 		}
@@ -213,31 +181,31 @@ var resolveCmd = &cobra.Command{
 
 		// Attempt to get a public profile if the capability is found
 		if len(capabilities.PublicProfile) > 0 && !skipPublicProfile {
-			chalker.Log(chalker.DEFAULT, "getting public profile...")
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("getting public profile for: %s...", chalk.Cyan.Color(parts[0]+"@"+domain)))
 			var profile *paymail.PublicProfileResponse
 			if profile, err = paymail.GetPublicProfile(capabilities.PublicProfile, parts[0], domain); err != nil {
 				chalker.Log(chalker.ERROR, fmt.Sprintf("get public profile failed: %s", err.Error()))
 				return
 			} else if profile != nil {
 				if len(profile.Name) > 0 {
-					chalker.Log(chalker.INFO, fmt.Sprintf("name: %s", profile.Name))
+					chalker.Log(chalker.DEFAULT, fmt.Sprintf("name: %s", chalk.Cyan.Color(profile.Name)))
 				}
 				if len(profile.Avatar) > 0 {
-					chalker.Log(chalker.INFO, fmt.Sprintf("avatar: %s", profile.Avatar))
+					chalker.Log(chalker.DEFAULT, fmt.Sprintf("avatar: %s", chalk.Cyan.Color(profile.Avatar)))
 				}
 			}
 		}
 
 		// Show pubkey
 		if pki != nil && len(pki.PubKey) > 0 {
-			chalker.Log(chalker.INFO, fmt.Sprintf("pubkey: %s", pki.PubKey))
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("pubkey: %s", chalk.Cyan.Color(pki.PubKey)))
 		}
 
 		// Show output script
-		chalker.Log(chalker.INFO, fmt.Sprintf("output script: %s", resolution.Output))
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("output script: %s", chalk.Cyan.Color(resolutionResponse.Output)))
 
 		// Show the resolved address from the output script
-		chalker.Log(chalker.INFO, fmt.Sprintf("address: %s", resolution.Address))
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("address: %s", chalk.Cyan.Color(resolutionResponse.Address)))
 	},
 }
 

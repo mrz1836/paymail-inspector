@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"net"
 	"reflect"
 	"strings"
 
@@ -42,31 +43,12 @@ var capabilitiesCmd = &cobra.Command{
 			return
 		}
 
-		// Get the details from the SRV record
-		chalker.Log(chalker.DEFAULT, "getting SRV record...")
-		srv, err := paymail.GetSRVRecord(serviceName, protocol, domain, nameServer)
+		// Get the capabilities
+		capabilities, err := getCapabilities(domain)
 		if err != nil {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("get SRV record failed: %s", err.Error()))
+			chalker.Log(chalker.ERROR, fmt.Sprintf("error: %s", err.Error()))
 			return
 		}
-
-		// Get the capabilities for the given domain
-		chalker.Log(chalker.DEFAULT, fmt.Sprintf("getting capabilities from %s...", srv.Target))
-		var capabilities *paymail.CapabilitiesResponse
-		if capabilities, err = paymail.GetCapabilities(srv.Target, int(srv.Port)); err != nil {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("get capabilities failed: %s", err.Error()))
-			return
-		}
-
-		// Check the version
-		if capabilities.BsvAlias != viper.GetString(flagBsvAlias) {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("capabilities %s version mismatch, expected: %s but got: %s", flagBsvAlias, viper.GetString(flagBsvAlias), capabilities.BsvAlias))
-			return
-		}
-
-		// Show basic results
-		chalker.Log(chalker.INFO, fmt.Sprintf("%s version: %s", flagBsvAlias, capabilities.BsvAlias))
-		chalker.Log(chalker.SUCCESS, fmt.Sprintf("%d capabilities found:", len(capabilities.Capabilities)))
 
 		// Show all the found capabilities
 		for key, val := range capabilities.Capabilities {
@@ -82,6 +64,42 @@ var capabilitiesCmd = &cobra.Command{
 			}
 		}
 	},
+}
+
+// getCapabilities will check SRV first, then attempt default domain:port check
+func getCapabilities(domain string) (capabilities *paymail.CapabilitiesResponse, err error) {
+
+	chalker.Log(chalker.DEFAULT, fmt.Sprintf("getting SRV record for: %s...", chalk.Cyan.Color(domain)))
+
+	// Get the details from the SRV record
+	capabilityDomain := ""
+	capabilityPort := paymail.DefaultPort
+	var srv *net.SRV
+	if srv, err = paymail.GetSRVRecord(serviceName, protocol, domain, nameServer); err != nil {
+		chalker.Log(chalker.ERROR, fmt.Sprintf("get SRV record failed: %s", err.Error()))
+		capabilityDomain = domain
+	} else if srv != nil {
+		capabilityDomain = srv.Target
+		capabilityPort = int(srv.Port)
+	}
+
+	// Get the capabilities for the given target domain
+	chalker.Log(chalker.DEFAULT, fmt.Sprintf("getting capabilities from: %s...", chalk.Cyan.Color(fmt.Sprintf("%s:%d", capabilityDomain, capabilityPort))))
+	if capabilities, err = paymail.GetCapabilities(capabilityDomain, capabilityPort); err != nil {
+		return
+	}
+
+	// Check the version
+	if capabilities.BsvAlias != viper.GetString(flagBsvAlias) {
+		err = fmt.Errorf("capabilities %s version mismatch, expected: %s but got: %s", flagBsvAlias, chalk.Cyan.Color(viper.GetString(flagBsvAlias)), chalk.Magenta.Color(capabilities.BsvAlias))
+		return
+	}
+
+	// Success
+	chalker.Log(chalker.SUCCESS, fmt.Sprintf("capabilities found: %d", len(capabilities.Capabilities)))
+	chalker.Log(chalker.DEFAULT, fmt.Sprintf("%s version: %s", flagBsvAlias, chalk.Cyan.Color(capabilities.BsvAlias)))
+
+	return
 }
 
 func init() {

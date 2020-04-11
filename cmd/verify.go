@@ -8,6 +8,7 @@ import (
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/mrz1836/paymail-inspector/paymail"
 	"github.com/spf13/cobra"
+	"github.com/ttacon/chalk"
 )
 
 // verifyCmd represents the verify command
@@ -71,19 +72,10 @@ using the provider domain (if capability is supported)`,
 			return
 		}
 
-		// Get the details from the SRV record
-		chalker.Log(chalker.DEFAULT, "getting SRV record...")
-		srv, err := paymail.GetSRVRecord(serviceName, protocol, domain, nameServer)
+		// Get the capabilities
+		capabilities, err := getCapabilities(domain)
 		if err != nil {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("get SRV record failed: %s", err.Error()))
-			return
-		}
-
-		// Get the capabilities for the given domain
-		chalker.Log(chalker.DEFAULT, fmt.Sprintf("getting capabilities from %s...", srv.Target))
-		var capabilities *paymail.CapabilitiesResponse
-		if capabilities, err = paymail.GetCapabilities(srv.Target, int(srv.Port)); err != nil {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("get capabilities failed: %s", err.Error()))
+			chalker.Log(chalker.ERROR, fmt.Sprintf("error: %s", err.Error()))
 			return
 		}
 
@@ -99,21 +91,21 @@ using the provider domain (if capability is supported)`,
 		// Fire the verify request
 		var verify *paymail.VerifyPubKeyResponse
 		if verify, err = paymail.VerifyPubKey(capabilities.VerifyPublicKeyOwner, parts[0], domain, pubKey); err != nil {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("get capabilities failed: %s", err.Error()))
+			chalker.Log(chalker.ERROR, fmt.Sprintf("get VerifyPublicKey request failed: %s", err.Error()))
 			return
 		} else if verify == nil {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("failed getting/parsing verify response for: %s", paymailAddress))
+			chalker.Log(chalker.ERROR, fmt.Sprintf("failed parsing VerifyPublicKey response for: %s", paymailAddress))
 			return
 		}
 
 		// Show the results
-		chalker.Log(chalker.INFO, fmt.Sprintf("paymail: %s", paymailAddress))
-		chalker.Log(chalker.INFO, fmt.Sprintf("pubkey: %s", pubKey))
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("paymail: %s", chalk.Cyan.Color(paymailAddress)))
+		chalker.Log(chalker.INFO, fmt.Sprintf("pubkey: %s", chalk.Cyan.Color(pubKey)))
 
 		if verify.Match {
 			chalker.Log(chalker.SUCCESS, "Paymail & PubKey Match!")
 		} else {
-			chalker.Log(chalker.ERROR, "DO NOT match!")
+			chalker.Log(chalker.ERROR, "DO NOT MATCH!")
 		}
 	},
 }
