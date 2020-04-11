@@ -28,8 +28,8 @@ var resolveCmd = &cobra.Command{
 	Use:        "resolve",
 	Short:      "Resolves a paymail address",
 	Long:       `Resolves a paymail address into a hex-encoded Bitcoin script and address`,
-	Aliases:    []string{"resolution", "address_resolution"},
-	SuggestFor: []string{"address", "destination"},
+	Aliases:    []string{"resolution"},
+	SuggestFor: []string{"address", "destination", "send"},
 	Example:    "resolve this@address.com",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
@@ -173,6 +173,7 @@ var resolveCmd = &cobra.Command{
 			}
 
 			// todo: validate or generate the signature (if possible)
+			// once completed, the full sender validation will be complete
 		}
 
 		// Get the alias of the address

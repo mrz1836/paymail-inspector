@@ -40,7 +40,7 @@ $ paymail-inspector -h
 ## Commands
 
 ### capabilities
-Lists the available capabilities of the paymail domain ([view example](examples/examples.md#get-capabilities-by-domain))
+Lists the available capabilities of the paymail service ([view example](examples/examples.md#get-capabilities-by-domain))
 ```bash
 $ paymail-inspector capabilities moneybutton.com
 ```
@@ -52,13 +52,13 @@ $ paymail-inspector resolve mrz@moneybutton.com
 ```
 
 ### validate
-Attempts to validate a paymail service for DNSSEC, SSL, SRV and other required properties ([view example](examples/examples.md#validate-paymail-setup-by-paymail-or-domain))
+Attempts to validate a paymail service for DNSSEC, SSL, SRV and required capabilities ([view example](examples/examples.md#validate-paymail-setup-by-paymail-or-domain))
 ```bash
 $ paymail-inspector validate moneybutton.com --priority 1 --skip-dnssec
 ```
 
 ### verify
-Attempts to verify a given paymail is associated to a given pubkey ([view example](examples/examples.md#verify-public-key-owner))
+Attempts to verify if a given paymail is associated to a corresponding pubkey ([view example](examples/examples.md#verify-public-key-owner))
 ```bash
 $ paymail-inspector verify mrz@moneybutton.com 02ead23149a1e33df17325ec7a7ba9e0b20c674c57c630f527d69b866aa9b65b10
 ```
@@ -70,20 +70,17 @@ This application was built using the [official paymail specifications](http://bs
 
 Additional paymail information can also be found via [MoneyButton's documentation](https://docs.moneybutton.com/docs/paymail-overview.html).
 
-### Features
-- [x] Validate any paymail domain or paymail address
-- [x] Customize the validation requirements via application flags
-- [x] Validate the SRV record, DNSSEC and SSL for the target domain
-- [x] Validation for required capabilities (`pki`, `paymentDestination`)
-- [x] List paymail capabilities ([.well-known/bsvalias](http://bsvalias.org/02-02-capability-discovery.html))
-- [x] Validate the `pki` response (brfc: [0c4339ef99c2](http://bsvalias.org/03-public-key-infrastructure.html))
-- [x] Resolve a paymail address (brfc: [759684b1a19a](http://bsvalias.org/04-01-basic-address-resolution.html))
-- [ ] Sender validation (brfc: [6745385c3fc0](http://bsvalias.org/04-02-sender-validation.html))
-- [ ] Receiver approvals (brfc: [3d7c2ca83a46](http://bsvalias.org/04-03-receiver-approvals.html))
-- [x] PayTo protocol prefix (brfc: [7bd25e5a1fc6](http://bsvalias.org/04-04-payto-protocol-prefix.html))
-- [x] Verify public key owner (brfc: [a9f510c16bde](http://bsvalias.org/05-verify-public-key-owner.html))
-- [ ] P2P Transactions (brfc: [5f1323cddf31](https://docs.moneybutton.com/docs/paymail-06-p2p-transactions.html))
-- [ ] P2P Payment Destination (brfc: [2a40af698840](https://docs.moneybutton.com/docs/paymail-07-p2p-payment-destination.html))
+### Implemented [BRFCs](http://bsvalias.org/01-brfc-specifications.html)
+- [x] Service discovery ([b2aa66e26b43](http://bsvalias.org/02-service-discovery.html))
+- [x] Public Key Infrastructure (pki) ([0c4339ef99c2](http://bsvalias.org/03-public-key-infrastructure.html))
+- [x] Basic Address Resolution ([759684b1a19a](http://bsvalias.org/04-01-basic-address-resolution.html))
+- [x] Verify Public Key Owner ([a9f510c16bde](http://bsvalias.org/05-verify-public-key-owner.html))
+- [x] PayTo Protocol Prefix ([7bd25e5a1fc6](http://bsvalias.org/04-04-payto-protocol-prefix.html))
+- [x] Public Profile (f12f968c92d6) (unknown source)
+- [ ] Sender Validation ([6745385c3fc0](http://bsvalias.org/04-02-sender-validation.html))
+- [ ] Receiver Approvals ([3d7c2ca83a46](http://bsvalias.org/04-03-receiver-approvals.html))
+- [ ] P2P Transactions ([5f1323cddf31](https://docs.moneybutton.com/docs/paymail-06-p2p-transactions.html))
+- [ ] P2P Payment Destination ([2a40af698840](https://docs.moneybutton.com/docs/paymail-07-p2p-payment-destination.html))
 
 ### Package Dependencies
 - bitcoinsv's [bsvd](https://github.com/bitcoinsv/bsvd) for BSV script functionality

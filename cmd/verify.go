@@ -17,7 +17,7 @@ var verifyCmd = &cobra.Command{
 	Long: `Verify will check the paymail address against a given pubkey 
 using the provider domain (if capability is supported)`,
 	Aliases:    []string{"verification"},
-	SuggestFor: []string{"pubkey", "veri"},
+	SuggestFor: []string{"pubkey"},
 	Example:    "verify mrz@" + defaultDomainName + " 02ead23149a1e33df17325ec7a7ba9e0b20c674c57c630f527d69b866aa9b65b10",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 2 {
