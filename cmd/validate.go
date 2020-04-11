@@ -13,12 +13,12 @@ import (
 
 // Default flag values
 var (
-	skipDnsCheck bool
 	nameServer   string
 	port         int
 	priority     int
 	protocol     string
 	serviceName  string
+	skipDnsCheck bool
 	skipSSLCheck bool
 	weight       int
 )

@@ -37,7 +37,7 @@ type AddressResolutionRequest struct {
 
 // AddressResolutionResponse is the response frm the request
 type AddressResolutionResponse struct {
-	Address   string `json:"address"`             // Legacy BSV address derived from the output hash
+	Address   string `json:"address"`             // Legacy BSV address derived from the output script
 	Output    string `json:"output"`              // hex-encoded Bitcoin script, which the sender MUST use during the construction of a payment transaction
 	Signature string `json:"signature,omitempty"` // This is used if SenderValidation is enforced
 }
@@ -116,7 +116,7 @@ func AddressResolution(resolutionUrl, alias, domain string, senderRequest *Addre
 
 	// Missing an address?
 	if len(addresses) == 0 {
-		err = fmt.Errorf("invalid output hash, missing an address")
+		err = fmt.Errorf("invalid output script, missing an address")
 		return
 	}
 

@@ -37,6 +37,8 @@ Custom flags for creating the "sender request":
       --sender-handle string   The sender's paymail handle (if not given it will be the receivers address)
   -n, --sender-name string     The sender's name
   -s, --signature string       The signature of the entire request
+      --skip-pki               Skip firing pki request and getting the pubkey
+      --skip-public-profile    Skip firing public profile request and getting the avatar
 ```
 
 ___
