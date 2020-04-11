@@ -5,7 +5,7 @@ Below are some examples using **paymail-inspector**
 ```bash
 $ paymail-inspector -h
 ```
-<img src="../.github/IMAGES/help-command.gif?raw=true&v=1" alt="Help Command">
+<img src="../.github/IMAGES/help-command.gif?raw=true&v=2" alt="Help Command">
 
 Global flags for the entire application
 ```
@@ -19,15 +19,15 @@ ___
 
 #### Get Capabilities (by Domain)
 ```bash
-$ paymail-inspector capabilities moneybutton.com
+$ paymail-inspector capabilities simply.cash
 ```
-<img src="../.github/IMAGES/capabilities-command.gif?raw=true&v=1" alt="Capabilities Command">
+<img src="../.github/IMAGES/capabilities-command.gif?raw=true&v=2" alt="Capabilities Command">
 
 ___
 
 #### Resolve Paymail Address (by Paymail)
 ```bash
-$ paymail-inspector resolve mrz@moneybutton.com
+$ paymail-inspector resolve mrz@simply.cash
 ```
 <img src="../.github/IMAGES/resolve-command.gif?raw=true&v=1" alt="Resolve Command">
 
@@ -47,9 +47,9 @@ ___
 
 #### Validate Paymail Setup (by Paymail or Domain)
 ```bash
-$ paymail-inspector validate moneybutton.com --priority 1 --skip-dnssec
+$ paymail-inspector validate simply.cash --skip-dnssec
 ```
-<img src="../.github/IMAGES/validate-command.gif?raw=true&v=1" alt="Validate Command">
+<img src="../.github/IMAGES/validate-command.gif?raw=true&v=2" alt="Validate Command">
 
 Custom flags for configuring the validation (enable/disable checks)
 ```
@@ -68,6 +68,6 @@ ___
 
 #### Verify Public Key Owner
 ```bash
-$ paymail-inspector verify mrz@moneybutton.com 02ead23149a1e33df17325ec7a7ba9e0b20c674c57c630f527d69b866aa9b65b10
+$ paymail-inspector verify mrz@simply.cash 022d613a707aeb7b0e2ed73157d401d7157bff7b6c692733caa656e8e4ed5570ec
 ```
 <img src="../.github/IMAGES/verify-command.gif?raw=true&v=2" alt="Verify Command">
