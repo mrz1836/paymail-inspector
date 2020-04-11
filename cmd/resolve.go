@@ -14,11 +14,13 @@ import (
 
 // Flags for the resolve command
 var (
-	amount       uint64
-	purpose      string
-	senderHandle string
-	senderName   string
-	signature    string
+	amount            uint64
+	purpose           string
+	senderHandle      string
+	senderName        string
+	signature         string
+	skipPki           bool
+	skipPublicProfile bool
 )
 
 // resolveCmd represents the resolve command
@@ -113,11 +115,13 @@ var resolveCmd = &cobra.Command{
 		parts := strings.Split(paymailAddress, "@")
 
 		// Get the PKI for the given address
-		chalker.Log(chalker.DEFAULT, "getting PKI...")
 		var pki *paymail.PKIResponse
-		if pki, err = paymail.GetPKI(capabilities.Pki, parts[0], domain); err != nil {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("get PKI failed: %s", err.Error()))
-			return
+		if !skipPki {
+			chalker.Log(chalker.DEFAULT, "getting PKI...")
+			if pki, err = paymail.GetPKI(capabilities.Pki, parts[0], domain); err != nil {
+				chalker.Log(chalker.ERROR, fmt.Sprintf("get PKI failed: %s", err.Error()))
+				return
+			}
 		}
 
 		// Setup the request body
@@ -139,10 +143,35 @@ var resolveCmd = &cobra.Command{
 			return
 		}
 
-		// Success!
+		// Success
 		chalker.Log(chalker.SUCCESS, "address resolution successful")
-		chalker.Log(chalker.INFO, fmt.Sprintf("pubkey: %s", pki.PubKey))
-		chalker.Log(chalker.INFO, fmt.Sprintf("output hash: %s", resolution.Output))
+
+		// Attempt to get a public profile if the capability is found
+		if len(capabilities.PublicProfile) > 0 && !skipPublicProfile {
+			chalker.Log(chalker.DEFAULT, "getting public profile...")
+			var profile *paymail.PublicProfileResponse
+			if profile, err = paymail.GetPublicProfile(capabilities.PublicProfile, parts[0], domain); err != nil {
+				chalker.Log(chalker.ERROR, fmt.Sprintf("get public profile failed: %s", err.Error()))
+				return
+			} else if profile != nil {
+				if len(profile.Name) > 0 {
+					chalker.Log(chalker.INFO, fmt.Sprintf("name: %s", profile.Name))
+				}
+				if len(profile.Avatar) > 0 {
+					chalker.Log(chalker.INFO, fmt.Sprintf("avatar: %s", profile.Avatar))
+				}
+			}
+		}
+
+		// Show pubkey
+		if pki != nil && len(pki.PubKey) > 0 {
+			chalker.Log(chalker.INFO, fmt.Sprintf("pubkey: %s", pki.PubKey))
+		}
+
+		// Show output script
+		chalker.Log(chalker.INFO, fmt.Sprintf("output script: %s", resolution.Output))
+
+		// Show the resolved address from the output script
 		chalker.Log(chalker.INFO, fmt.Sprintf("address: %s", resolution.Address))
 	},
 }
@@ -164,4 +193,10 @@ func init() {
 
 	// Set the signature of the entire request
 	resolveCmd.Flags().StringVarP(&signature, "signature", "s", "", "The signature of the entire request")
+
+	// Skip getting the PubKey
+	resolveCmd.Flags().BoolVar(&skipPki, "skip-pki", false, "Skip firing pki request and getting the pubkey")
+
+	// Skip getting public profile
+	resolveCmd.Flags().BoolVar(&skipPublicProfile, "skip-public-profile", false, "Skip firing public profile request and getting the avatar")
 }
