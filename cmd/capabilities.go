@@ -83,6 +83,7 @@ func getCapabilities(domain string) (capabilities *paymail.CapabilitiesResponse,
 		chalker.Log(chalker.ERROR, fmt.Sprintf("get SRV record failed: %s", err.Error()))
 		capabilityDomain = domain
 	} else if srv != nil {
+		chalker.Log(chalker.SUCCESS, fmt.Sprintf("SRV record found, target: %s:%d", srv.Target, srv.Port))
 		capabilityDomain = srv.Target
 		capabilityPort = int(srv.Port)
 	}
