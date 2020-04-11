@@ -11,7 +11,7 @@
 
 > **paymail-inspector** is a CLI tool for inspecting, validating or resolving paymail addresses and domains
 
-<img src=".github/IMAGES/paymail-inspector.gif?raw=true" alt="Paymail Commands">
+<img src=".github/IMAGES/paymail-inspector.gif?raw=true&v=2" alt="Paymail Commands">
 
 ## Table of Contents
 - [Installation](#installation)
@@ -42,25 +42,25 @@ $ paymail-inspector -h
 ### capabilities
 Lists the available capabilities of the paymail service ([view example](examples/examples.md#get-capabilities-by-domain))
 ```bash
-$ paymail-inspector capabilities moneybutton.com
+$ paymail-inspector capabilities simply.cash
 ```
 
 ### resolve
 Returns the `pubkey`, `output script` and `address` for a given paymail address ([view example](examples/examples.md#resolve-paymail-address-by-paymail))
 ```bash
-$ paymail-inspector resolve mrz@moneybutton.com
+$ paymail-inspector resolve mrz@simply.cash
 ```
 
 ### validate
 Attempts to validate a paymail service for DNSSEC, SSL, SRV and required capabilities ([view example](examples/examples.md#validate-paymail-setup-by-paymail-or-domain))
 ```bash
-$ paymail-inspector validate moneybutton.com --priority 1 --skip-dnssec
+$ paymail-inspector validate simply.cash --skip-dnssec
 ```
 
 ### verify
 Attempts to verify if a given paymail is associated to a corresponding pubkey ([view example](examples/examples.md#verify-public-key-owner))
 ```bash
-$ paymail-inspector verify mrz@moneybutton.com 02ead23149a1e33df17325ec7a7ba9e0b20c674c57c630f527d69b866aa9b65b10
+$ paymail-inspector verify mrz@simply.cash 022d613a707aeb7b0e2ed73157d401d7157bff7b6c692733caa656e8e4ed5570ec
 ```
 
 ## Documentation

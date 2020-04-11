@@ -19,7 +19,7 @@ var verifyCmd = &cobra.Command{
 using the provider domain (if capability is supported)`,
 	Aliases:    []string{"verification"},
 	SuggestFor: []string{"pubkey"},
-	Example:    "verify mrz@" + defaultDomainName + " 02ead23149a1e33df17325ec7a7ba9e0b20c674c57c630f527d69b866aa9b65b10",
+	Example:    "verify mrz@" + defaultDomainName + " 022d613a707aeb7b0e2ed73157d401d7157bff7b6c692733caa656e8e4ed5570ec",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 2 {
 			return chalker.Error("%s requires a paymail address AND pubkey")

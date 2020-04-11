@@ -19,7 +19,7 @@ var capabilitiesCmd = &cobra.Command{
 	Use:     "capabilities",
 	Short:   "Get the capabilities of the paymail domain",
 	Long:    `This command will return the capabilities for a given paymail domain`,
-	Aliases: []string{"c", "abilities"},
+	Aliases: []string{"c", "abilities", "inspect"},
 	Example: "capabilities " + defaultDomainName,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {

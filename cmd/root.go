@@ -12,6 +12,7 @@ import (
 	"github.com/mrz1836/paymail-inspector/paymail"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/ttacon/chalk"
 )
 
 // The config file if used
@@ -22,8 +23,9 @@ var (
 // Defaults for the application
 const (
 	configDefault     = "paymail-inspector" // Config file and application name
-	defaultDomainName = "moneybutton.com"   // Used in examples
+	defaultDomainName = "simply.cash"       // Used in examples
 	defaultNameServer = "8.8.8.8"           // Default DNS NameServer
+	version           = "0.0.11"            // Application version
 )
 
 // These are keys for known flags that are used in the configuration
@@ -35,20 +37,20 @@ const (
 var rootCmd = &cobra.Command{
 	Use:   configDefault,
 	Short: "Inspect, validate or resolve paymail domains and addresses",
-	Long: `
+	Long: chalk.Green.Color(`
 __________                             .__.__    .___                                     __                
 \______   \_____  ___.__. _____ _____  |__|  |   |   | ____   ____________   ____   _____/  |_  ___________ 
  |     ___/\__  \<   |  |/     \\__  \ |  |  |   |   |/    \ /  ___/\____ \_/ __ \_/ ___\   __\/  _ \_  __ \
  |    |     / __ \\___  |  Y Y  \/ __ \|  |  |__ |   |   |  \\___ \ |  |_> >  ___/\  \___|  | (  <_> )  | \/
  |____|    (____  / ____|__|_|  (____  /__|____/ |___|___|  /____  >|   __/ \___  >\___  >__|  \____/|__|   
-                \/\/          \/     \/                   \/     \/ |__|        \/     \/
-Author: MrZ © 2020 github.com/mrz1836/paymail-validator
+                \/\/          \/     \/                   \/     \/ |__|        \/     \/     v`+version) + `
+` + chalk.Yellow.Color("Author: MrZ © 2020 github.com/mrz1836/paymail-inspector") + `
 
 This CLI tool can help you inspect, validate or resolve a paymail domain/address.
 
-Feel free to contribute via Github
+Help contribute via Github!
 `,
-	Version: "0.0.10",
+	Version: version,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

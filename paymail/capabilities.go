@@ -110,18 +110,18 @@ func GetCapabilities(target string, port int) (capabilities *CapabilitiesRespons
 			capabilities.PaymentDestination = val.(string)
 		} else if key == CapabilitySenderValidation && valType == typeBool {
 			capabilities.SenderValidation = val.(bool)
-		} else if key == CapabilityReceiverApprovals && valType == typeString {
-			capabilities.ReceiverApprovals = val.(string)
-		} else if key == CapabilityVerifyPublicKeyOwner && valType == typeString {
-			capabilities.VerifyPublicKeyOwner = val.(string)
-		} else if key == CapabilityPublicProfile && valType == typeString {
-			capabilities.PublicProfile = val.(string)
 		} else if key == CapabilityP2PTransactions && valType == typeString {
 			capabilities.P2PTransactions = val.(string)
 		} else if key == CapabilityP2PPaymentDestination && valType == typeString {
 			capabilities.P2PPaymentDestination = val.(string)
 		} else if key == CapabilityPayToProtocolPrefix {
 			capabilities.PayToProtocolPrefix = true
+		} else if key == CapabilityVerifyPublicKeyOwner && valType == typeString {
+			capabilities.VerifyPublicKeyOwner = val.(string)
+		} else if key == CapabilityPublicProfile && valType == typeString {
+			capabilities.PublicProfile = val.(string)
+		} else if key == CapabilityReceiverApprovals && valType == typeString {
+			capabilities.ReceiverApprovals = val.(string)
 		}
 	}
 
