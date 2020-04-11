@@ -11,26 +11,27 @@ import (
 Default:
 
 {
-  "bsvalias": "1.0",
-  "handle": "<alias>@<domain>.<tld>",
-  "pubkey": "..."
+  "handle":"somepaymailhandle@domain.tld",
+  "match": true,
+  "pubkey":"<consulted pubkey>"
 }
 */
 
-// PKIResponse is the result returned
-type PKIResponse struct {
-	BsvAlias string `json:"bsvalias"` // Version
+// VerifyPubKeyResponse is the result returned
+type VerifyPubKeyResponse struct {
+	BsvAlias string `json:"bsvalias"` // Version of the bsvalias
 	Handle   string `json:"handle"`   // The <alias>@<domain>.<tld>
+	Match    bool   `json:"match"`    // If the match was successful or not
 	PubKey   string `json:"pubkey"`   // The related PubKey
 }
 
-// GetPKI will return a valid PKI response
-// Specs: http://bsvalias.org/03-public-key-infrastructure.html
-func GetPKI(pkiUrl, alias, domain string) (pki *PKIResponse, err error) {
+// VerifyPubKey will try to match a handle and pubkey
+// Specs: https://bsvalias.org/05-verify-public-key-owner.html
+func VerifyPubKey(verifyUrl, alias, domain, pubKey string) (response *VerifyPubKeyResponse, err error) {
 
 	// Set the base url and path (assuming the url is from the GetCapabilities request)
-	// https://<host-discovery-target>/{alias}@{domain.tld}/id
-	reqURL := strings.Replace(strings.Replace(pkiUrl, "{alias}", alias, -1), "{domain.tld}", domain, -1)
+	// https://<host-discovery-target>/verifypubkey/{alias}@{domain.tld}/{pubkey}
+	reqURL := strings.Replace(strings.Replace(strings.Replace(verifyUrl, "{pubkey}", pubKey, -1), "{alias}", alias, -1), "{domain.tld}", domain, -1)
 
 	// Start the request
 	var req *http.Request
@@ -60,27 +61,25 @@ func GetPKI(pkiUrl, alias, domain string) (pki *PKIResponse, err error) {
 	}
 
 	// Try and decode the response
-	if err = json.NewDecoder(resp.Body).Decode(&pki); err != nil {
+	if err = json.NewDecoder(resp.Body).Decode(&response); err != nil {
 		return
 	}
 
 	// Invalid version?
-	if len(pki.BsvAlias) == 0 {
+	if len(response.BsvAlias) == 0 {
 		err = fmt.Errorf("missing bsvalias version")
 		return
 	}
 
 	// Check basic requirements (handle)
-	if pki.Handle != alias+"@"+domain {
-		err = fmt.Errorf("pki response handle %s does not match paymail address: %s", pki.Handle, alias+"@"+domain)
+	if response.Handle != alias+"@"+domain {
+		err = fmt.Errorf("verify response handle %s does not match paymail address: %s", response.Handle, alias+"@"+domain)
 		return
 	}
 
 	// Check the PubKey length
-	if len(pki.PubKey) == 0 {
-		err = fmt.Errorf("pki response is missing a PubKey value")
-	} else if len(pki.PubKey) != PubKeyLength {
-		err = fmt.Errorf("returned pubkey is not the required length of %d, got: %d", PubKeyLength, len(pki.PubKey))
+	if len(response.PubKey) == 0 {
+		err = fmt.Errorf("verify response is missing a PubKey value")
 	}
 
 	return

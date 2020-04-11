@@ -103,7 +103,7 @@ func ValidateSRVRecord(srv *net.SRV, nameServer string, port, priority, weight i
 	// Setup the custom resolver
 	r := customResolver(nameServer, defaultNameServerNetwork)
 
-	// Do we have a hostname that resolves?
+	// Test resolving the target
 	var addresses []string
 	if addresses, err = r.LookupHost(context.Background(), srv.Target); err != nil {
 		return

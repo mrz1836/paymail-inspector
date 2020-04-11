@@ -57,6 +57,12 @@ Attempts to validate a paymail service for DNSSEC, SSL, SRV and other required p
 $ paymail-inspector validate moneybutton.com --priority 1 --skip-dnssec
 ```
 
+### verify
+Attempts to verify a given paymail is associated to a given pubkey ([view example](examples/examples.md#verify-public-key-owner))
+```bash
+$ paymail-inspector verify mrz@moneybutton.com 035668e03de9ebd78ca6905ea5b36c4a33e050a790fae7a0b2e039857f6d66e17b
+```
+
 ## Documentation
 Get started with the [examples](examples/examples.md). View the generated [godocs](https://pkg.go.dev/github.com/mrz1836/paymail-inspector?tab=subdirectories).
 
@@ -75,7 +81,7 @@ Additional paymail information can also be found via [MoneyButton's documentatio
 - [ ] Sender validation (brfc: [6745385c3fc0](http://bsvalias.org/04-02-sender-validation.html))
 - [ ] Receiver approvals (brfc: [3d7c2ca83a46](http://bsvalias.org/04-03-receiver-approvals.html))
 - [x] PayTo protocol prefix (brfc: [7bd25e5a1fc6](http://bsvalias.org/04-04-payto-protocol-prefix.html))
-- [ ] Verify public key owner (brfc: [a9f510c16bde](http://bsvalias.org/05-verify-public-key-owner.html))
+- [x] Verify public key owner (brfc: [a9f510c16bde](http://bsvalias.org/05-verify-public-key-owner.html))
 - [ ] P2P Transactions (brfc: [5f1323cddf31](https://docs.moneybutton.com/docs/paymail-06-p2p-transactions.html))
 - [ ] P2P Payment Destination (brfc: [2a40af698840](https://docs.moneybutton.com/docs/paymail-07-p2p-payment-destination.html))
 

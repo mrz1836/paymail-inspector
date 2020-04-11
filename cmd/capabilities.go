@@ -24,7 +24,7 @@ var capabilitiesCmd = &cobra.Command{
 		if len(args) < 1 {
 			return chalker.Error("requires either a domain or paymail address")
 		} else if len(args) > 1 {
-			return chalker.Error("validate only supports one domain or address at a time")
+			return chalker.Error("capabilities only supports one domain or address at a time")
 		}
 		return nil
 	},
@@ -44,7 +44,6 @@ var capabilitiesCmd = &cobra.Command{
 
 		// Get the details from the SRV record
 		chalker.Log(chalker.DEFAULT, "getting SRV record...")
-
 		srv, err := paymail.GetSRVRecord(serviceName, protocol, domain, nameServer)
 		if err != nil {
 			chalker.Log(chalker.ERROR, fmt.Sprintf("get SRV record failed: %s", err.Error()))
@@ -52,10 +51,9 @@ var capabilitiesCmd = &cobra.Command{
 		}
 
 		// Get the capabilities for the given domain
-		chalker.Log(chalker.DEFAULT, "getting capabilities...")
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("getting capabilities from %s...", srv.Target))
 		var capabilities *paymail.CapabilitiesResponse
-		capabilities, err = paymail.GetCapabilities(srv.Target, int(srv.Port))
-		if err != nil {
+		if capabilities, err = paymail.GetCapabilities(srv.Target, int(srv.Port)); err != nil {
 			chalker.Log(chalker.ERROR, fmt.Sprintf("get capabilities failed: %s", err.Error()))
 			return
 		}

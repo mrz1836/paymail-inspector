@@ -48,7 +48,7 @@ This CLI tool can help you inspect, validate or resolve a paymail domain/address
 
 Feel free to contribute via Github
 `,
-	Version: "0.0.8",
+	Version: "0.0.9",
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

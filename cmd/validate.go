@@ -127,7 +127,7 @@ var validateCmd = &cobra.Command{
 		}
 
 		// Now lookup the capabilities
-		chalker.Log(chalker.DEFAULT, "getting capabilities...")
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("getting capabilities from %s...", srv.Target))
 		var capabilities *paymail.CapabilitiesResponse
 		if capabilities, err = paymail.GetCapabilities(srv.Target, int(srv.Port)); err != nil {
 			chalker.Log(chalker.ERROR, fmt.Sprintf("get capabilities failed: %s", err.Error()))

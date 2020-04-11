@@ -11,8 +11,8 @@ import (
 Default:
 
 {
-    "name": "<name>",
-    "avatar": "https://<domain><image>"
+    "avatar": "https://<domain><image>",
+    "name": "<name>"
 }
 */
 

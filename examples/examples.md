@@ -9,8 +9,10 @@ $ paymail-inspector -h
 
 Global flags for the entire application
 ```
-  --bsvalias string   The bsvalias version (default: 1.0)
-  --config string     config file (default is $HOME/.paymail-inspector.yaml)
+  -h, --help              help for paymail-inspector
+  -v, --version           version for paymail-inspector
+      --bsvalias string   The bsvalias version (default: 1.0)
+      --config string     config file (default is $HOME/.paymail-inspector.yaml)
 ```
 
 ___
@@ -51,7 +53,6 @@ $ paymail-inspector validate moneybutton.com --priority 1 --skip-dnssec
 
 Custom flags for configuring the validation (enable/disable checks)
 ```
-  -h, --help                help for validate
   -n, --nameserver string   DNS name server for resolving records (default "8.8.8.8")
   -p, --port int            Port that is found in the SRV record (default 443)
       --priority int        Priority value that is found in the SRV record (default 10)
@@ -61,3 +62,11 @@ Custom flags for configuring the validation (enable/disable checks)
       --skip-ssl            Skip checking SSL of the target
   -w, --weight int          Weight value that is found in the SRV record (default 10)
 ```
+
+___
+
+#### Verify Public Key Owner
+```bash
+$ paymail-inspector verify mrz@moneybutton.com 035668e03de9ebd78ca6905ea5b36c4a33e050a790fae7a0b2e039857f6d66e17b
+```
+<img src="../.github/IMAGES/verify-command.gif?raw=true&v=1" alt="Verify Command">

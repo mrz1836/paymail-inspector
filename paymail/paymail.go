@@ -18,7 +18,6 @@ const (
 	defaultTimeout           = 5     // In seconds
 	defaultUserAgent         = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36"
 	maxSRVRecords            = 1        // Given by paymail specs
-	pubKeyLength             = 66       // Required length for a valid PubKey
 	typeBool                 = "bool"   // For bool detection
 	typeString               = "string" // For string detection
 )
@@ -47,6 +46,7 @@ const (
 	DefaultProtocol        = "tcp"      // Default protocol (from specs)
 	DefaultServiceName     = "bsvalias" // Default service name (from specs)
 	DefaultWeight          = 10         // Default weight (from specs)
+	PubKeyLength           = 66         // Required length for a valid PubKey (pki)
 )
 
 // ExtractParts will check if it's a domain or address and extract the parts
