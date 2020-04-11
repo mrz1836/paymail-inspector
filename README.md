@@ -46,7 +46,7 @@ $ paymail-inspector capabilities moneybutton.com
 ```
 
 ### resolve
-Returns the `pubkey`, `output hash` and `address` for a given paymail address ([view example](examples/examples.md#resolve-paymail-address-by-paymail))
+Returns the `pubkey`, `output script` and `address` for a given paymail address ([view example](examples/examples.md#resolve-paymail-address-by-paymail))
 ```bash
 $ paymail-inspector resolve mrz@moneybutton.com
 ```
