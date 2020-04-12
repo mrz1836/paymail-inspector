@@ -15,9 +15,26 @@ import (
 	"github.com/ttacon/chalk"
 )
 
-// The config file if used
+// Default flag values for various commands
 var (
-	configFile string
+	amount            uint64
+	configFile        string
+	nameServer        string
+	port              int
+	priority          int
+	protocol          string
+	purpose           string
+	satoshis          uint64
+	senderHandle      string
+	senderName        string
+	serviceName       string
+	signature         string
+	skipDnsCheck      bool
+	skipPki           bool
+	skipPublicProfile bool
+	skipSrvCheck      bool
+	skipSSLCheck      bool
+	weight            int
 )
 
 // Defaults for the application
@@ -25,7 +42,7 @@ const (
 	configDefault     = "paymail-inspector" // Config file and application name
 	defaultDomainName = "simply.cash"       // Used in examples
 	defaultNameServer = "8.8.8.8"           // Default DNS NameServer
-	version           = "0.0.11"            // Application version
+	version           = "0.0.12"            // Application version
 )
 
 // These are keys for known flags that are used in the configuration
