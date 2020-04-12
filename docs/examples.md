@@ -7,7 +7,7 @@ $ paymail-inspector -h
 ```
 <img src="../.github/IMAGES/help-command.gif?raw=true&v=1" alt="Help Command">
 
-Global flags for the entire application
+Global flags for the entire application [(view command specs)](commands/paymail-inspector.md)
 ```
   -h, --help              help for paymail-inspector
   -v, --version           version for paymail-inspector
@@ -24,7 +24,7 @@ $ paymail-inspector brfc list
 ```
 <img src="../.github/IMAGES/brfc-list-command.gif?raw=true&v=1" alt="BRFC List Command">
 
-Custom flags for the brfc:list command
+Custom flags for the brfc:list command [(view command specs)](commands/paymail-inspector_brfc.md)
 ```
   -h, --help              help for brfc
       --skip-validation   Skip validating the existing BRFC IDs
@@ -38,7 +38,7 @@ $ paymail-inspector brfc generate --title "BRFC Specifications" --author "andy (
 ```
 <img src="../.github/IMAGES/brfc-generate-command.gif?raw=true&v=1" alt="BRFC Generate Command">
 
-Custom flags for the brfc:generate command
+Custom flags for the brfc:generate command [(view command specs)](commands/paymail-inspector_brfc.md)
 ```
       --author string     Author(s) new BRFC specification
   -h, --help              help for brfc
@@ -54,7 +54,7 @@ $ paymail-inspector capabilities simply.cash
 ```
 <img src="../.github/IMAGES/capabilities-command.gif?raw=true&v=1" alt="Capabilities Command">
 
-Custom flags for starting a P2P payment request
+Custom flags for the capabilities request [(view command specs)](commands/paymail-inspector_capabilities.md)
 ```
   -h, --help              help for capabilities
 ```
@@ -67,7 +67,7 @@ $ paymail-inspector p2p mrz@handcash.io
 ```
 <img src="../.github/IMAGES/p2p-command.gif?raw=true&v=1" alt="P2P Command">
 
-Custom flags for starting a P2P payment request
+Custom flags for the p2p command [(view command specs)](commands/paymail-inspector_p2p.md)
 ```
   -h, --help              help for p2p
       --satoshis uint     Amount in satoshis for the payment
@@ -81,7 +81,7 @@ $ paymail-inspector resolve mrz@simply.cash
 ```
 <img src="../.github/IMAGES/resolve-command.gif?raw=true&v=1" alt="Resolve Command">
 
-Custom flags for resolving or starting a payment request
+Custom flags for the resolve command [(view command specs)](commands/paymail-inspector_resolve.md)
 ```
   -a, --amount uint            Amount in satoshis for the payment request
   -h, --help                   help for resolve
@@ -101,7 +101,7 @@ $ paymail-inspector validate simply.cash --skip-dnssec
 ```
 <img src="../.github/IMAGES/validate-command.gif?raw=true&v=1" alt="Validate Command">
 
-Custom flags for configuring the validation (enable/disable checks)
+Custom flags for the validation command [(view command specs)](commands/paymail-inspector_validate.md)
 ```
   -h, --help                help for validate
   -n, --nameserver string   DNS name server for resolving records (default "8.8.8.8")
@@ -123,7 +123,7 @@ $ paymail-inspector verify mrz@simply.cash 022d613a707aeb7b0e2ed73157d401d7157bf
 ```
 <img src="../.github/IMAGES/verify-command.gif?raw=true&v=1" alt="Verify Command">
 
-Custom flags for the verify command
+Custom flags for the verify command [(view command specs)](commands/paymail-inspector_verify.md)
 ```
   -h, --help              help for verify
 ```
