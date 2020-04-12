@@ -11,7 +11,7 @@
 
 > **paymail-inspector** is a CLI tool for inspecting, validating or resolving paymail addresses and domains
 
-<img src=".github/IMAGES/paymail-inspector.gif?raw=true&v=1" alt="Paymail Commands">
+<img src=".github/IMAGES/paymail-inspector.gif?raw=true&v=2" alt="Paymail Commands">
 
 ## Table of Contents
 - [Installation](#installation)
