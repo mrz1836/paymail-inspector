@@ -25,8 +25,6 @@ var (
 	protocol          string
 	purpose           string
 	satoshis          uint64
-	senderHandle      string
-	senderName        string
 	serviceName       string
 	signature         string
 	skipDnsCheck      bool
@@ -42,12 +40,14 @@ const (
 	configDefault     = "paymail-inspector" // Config file and application name
 	defaultDomainName = "simply.cash"       // Used in examples
 	defaultNameServer = "8.8.8.8"           // Default DNS NameServer
-	version           = "0.0.12"            // Application version
+	version           = "0.0.13"            // Application version
 )
 
 // These are keys for known flags that are used in the configuration
 const (
-	flagBsvAlias = "bsvalias"
+	flagBsvAlias     = "bsvalias"
+	flagSenderHandle = "sender-handle"
+	flagSenderName   = "sender-name"
 )
 
 // rootCmd represents the base command when called without any sub-commands

@@ -8,6 +8,7 @@ import (
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/mrz1836/paymail-inspector/paymail"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"github.com/ttacon/chalk"
 )
 
@@ -31,7 +32,8 @@ var resolveCmd = &cobra.Command{
 
 		// Extract the parts given
 		var senderDomain string
-		senderDomain, senderHandle = paymail.ExtractParts(senderHandle)
+		var senderHandle string
+		senderDomain, senderHandle = paymail.ExtractParts(viper.GetString(flagSenderHandle))
 		domain, paymailAddress := paymail.ExtractParts(args[0])
 
 		// Did we get a paymail address?
@@ -47,7 +49,7 @@ var resolveCmd = &cobra.Command{
 
 		// No sender handle given? (default: set to the receiver's paymail address)
 		if len(senderHandle) == 0 {
-			chalker.Log(chalker.WARN, fmt.Sprintf("--sender-handle not set, using: %s", paymailAddress))
+			chalker.Log(chalker.WARN, fmt.Sprintf("--%s not set, using: %s", flagSenderHandle, paymailAddress))
 			senderHandle = paymailAddress
 			senderDomain, senderHandle = paymail.ExtractParts(senderHandle)
 		} else { // Sender handle is set (basic validation)
@@ -117,7 +119,7 @@ var resolveCmd = &cobra.Command{
 					chalker.Log(chalker.ERROR, fmt.Sprintf("error: %s", err.Error()))
 					return
 				} else if senderPki != nil {
-					chalker.Log(chalker.INFO, fmt.Sprintf("--sender-handle %s@%s's pubkey: %s", parts[0], parts[1], chalk.Cyan.Color(senderPki.PubKey)))
+					chalker.Log(chalker.INFO, fmt.Sprintf("--%s %s@%s's pubkey: %s", flagSenderHandle, parts[0], parts[1], chalk.Cyan.Color(senderPki.PubKey)))
 				}
 			}
 
@@ -141,7 +143,7 @@ var resolveCmd = &cobra.Command{
 			Dt:           time.Now().UTC().Format(time.RFC3339), // UTC is assumed
 			Purpose:      purpose,
 			SenderHandle: senderHandle,
-			SenderName:   senderName,
+			SenderName:   viper.GetString(flagSenderName),
 			Signature:    signature,
 		}
 
@@ -197,10 +199,12 @@ func init() {
 	resolveCmd.Flags().StringVarP(&purpose, "purpose", "p", "", "Purpose for the transaction")
 
 	// Set the sender's handle for the sender request
-	resolveCmd.Flags().StringVar(&senderHandle, "sender-handle", "", "Sender's paymail handle. Required by bsvalias spec. Receiver paymail used if not specified.")
+	resolveCmd.PersistentFlags().String(flagSenderHandle, "", "Sender's paymail handle. Required by bsvalias spec. Receiver paymail used if not specified.")
+	er(viper.BindPFlag(flagSenderHandle, resolveCmd.PersistentFlags().Lookup(flagSenderHandle)))
 
 	// Set the sender's name for the sender request
-	resolveCmd.Flags().StringVarP(&senderName, "sender-name", "n", "", "The sender's name")
+	resolveCmd.Flags().String(flagSenderName, "", "The sender's name")
+	er(viper.BindPFlag(flagSenderName, resolveCmd.PersistentFlags().Lookup(flagSenderHandle)))
 
 	// Set the signature of the entire request
 	resolveCmd.Flags().StringVarP(&signature, "signature", "s", "", "The signature of the entire request")
