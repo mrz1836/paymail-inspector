@@ -40,12 +40,12 @@ $ paymail-inspector -h
 ## Commands
 
 ### brfc
-List all known brfc specifications or generate a new brfc id ([view example](docs/examples.md#list-brfc-specifications))
+List all known brfc specifications ([view example](docs/examples.md#list-brfc-specifications))
 ```bash
 $ paymail-inspector brfc list
 ```
 
-Generate a new brfc id for a new specification ([view example](docs/examples.md#generate-new-brfc-id))
+Generate a new `BRFC ID` for a new specification ([view example](docs/examples.md#generate-new-brfc-id))
 ```bash
 $ paymail-inspector brfc generate --title "BRFC Specifications" --author "andy (nChain)" --version 1
 ```
