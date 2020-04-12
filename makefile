@@ -5,6 +5,11 @@ test:
 	golint
 	go test ./... -v
 
+test-short:
+	go vet
+	golint
+	go test ./... -v -test.short
+
 install:
 	go install github.com/mrz1836/paymail-inspector
 
@@ -15,17 +20,19 @@ uninstall:
 build:
 	go build -o bin/paymail-inspector
 
+gen-docs:
+	paymail-inspector --docs
+	
 update:
 	go get -u ./...
 	go mod tidy
 
 release:
-	curl https://proxy.golang.org/github.com/mrz1836/paymail-inspector/@v/v0.0.13.info
+	curl https://proxy.golang.org/github.com/mrz1836/paymail-inspector/@v/v0.0.14.info
 
 clean:
 	go clean -testcache
-	$(RM) -r release bin
 
-all: test build release
+all: test install clean gen-docs release
 
-.PHONY: install test clean release
+.PHONY: test install clean gen-docs release
