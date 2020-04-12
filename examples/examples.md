@@ -5,7 +5,7 @@ Below are some examples using **paymail-inspector**
 ```bash
 $ paymail-inspector -h
 ```
-<img src="../.github/IMAGES/help-command.gif?raw=true&v=2" alt="Help Command">
+<img src="../.github/IMAGES/help-command.gif?raw=true&v=3" alt="Help Command">
 
 Global flags for the entire application
 ```
@@ -21,7 +21,20 @@ ___
 ```bash
 $ paymail-inspector capabilities simply.cash
 ```
-<img src="../.github/IMAGES/capabilities-command.gif?raw=true&v=2" alt="Capabilities Command">
+<img src="../.github/IMAGES/capabilities-command.gif?raw=true&v=3" alt="Capabilities Command">
+
+___
+
+#### Start P2P Payment Request (by Paymail)
+```bash
+$ paymail-inspector p2p mrz@handcash.io
+```
+<img src="../.github/IMAGES/p2p-command.gif?raw=true&v=3" alt="P2P Command">
+
+Custom flags for starting a P2P payment request
+```
+      --satoshis uint          Amount in satoshis for the payment
+```
 
 ___
 
@@ -29,7 +42,7 @@ ___
 ```bash
 $ paymail-inspector resolve mrz@simply.cash
 ```
-<img src="../.github/IMAGES/resolve-command.gif?raw=true&v=1" alt="Resolve Command">
+<img src="../.github/IMAGES/resolve-command.gif?raw=true&v=3" alt="Resolve Command">
 
 Custom flags for resolving or starting a payment request
 ```
@@ -49,7 +62,7 @@ ___
 ```bash
 $ paymail-inspector validate simply.cash --skip-dnssec
 ```
-<img src="../.github/IMAGES/validate-command.gif?raw=true&v=2" alt="Validate Command">
+<img src="../.github/IMAGES/validate-command.gif?raw=true&v=3" alt="Validate Command">
 
 Custom flags for configuring the validation (enable/disable checks)
 ```
@@ -70,4 +83,4 @@ ___
 ```bash
 $ paymail-inspector verify mrz@simply.cash 022d613a707aeb7b0e2ed73157d401d7157bff7b6c692733caa656e8e4ed5570ec
 ```
-<img src="../.github/IMAGES/verify-command.gif?raw=true&v=2" alt="Verify Command">
+<img src="../.github/IMAGES/verify-command.gif?raw=true&v=3" alt="Verify Command">
