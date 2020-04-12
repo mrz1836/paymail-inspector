@@ -2,16 +2,16 @@
 
 # Paymail Inspector
 
-[![Go](https://img.shields.io/github/go-mod/go-version/mrz1836/paymail-inspector?v=1)](https://golang.org/)
-[![Build Status](https://travis-ci.com/mrz1836/paymail-inspector.svg?branch=master&v=1)](https://travis-ci.com/mrz1836/paymail-inspector)
-[![Report](https://goreportcard.com/badge/github.com/mrz1836/paymail-inspector?style=flat&v=1)](https://goreportcard.com/report/github.com/mrz1836/paymail-inspector)
-[![Release](https://img.shields.io/github/release-pre/mrz1836/paymail-inspector.svg?style=flat&v=1)](https://github.com/mrz1836/paymail-inspector/releases)
+[![Go](https://img.shields.io/github/go-mod/go-version/mrz1836/paymail-inspector)](https://golang.org/)
+[![Build Status](https://travis-ci.com/mrz1836/paymail-inspector.svg?branch=master)](https://travis-ci.com/mrz1836/paymail-inspector)
+[![Report](https://goreportcard.com/badge/github.com/mrz1836/paymail-inspector?style=flat)](https://goreportcard.com/report/github.com/mrz1836/paymail-inspector)
+[![Release](https://img.shields.io/github/release-pre/mrz1836/paymail-inspector.svg?style=flat)](https://github.com/mrz1836/paymail-inspector/releases)
 [![standard-readme compliant](https://img.shields.io/badge/standard--readme-OK-green.svg?style=flat)](https://github.com/RichardLitt/standard-readme)
 [![GoDoc](https://godoc.org/github.com/mrz1836/paymail-inspector?status.svg&style=flat)](https://pkg.go.dev/github.com/mrz1836/paymail-inspector?tab=subdirectories)
 
 > **paymail-inspector** is a CLI tool for inspecting, validating or resolving paymail addresses and domains
 
-<img src=".github/IMAGES/paymail-inspector.gif?raw=true&v=3" alt="Paymail Commands">
+<img src=".github/IMAGES/paymail-inspector.gif?raw=true&v=1" alt="Paymail Commands">
 
 ## Table of Contents
 - [Installation](#installation)
@@ -39,45 +39,59 @@ $ paymail-inspector -h
 
 ## Commands
 
+### brfc
+List all known brfc specifications or generate a new brfc id ([view example](docs/examples.md#list-brfc-specifications))
+```bash
+$ paymail-inspector brfc list
+```
+
+Generate a new brfc id for a new specification ([view example](docs/examples.md#generate-new-brfc-id))
+```bash
+$ paymail-inspector brfc generate --title "BRFC Specifications" --author "andy (nChain)" --version 1
+```
+
 ### capabilities
-Lists the available capabilities of the paymail service ([view example](examples/examples.md#get-capabilities-by-domain))
+Lists the available capabilities of the paymail service ([view example](docs/examples.md#get-capabilities-by-domain))
 ```bash
 $ paymail-inspector capabilities simply.cash
 ```
 
 ### p2p
-Starts a p2p payment request and returns (n) outputs of (`script`,`satoshis`,`address`) ([view example](examples/examples.md#start-p2p-request))
+Starts a p2p payment request and returns (n) outputs of (`script`,`satoshis`,`address`) ([view example](docs/examples.md#start-p2p-payment-request-by-paymail))
 ```bash
 $ paymail-inspector p2p mrz@handcash.io
 ```
 
 ### resolve
-Returns the `pubkey`, `output script` and `address` for a given paymail address ([view example](examples/examples.md#resolve-paymail-address-by-paymail))
+Returns the `pubkey`, `output script` and `address` for a given paymail address ([view example](docs/examples.md#resolve-paymail-address-by-paymail))
 ```bash
 $ paymail-inspector resolve mrz@simply.cash
 ```
 
 ### validate
-Runs several validations on the paymail service for DNSSEC, SSL, SRV and required capabilities ([view example](examples/examples.md#validate-paymail-setup-by-paymail-or-domain))
+Runs several validations on the paymail service for DNSSEC, SSL, SRV and required capabilities ([view example](docs/examples.md#validate-paymail-setup-by-paymail-or-domain))
 ```bash
 $ paymail-inspector validate simply.cash --skip-dnssec
 ```
 
 ### verify
-Verifies if a paymail is associated to a pubkey ([view example](examples/examples.md#verify-public-key-owner))
+Verifies if a paymail is associated to a pubkey ([view example](docs/examples.md#verify-public-key-owner))
 ```bash
 $ paymail-inspector verify mrz@simply.cash 022d613a707aeb7b0e2ed73157d401d7157bff7b6c692733caa656e8e4ed5570ec
 ```
 
 ## Documentation
-Get started with the [examples](examples/examples.md). View the generated [godocs](https://pkg.go.dev/github.com/mrz1836/paymail-inspector?tab=subdirectories).
+Get started with the [examples](docs/examples.md). View the generated golang [godocs](https://pkg.go.dev/github.com/mrz1836/paymail-inspector?tab=subdirectories).
+
+All the generated command documentation can be found in [docs/commands](docs/commands).
 
 This application was built using the [official paymail specifications](http://bsvalias.org/index.html).
 
 Additional paymail information can also be found via [MoneyButton's documentation](https://docs.moneybutton.com/docs/paymail-overview.html).
 
 ### Implemented [BRFCs](http://bsvalias.org/01-brfc-specifications.html)
-- [x] Service discovery ([b2aa66e26b43](http://bsvalias.org/02-service-discovery.html))
+- [x] BRFC ID Assignment ([assignment](http://bsvalias.org/01-02-brfc-id-assignment.html))
+- [x] Service Discovery ([b2aa66e26b43](http://bsvalias.org/02-service-discovery.html))
 - [x] Public Key Infrastructure (pki) ([0c4339ef99c2](http://bsvalias.org/03-public-key-infrastructure.html))
 - [x] Basic Address Resolution ([759684b1a19a](http://bsvalias.org/04-01-basic-address-resolution.html))
 - [x] Verify Public Key Owner ([a9f510c16bde](http://bsvalias.org/05-verify-public-key-owner.html))
@@ -114,7 +128,7 @@ $ make uninstall
 The file should be located in your `$HOME` folder and named `.paymail-inspector.yaml`. View the [example config file](.paymail-inspector.yaml).
 
 ## Examples & Tests
-All unit tests and [examples](examples/examples.md) run via [Travis CI](https://travis-ci.com/mrz1836/paymail-inspector) and uses [Go version 1.14.x](https://golang.org/doc/go1.14). View the [deployment configuration file](.travis.yml).
+All unit tests and [examples](docs/examples.md) run via [Travis CI](https://travis-ci.com/mrz1836/paymail-inspector) and uses [Go version 1.14.x](https://golang.org/doc/go1.14). View the [deployment configuration file](.travis.yml).
 
 Run all tests (including integration tests)
 ```bash
@@ -124,14 +138,16 @@ $ make test
 
 Run tests (_excluding_ integration tests)
 ```bash
-$ go test ./... -v -test.short
+$ make test-short
 ```
 
 ## Code Standards
 Read more about this Go project's [code standards](CODE_STANDARDS.md).
 
 ## Usage
-View all the [examples](examples/examples.md) and see the [commands above](#commands)
+View all the [examples](docs/examples.md) and see the [commands above](#commands)
+
+All the generated command documentation can be found in [docs/commands](docs/commands).
 
 ## Maintainers
 
