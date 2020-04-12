@@ -11,7 +11,7 @@
 
 > **paymail-inspector** is a CLI tool for inspecting, validating or resolving paymail addresses and domains
 
-<img src=".github/IMAGES/paymail-inspector.gif?raw=true&v=2" alt="Paymail Commands">
+<img src=".github/IMAGES/paymail-inspector.gif?raw=true&v=3" alt="Paymail Commands">
 
 ## Table of Contents
 - [Installation](#installation)
@@ -29,7 +29,7 @@
 **paymail-inspector** requires a [supported release of Go](https://golang.org/doc/devel/release.html#policy).
 ```bash
 $ go get -u github.com/mrz1836/paymail-inspector
-$ make install
+$ go install github.com/mrz1836/paymail-inspector
 ```
 
 #### Run the Application
@@ -45,6 +45,12 @@ Lists the available capabilities of the paymail service ([view example](examples
 $ paymail-inspector capabilities simply.cash
 ```
 
+### p2p
+Starts a p2p payment request and returns (n) outputs of (`script`,`satoshis`,`address`) ([view example](examples/examples.md#start-p2p-request))
+```bash
+$ paymail-inspector p2p mrz@handcash.io
+```
+
 ### resolve
 Returns the `pubkey`, `output script` and `address` for a given paymail address ([view example](examples/examples.md#resolve-paymail-address-by-paymail))
 ```bash
@@ -52,13 +58,13 @@ $ paymail-inspector resolve mrz@simply.cash
 ```
 
 ### validate
-Attempts to validate a paymail service for DNSSEC, SSL, SRV and required capabilities ([view example](examples/examples.md#validate-paymail-setup-by-paymail-or-domain))
+Runs several validations on the paymail service for DNSSEC, SSL, SRV and required capabilities ([view example](examples/examples.md#validate-paymail-setup-by-paymail-or-domain))
 ```bash
 $ paymail-inspector validate simply.cash --skip-dnssec
 ```
 
 ### verify
-Attempts to verify if a given paymail is associated to a corresponding pubkey ([view example](examples/examples.md#verify-public-key-owner))
+Verifies if a paymail is associated to a pubkey ([view example](examples/examples.md#verify-public-key-owner))
 ```bash
 $ paymail-inspector verify mrz@simply.cash 022d613a707aeb7b0e2ed73157d401d7157bff7b6c692733caa656e8e4ed5570ec
 ```
@@ -77,10 +83,11 @@ Additional paymail information can also be found via [MoneyButton's documentatio
 - [x] Verify Public Key Owner ([a9f510c16bde](http://bsvalias.org/05-verify-public-key-owner.html))
 - [x] PayTo Protocol Prefix ([7bd25e5a1fc6](http://bsvalias.org/04-04-payto-protocol-prefix.html))
 - [x] Public Profile (f12f968c92d6) (unknown source)
+- [x] P2P Payment Destination ([2a40af698840](https://docs.moneybutton.com/docs/paymail-07-p2p-payment-destination.html))
+- [ ] P2P Transactions ([5f1323cddf31](https://docs.moneybutton.com/docs/paymail-06-p2p-transactions.html))
 - [ ] Sender Validation ([6745385c3fc0](http://bsvalias.org/04-02-sender-validation.html))
 - [ ] Receiver Approvals ([3d7c2ca83a46](http://bsvalias.org/04-03-receiver-approvals.html))
-- [ ] P2P Transactions ([5f1323cddf31](https://docs.moneybutton.com/docs/paymail-06-p2p-transactions.html))
-- [ ] P2P Payment Destination ([2a40af698840](https://docs.moneybutton.com/docs/paymail-07-p2p-payment-destination.html))
+
 
 ### Package Dependencies
 - bitcoinsv's [bsvd](https://github.com/bitcoinsv/bsvd) for BSV script functionality
@@ -92,9 +99,15 @@ Additional paymail information can also be found via [MoneyButton's documentatio
 - spf13's [viper](https://github.com/spf13/viper) for easy application configuration
 - ttacon's [chalk](https://github.com/ttacon/chalk) for colorful logs
 
-#### Upgrade Dependencies
+#### Upgrade Dependencies & Reinstall
 ```bash
 $ make update
+$ make install
+```
+
+#### Uninstall Application
+```bash
+$ make uninstall
 ```
 
 #### Custom Configuration
