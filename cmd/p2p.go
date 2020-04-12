@@ -16,15 +16,30 @@ const (
 
 // p2pCmd represents the p2p command
 var p2pCmd = &cobra.Command{
-	Use:        "p2p",
-	Short:      "Starts a new p2p payment request",
-	Long:       `This command will start a new p2p request with the receiver.`,
+	Use:   "p2p",
+	Short: "Starts a new p2p payment request",
+	Long: chalk.Green.Color(`
+       ________         
+______ \_____  \______  
+\____ \ /  ____/\____ \ 
+|  |_> >       \|  |_> >
+|   __/\_______ \   __/ 
+|__|           \/__|`) + `
+` + chalk.Yellow.Color(`
+This command will start a new p2p request with the receiver and optional amount expected (in Satoshis).
+
+This protocol is an alternative protocol to basic address resolution. 
+Instead of returning one address, it returns a list of outputs with a reference number. 
+It is only intended to be used with P2P Transactions and will continue to function even 
+after basic address resolution is deprecated.
+
+Read more at: `+chalk.Cyan.Color("https://docs.moneybutton.com/docs/paymail-07-p2p-payment-destination.html")),
 	Aliases:    []string{"send"},
 	SuggestFor: []string{"sending"},
 	Example:    "p2p this@address.com",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
-			return chalker.Error("%s requires a paymail address")
+			return chalker.Error("p2p requires a paymail address")
 		} else if len(args) > 1 {
 			return chalker.Error("p2p only supports one address at a time")
 		}

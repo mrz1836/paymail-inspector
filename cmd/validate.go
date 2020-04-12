@@ -16,15 +16,29 @@ import (
 var validateCmd = &cobra.Command{
 	Use:   "validate",
 	Short: "Validate a paymail address or domain",
-	Long: `Validate a specific paymail address (user@domain.tld) or validate a domain for required paymail capabilities. 
-				By default, this will check for a SRV record, DNSSEC and SSL for the domain. This will also check for
-				required capabilities that all paymail services are required to support.`,
+	Long: chalk.Green.Color(`
+              .__  .__    .___       __          
+___  _______  |  | |__| __| _/____ _/  |_  ____  
+\  \/ /\__  \ |  | |  |/ __ |\__  \\   __\/ __ \ 
+ \   /  / __ \|  |_|  / /_/ | / __ \|  | \  ___/ 
+  \_/  (____  /____/__\____ |(____  /__|  \___  >
+            \/             \/     \/          \/`) + `
+` + chalk.Yellow.Color(`
+Validate a specific paymail address (user@domain.tld) or validate a domain for required paymail capabilities. 
+
+By default, this will check for a SRV record, DNSSEC and SSL for the domain. 
+
+This will also check for required capabilities that all paymail services are required to support.
+
+All these validations are suggestions/requirements from bsvalias spec.
+
+Read more at: `+chalk.Cyan.Color("http://bsvalias.org/index.html")),
 	Example:    "validate " + defaultDomainName,
 	Aliases:    []string{"val", "check"},
 	SuggestFor: []string{"valid"},
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
-			return chalker.Error("requires either a domain or paymail address")
+			return chalker.Error("validate requires either a domain or paymail address")
 		} else if len(args) > 1 {
 			return chalker.Error("validate only supports one domain or address at a time")
 		}

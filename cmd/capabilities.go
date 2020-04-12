@@ -16,14 +16,30 @@ import (
 
 // capabilitiesCmd represents the capabilities command
 var capabilitiesCmd = &cobra.Command{
-	Use:     "capabilities",
-	Short:   "Get the capabilities of the paymail domain",
-	Long:    `This command will return the capabilities for a given paymail domain`,
+	Use:   "capabilities",
+	Short: "Get the capabilities of the paymail domain",
+	Long: chalk.Green.Color(`
+                          ___.   .__.__  .__  __  .__               
+  ____ _____  ___________ \_ |__ |__|  | |__|/  |_|__| ____   ______
+_/ ___\\__  \ \____ \__  \ | __ \|  |  | |  \   __\  |/ __ \ /  ___/
+\  \___ / __ \|  |_> > __ \| \_\ \  |  |_|  ||  | |  \  ___/ \___ \ 
+ \___  >____  /   __(____  /___  /__|____/__||__| |__|\___  >____  >
+     \/     \/|__|       \/    \/                         \/     \/`) + `
+` + chalk.Yellow.Color(`
+This command will return the capabilities for a given paymail domain.
+
+Capability Discovery is the process by which a paymail client learns the supported 
+features of a paymail service and their respective endpoints and configurations.
+
+Drawing inspiration from RFC 5785 and IANA's Well-Known URIs resource, the Capability Discovery protocol 
+dictates that a machine-readable document is placed in a predictable location on a web server.
+
+Read more at: `+chalk.Cyan.Color("http://bsvalias.org/02-02-capability-discovery.html")),
 	Aliases: []string{"c", "abilities", "inspect", "lookup"},
 	Example: "capabilities " + defaultDomainName,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
-			return chalker.Error("requires either a domain or paymail address")
+			return chalker.Error("capabilities requires either a domain or paymail address")
 		} else if len(args) > 1 {
 			return chalker.Error("capabilities only supports one domain or address at a time")
 		}

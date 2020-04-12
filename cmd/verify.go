@@ -15,14 +15,29 @@ import (
 var verifyCmd = &cobra.Command{
 	Use:   "verify",
 	Short: "Verifies if a paymail is associated to a pubkey",
-	Long: `Verify will check the paymail address against a given pubkey 
-using the provider domain (if capability is supported)`,
+	Long: chalk.Green.Color(`
+                   .__  _____       
+___  __ ___________|__|/ ____\__.__.
+\  \/ // __ \_  __ \  \   __<   |  |
+ \   /\  ___/|  | \/  ||  |  \___  |
+  \_/  \___  >__|  |__||__|  / ____|
+           \/                \/`) + `
+` + chalk.Yellow.Color(`
+Verify will check the paymail address against a given pubkey using the provider domain (if capability is supported).
+
+This capability allows clients to verify if a given public key is a valid identity key for a given paymail handle.
+
+The public key returned by pki flow for a given paymail handle may change over time. 
+This situation may produce troubles to verify data signed using old keys, because even having the keys, 
+the verifier doesn't know if the public key actually belongs to the right user.
+
+Read more at: `+chalk.Cyan.Color("http://bsvalias.org/05-verify-public-key-owner.html")),
 	Aliases:    []string{"verification"},
 	SuggestFor: []string{"pubkey"},
 	Example:    "verify mrz@" + defaultDomainName + " 022d613a707aeb7b0e2ed73157d401d7157bff7b6c692733caa656e8e4ed5570ec",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 2 {
-			return chalker.Error("%s requires a paymail address AND pubkey")
+			return chalker.Error("verify requires a paymail address AND pubkey")
 		} else if len(args) > 2 {
 			return chalker.Error("verify only supports one address and one pubkey at a time")
 		}

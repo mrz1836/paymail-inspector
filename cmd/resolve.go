@@ -14,15 +14,29 @@ import (
 
 // resolveCmd represents the resolve command
 var resolveCmd = &cobra.Command{
-	Use:        "resolve",
-	Short:      "Resolves a paymail address",
-	Long:       `Resolves a paymail address into a hex-encoded Bitcoin script and address`,
+	Use:   "resolve",
+	Short: "Resolves a paymail address",
+	Long: chalk.Green.Color(`
+                            .__               
+_______   ____   __________ |  |___  __ ____  
+\_  __ \_/ __ \ /  ___/  _ \|  |\  \/ // __ \ 
+ |  | \/\  ___/ \___ (  <_> )  |_\   /\  ___/ 
+ |__|    \___  >____  >____/|____/\_/  \___  >
+             \/     \/                     \/`) + `
+` + chalk.Yellow.Color(`
+Resolves a paymail address into a hex-encoded Bitcoin script, address and public profile (if found).
+
+Given a sender and a receiver, where the sender knows the receiver's 
+paymail handle <alias>@<domain>.<tld>, the sender can perform Service Discovery against 
+the receiver and request a payment destination from the receiver's paymail service.
+
+Read more at: `+chalk.Cyan.Color("http://bsvalias.org/04-01-basic-address-resolution.html")),
 	Aliases:    []string{"r", "resolution"},
 	SuggestFor: []string{"address", "destination", "payment", "addressing"},
 	Example:    "resolve this@address.com",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
-			return chalker.Error("%s requires either a paymail address")
+			return chalker.Error("resolve requires either a paymail address")
 		} else if len(args) > 1 {
 			return chalker.Error("resolve only supports one address at a time")
 		}
