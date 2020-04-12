@@ -5,22 +5,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mrz1836/go-validate"
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/mrz1836/paymail-inspector/paymail"
 	"github.com/spf13/cobra"
 	"github.com/ttacon/chalk"
-)
-
-// Flags for the resolve command
-var (
-	amount            uint64
-	purpose           string
-	senderHandle      string
-	senderName        string
-	signature         string
-	skipPki           bool
-	skipPublicProfile bool
 )
 
 // resolveCmd represents the resolve command
@@ -52,12 +40,8 @@ var resolveCmd = &cobra.Command{
 			return
 		}
 
-		// Validate the format for the paymail address (paymail addresses follow conventional email requirements)
-		if ok, err := validate.IsValidEmail(paymailAddress, false); err != nil {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("paymail address failed format validation: %s", err.Error()))
-			return
-		} else if !ok {
-			chalker.Log(chalker.ERROR, "paymail address failed format validation: unknown reason")
+		// Validate the paymail address and domain (error already shown)
+		if ok := validatePaymailAndDomain(paymailAddress, domain); !ok {
 			return
 		}
 
@@ -68,21 +52,8 @@ var resolveCmd = &cobra.Command{
 			senderDomain, senderHandle = paymail.ExtractParts(senderHandle)
 		} else { // Sender handle is set (basic validation)
 
-			// Validate the format for the given handle
-			if ok, err := validate.IsValidEmail(senderHandle, false); err != nil {
-				chalker.Log(chalker.ERROR, fmt.Sprintf("--sender-handle failed format validation: %s", err.Error()))
-				return
-			} else if !ok {
-				chalker.Log(chalker.ERROR, "--sender-handle failed format validation: unknown reason")
-				return
-			}
-
-			// Check for a real domain (require at least one period)
-			if !strings.Contains(senderDomain, ".") {
-				chalker.Log(chalker.ERROR, fmt.Sprintf("--sender-handle domain name is invalid: %s", senderDomain))
-				return
-			} else if !validate.IsValidDNSName(senderDomain) { // Basic DNS check (not a REAL domain name check)
-				chalker.Log(chalker.ERROR, fmt.Sprintf("--sender-handle domain name failed DNS check: %s", senderDomain))
+			// Validate the paymail address and domain (error already shown)
+			if ok := validatePaymailAndDomain(senderHandle, senderDomain); !ok {
 				return
 			}
 		}
@@ -100,7 +71,7 @@ var resolveCmd = &cobra.Command{
 
 		// Does the paymail provider have the capability?
 		if len(capabilities.PaymentDestination) == 0 {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("missing a required capability: %s", paymail.CapabilityPaymentDestination))
+			chalker.Log(chalker.ERROR, fmt.Sprintf("%s is missing a required capability: %s", domain, paymail.CapabilityPaymentDestination))
 			return
 		}
 
@@ -133,7 +104,7 @@ var resolveCmd = &cobra.Command{
 				}
 				// Does the paymail provider have the capability?
 				if len(senderCapabilities.Pki) == 0 {
-					chalker.Log(chalker.ERROR, fmt.Sprintf("--sender-handle missing a required capability: %s", paymail.CapabilityPaymentDestination))
+					chalker.Log(chalker.ERROR, fmt.Sprintf("%s is missing a required capability: %s", senderDomain, paymail.CapabilityPki))
 					return
 				}
 

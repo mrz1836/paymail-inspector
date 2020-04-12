@@ -14,7 +14,7 @@ import (
 // verifyCmd represents the verify command
 var verifyCmd = &cobra.Command{
 	Use:   "verify",
-	Short: "Verifies if a given paymail is associated to the pubkey",
+	Short: "Verifies if a paymail is associated to a pubkey",
 	Long: `Verify will check the paymail address against a given pubkey 
 using the provider domain (if capability is supported)`,
 	Aliases:    []string{"verification"},
@@ -85,7 +85,7 @@ using the provider domain (if capability is supported)`,
 
 		// Does the paymail provider have the capability?
 		if len(capabilities.VerifyPublicKeyOwner) == 0 {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("missing a required capability: %s", paymail.CapabilityVerifyPublicKeyOwner))
+			chalker.Log(chalker.ERROR, fmt.Sprintf("%s is missing a required capability: %s", domain, paymail.CapabilityVerifyPublicKeyOwner))
 			return
 		}
 

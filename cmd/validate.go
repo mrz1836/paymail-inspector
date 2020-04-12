@@ -12,29 +12,16 @@ import (
 	"github.com/ttacon/chalk"
 )
 
-// Default flag values
-var (
-	nameServer   string
-	port         int
-	priority     int
-	protocol     string
-	serviceName  string
-	skipDnsCheck bool
-	skipSrvCheck bool
-	skipSSLCheck bool
-	weight       int
-)
-
 // validateCmd represents the validate command
 var validateCmd = &cobra.Command{
 	Use:   "validate",
 	Short: "Validate a paymail address or domain",
 	Long: `Validate a specific paymail address (user@domain.tld) or validate a domain for required paymail capabilities. 
-				By default, this will check for a SRV record, DNSSEC and SSL for the domain. 
-				Finally, it will list the capabilities for the target and resolve any address given as well.`,
+				By default, this will check for a SRV record, DNSSEC and SSL for the domain. This will also check for
+				required capabilities that all paymail services are required to support.`,
 	Example:    "validate " + defaultDomainName,
 	Aliases:    []string{"val", "check"},
-	SuggestFor: []string{"valid", "lookup"},
+	SuggestFor: []string{"valid"},
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return chalker.Error("requires either a domain or paymail address")
@@ -48,32 +35,27 @@ var validateCmd = &cobra.Command{
 		// Extract the parts given
 		domain, paymailAddress := paymail.ExtractParts(args[0])
 		var err error
-		var ok bool
 
 		// Are we an address?
 		if len(paymailAddress) > 0 {
 			chalker.Log(chalker.DEFAULT, fmt.Sprintf("paymail detected: %s", chalk.Cyan.Color(paymailAddress)))
 
-			// Validate the format for the paymail address (paymail addresses follow conventional email requirements)
-			if ok, err = validate.IsValidEmail(paymailAddress, false); err != nil {
-				chalker.Log(chalker.ERROR, fmt.Sprintf("paymail address failed format validation: %s", err.Error()))
-				return
-			} else if !ok {
-				chalker.Log(chalker.ERROR, "paymail address failed format validation: unknown reason")
+			// Validate the paymail address and domain (error already shown)
+			if ok := validatePaymailAndDomain(paymailAddress, domain); !ok {
 				return
 			}
 
 		} else {
 			chalker.Log(chalker.INFO, fmt.Sprintf("domain detected: %s", chalk.Cyan.Color(domain)))
-		}
 
-		// Check for a real domain (require at least one period)
-		if !strings.Contains(domain, ".") {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("domain name is invalid: %s", domain))
-			return
-		} else if !validate.IsValidDNSName(domain) { // Basic DNS check (not a REAL domain name check)
-			chalker.Log(chalker.ERROR, fmt.Sprintf("domain name failed DNS check: %s", domain))
-			return
+			// Check for a real domain (require at least one period)
+			if !strings.Contains(domain, ".") {
+				chalker.Log(chalker.ERROR, fmt.Sprintf("domain name is invalid: %s", domain))
+				return
+			} else if !validate.IsValidDNSName(domain) { // Basic DNS check (not a REAL domain name check)
+				chalker.Log(chalker.ERROR, fmt.Sprintf("domain name failed DNS check: %s", domain))
+				return
+			}
 		}
 
 		// Used for future checks
