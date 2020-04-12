@@ -22,6 +22,7 @@ update:
 release:
 	chmod +x scripts/release
 	scripts/release build
+	curl https://proxy.golang.org/github.com/mrz1836/paymail-inspector/@v/v0.0.12.info
 
 clean:
 	go clean -testcache
