@@ -33,7 +33,7 @@ This will also check for required capabilities that all paymail services are req
 All these validations are suggestions/requirements from bsvalias spec.
 
 Read more at: `+chalk.Cyan.Color("http://bsvalias.org/index.html")),
-	Example:    "validate " + defaultDomainName,
+	Example:    configDefault + " validate " + defaultDomainName,
 	Aliases:    []string{"val", "check"},
 	SuggestFor: []string{"valid"},
 	Args: func(cmd *cobra.Command, args []string) error {
