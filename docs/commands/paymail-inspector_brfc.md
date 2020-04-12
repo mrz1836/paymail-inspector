@@ -4,13 +4,14 @@ List all known BRFC specs or Generate a new BRFC number
 
 ### Synopsis
 
-
+```
 ___.           _____       
 \_ |__________/ ____\____  
  | __ \_  __ \   __\/ ___\ 
  | \_\ \  | \/|  | \  \___ 
  |___  /__|   |__|  \___  >
      \/                 \/
+```
 
 Use the [list] argument to show all known BRFC protocols.
 

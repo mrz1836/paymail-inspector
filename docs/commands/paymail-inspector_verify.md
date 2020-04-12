@@ -4,13 +4,14 @@ Verifies if a paymail is associated to a pubkey
 
 ### Synopsis
 
-
+```
                    .__  _____       
 ___  __ ___________|__|/ ____\__.__.
 \  \/ // __ \_  __ \  \   __<   |  |
  \   /\  ___/|  | \/  ||  |  \___  |
   \_/  \___  >__|  |__||__|  / ____|
            \/                \/
+```
 
 Verify will check the paymail address against a given pubkey using the provider domain (if capability is supported).
 

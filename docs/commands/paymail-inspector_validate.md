@@ -4,13 +4,14 @@ Validate a paymail address or domain
 
 ### Synopsis
 
-
+```
               .__  .__    .___       __          
 ___  _______  |  | |__| __| _/____ _/  |_  ____  
 \  \/ /\__  \ |  | |  |/ __ |\__  \\   __\/ __ \ 
  \   /  / __ \|  |_|  / /_/ | / __ \|  | \  ___/ 
   \_/  (____  /____/__\____ |(____  /__|  \___  >
             \/             \/     \/          \/
+```
 
 Validate a specific paymail address (user@domain.tld) or validate a domain for required paymail capabilities. 
 

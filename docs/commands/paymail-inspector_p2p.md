@@ -4,13 +4,14 @@ Starts a new p2p payment request
 
 ### Synopsis
 
-
+```
        ________         
 ______ \_____  \______  
 \____ \ /  ____/\____ \ 
 |  |_> >       \|  |_> >
 |   __/\_______ \   __/ 
 |__|           \/__|
+```
 
 This command will start a new p2p request with the receiver and optional amount expected (in Satoshis).
 
