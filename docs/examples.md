@@ -5,7 +5,7 @@ Below are some examples using **paymail-inspector**
 ```bash
 $ paymail-inspector -h
 ```
-<img src="../.github/IMAGES/help-command.gif?raw=true&v=3" alt="Help Command">
+<img src="../.github/IMAGES/help-command.gif?raw=true&v=1" alt="Help Command">
 
 Global flags for the entire application
 ```
@@ -17,11 +17,47 @@ Global flags for the entire application
 
 ___
 
+
+#### List BRFC Specifications
+```bash
+$ paymail-inspector brfc list
+```
+<img src="../.github/IMAGES/brfc-list-command.gif?raw=true&v=1" alt="BRFC List Command">
+
+Custom flags for the brfc:list command
+```
+  -h, --help              help for brfc
+      --skip-validation   Skip validating the existing BRFC IDs
+```
+
+___
+
+#### Generate new BRFC ID
+```bash
+$ paymail-inspector brfc generate --title "BRFC Specifications" --author "andy (nChain)" --version 1
+```
+<img src="../.github/IMAGES/brfc-generate-command.gif?raw=true&v=1" alt="BRFC Generate Command">
+
+Custom flags for the brfc:generate command
+```
+      --author string     Author(s) new BRFC specification
+  -h, --help              help for brfc
+      --title string      Title of the new BRFC specification
+      --version string    Version of the new BRFC specification
+```
+
+___
+
 #### Get Capabilities (by Domain)
 ```bash
 $ paymail-inspector capabilities simply.cash
 ```
-<img src="../.github/IMAGES/capabilities-command.gif?raw=true&v=3" alt="Capabilities Command">
+<img src="../.github/IMAGES/capabilities-command.gif?raw=true&v=1" alt="Capabilities Command">
+
+Custom flags for starting a P2P payment request
+```
+  -h, --help              help for capabilities
+```
 
 ___
 
@@ -29,11 +65,12 @@ ___
 ```bash
 $ paymail-inspector p2p mrz@handcash.io
 ```
-<img src="../.github/IMAGES/p2p-command.gif?raw=true&v=3" alt="P2P Command">
+<img src="../.github/IMAGES/p2p-command.gif?raw=true&v=1" alt="P2P Command">
 
 Custom flags for starting a P2P payment request
 ```
-      --satoshis uint          Amount in satoshis for the payment
+  -h, --help              help for p2p
+      --satoshis uint     Amount in satoshis for the payment
 ```
 
 ___
@@ -42,7 +79,7 @@ ___
 ```bash
 $ paymail-inspector resolve mrz@simply.cash
 ```
-<img src="../.github/IMAGES/resolve-command.gif?raw=true&v=3" alt="Resolve Command">
+<img src="../.github/IMAGES/resolve-command.gif?raw=true&v=1" alt="Resolve Command">
 
 Custom flags for resolving or starting a payment request
 ```
@@ -62,10 +99,11 @@ ___
 ```bash
 $ paymail-inspector validate simply.cash --skip-dnssec
 ```
-<img src="../.github/IMAGES/validate-command.gif?raw=true&v=3" alt="Validate Command">
+<img src="../.github/IMAGES/validate-command.gif?raw=true&v=1" alt="Validate Command">
 
 Custom flags for configuring the validation (enable/disable checks)
 ```
+  -h, --help                help for validate
   -n, --nameserver string   DNS name server for resolving records (default "8.8.8.8")
   -p, --port int            Port that is found in the SRV record (default 443)
       --priority int        Priority value that is found in the SRV record (default 10)
@@ -83,4 +121,9 @@ ___
 ```bash
 $ paymail-inspector verify mrz@simply.cash 022d613a707aeb7b0e2ed73157d401d7157bff7b6c692733caa656e8e4ed5570ec
 ```
-<img src="../.github/IMAGES/verify-command.gif?raw=true&v=3" alt="Verify Command">
+<img src="../.github/IMAGES/verify-command.gif?raw=true&v=1" alt="Verify Command">
+
+Custom flags for the verify command
+```
+  -h, --help              help for verify
+```
