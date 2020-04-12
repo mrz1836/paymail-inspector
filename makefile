@@ -20,9 +20,7 @@ update:
 	go mod tidy
 
 release:
-	chmod +x scripts/release
-	scripts/release build
-	curl https://proxy.golang.org/github.com/mrz1836/paymail-inspector/@v/v0.0.12.info
+	curl https://proxy.golang.org/github.com/mrz1836/paymail-inspector/@v/v0.0.13.info
 
 clean:
 	go clean -testcache
