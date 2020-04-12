@@ -4,14 +4,14 @@ List all known BRFC specs or Generate a new BRFC number
 
 ### Synopsis
 
-
+
 ___.           _____       
 \_ |__________/ ____\____  
  | __ \_  __ \   __\/ ___\ 
  | \_\ \  | \/|  | \  \___ 
  |___  /__|   |__|  \___  >
-     \/                 \/
-
+     \/                 \/
+
 Use the [list] argument to show all known BRFC protocols.
 
 Use the [generate] argument with required flags to generate a new BRFC ID.
@@ -23,7 +23,7 @@ Whilst this is not the authoritative definition of the BRFC process, a summary i
 as the BRFC process is the nominated mechanism through which extensions to the paymail system 
 are defined and discovered during Service Discovery.
 
-Read more at: [36mhttp://bsvalias.org/01-brfc-specifications.html
+Read more at: http://bsvalias.org/01-brfc-specifications.html
 
 ```
 paymail-inspector brfc [flags]

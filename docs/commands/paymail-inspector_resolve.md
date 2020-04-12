@@ -4,21 +4,21 @@ Resolves a paymail address
 
 ### Synopsis
 
-
+
                             .__               
 _______   ____   __________ |  |___  __ ____  
 \_  __ \_/ __ \ /  ___/  _ \|  |\  \/ // __ \ 
  |  | \/\  ___/ \___ (  <_> )  |_\   /\  ___/ 
  |__|    \___  >____  >____/|____/\_/  \___  >
-             \/     \/                     \/
-
+             \/     \/                     \/
+
 Resolves a paymail address into a hex-encoded Bitcoin script, address and public profile (if found).
 
 Given a sender and a receiver, where the sender knows the receiver's 
 paymail handle <alias>@<domain>.<tld>, the sender can perform Service Discovery against 
 the receiver and request a payment destination from the receiver's paymail service.
 
-Read more at: [36mhttp://bsvalias.org/04-01-basic-address-resolution.html
+Read more at: http://bsvalias.org/04-01-basic-address-resolution.html
 
 ```
 paymail-inspector resolve [flags]

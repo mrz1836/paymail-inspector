@@ -4,14 +4,14 @@ Validate a paymail address or domain
 
 ### Synopsis
 
-
+
               .__  .__    .___       __          
 ___  _______  |  | |__| __| _/____ _/  |_  ____  
 \  \/ /\__  \ |  | |  |/ __ |\__  \\   __\/ __ \ 
  \   /  / __ \|  |_|  / /_/ | / __ \|  | \  ___/ 
   \_/  (____  /____/__\____ |(____  /__|  \___  >
-            \/             \/     \/          \/
-
+            \/             \/     \/          \/
+
 Validate a specific paymail address (user@domain.tld) or validate a domain for required paymail capabilities. 
 
 By default, this will check for a SRV record, DNSSEC and SSL for the domain. 
@@ -20,7 +20,7 @@ This will also check for required capabilities that all paymail services are req
 
 All these validations are suggestions/requirements from bsvalias spec.
 
-Read more at: [36mhttp://bsvalias.org/index.html
+Read more at: http://bsvalias.org/index.html
 
 ```
 paymail-inspector validate [flags]

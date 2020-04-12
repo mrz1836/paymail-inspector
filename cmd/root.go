@@ -91,7 +91,7 @@ func Execute() {
 	if generateDocs {
 
 		// Replace the colorful logs in terminal (displays in Cobra docs) (color numbers generated)
-		replacer := strings.NewReplacer("[32m", "", "[33m", "", "[39m", "")
+		replacer := strings.NewReplacer("[32m", "", "[33m", "", "[39m", "", "[36m", "", "\u001B", "")
 		rootCmd.Long = replacer.Replace(rootCmd.Long)
 
 		// Loop all command, adjust the Long description, re-add command
