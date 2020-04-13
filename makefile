@@ -88,7 +88,7 @@ release: ## Full production release (creates release in Github)
 	 make godocs
 
 release-test: ## Full production test release (everything except deploy)
-	 goreleaser --skip-publish
+	 goreleaser --skip-publish --rm-dist
 
 release-snap: ## Test the full release (build binaries)
 	goreleaser --snapshot --skip-publish --rm-dist
@@ -102,6 +102,11 @@ tag: ## Generate a new tag and push (IE: make tag version=0.0.16)
 	
 tag-remove: ## Remove a tag if found (IE: make tag-remove version=0.0.16)
 	git tag -d v$(version)
+
+tag-update: ## Update an existing tag to current commit (IE: make tag-update version=0.0.16)
+	# git push --force origin HEAD:refs/tags/v$(version)
+	git tag -f -a v$(version)
+	git push -f --tags
 	
 test: ## Runs vet, lint and ALL tests
 	go vet -v
