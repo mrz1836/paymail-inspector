@@ -34,9 +34,9 @@ $ paymail-inspector -h
 
 _(Don't have Go?)_ [Download the binary](https://github.com/mrz1836/paymail-inspector/releases) for Linux, Mac or Windows and run manually (Mac example)
 ```bash
-$ curl -LO https://github.com/mrz1836/paymail-inspector/releases/download/v0.0.15/paymail-inspector_0.0.15_Darwin_x86_64.tar.gz
-$ mkdir ./app && tar -zxf paymail-inspector_0.0.15_Darwin_x86_64.tar.gz --directory ./app && cd ./app
-$ ./paymail-inspector -h
+$ curl -LkSs https://github.com/mrz1836/paymail-inspector/releases/download/v0.0.16/paymail-inspector_Darwin_x86_64.tar.gz -o app.tar.gz
+$ tar -zxf app.tar.gz
+$ ./app/paymail-inspector -h
 ```
 
 ## Commands

@@ -7,20 +7,26 @@ builds:
 - env:
   - CGO_ENABLED=0
   - GO111MODULE=on
+  goos:
+  - darwin
+  - linux
+  - windows
   ldflags:
   - -s -w -X github.com/mrz1836/{{ .ProjectName }}/cmd.Version={{ .Version }}
 archives:
-- replacements:
-    darwin: Darwin
+- wrap_in_directory: app
+  name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+  replacements:
+    darwin: macOS
     linux: Linux
     windows: Windows
-    386: i386
-    amd64: x86_64
+    386: 32-bit
+    amd64: 64-bit
 release:
   prerelease: true
   name_template: "Release v{{.Version}}"
 checksum:
-  name_template: 'checksums.txt'
+  name_template: '{{ .ProjectName }}_checksums.txt'
 snapshot:
   name_template: "{{ .Tag }}"
 changelog:
