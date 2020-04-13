@@ -77,6 +77,7 @@ linux: $(LINUX) ## Build for Linux (amd64)
 
 release: ## Full production release (creates release in Github)
 	 goreleaser
+	 make godocs
 
 release-test: ## Full production test release (everything except deploy)
 	 goreleaser --skip-publish
