@@ -101,19 +101,18 @@ tag: ## Generate a new tag and push (IE: make tag version=0.0.16)
 	test $(version)
 	git tag -a v$(version) -m "Pending full release..."
 	git push origin v$(version)
-	
-tag-test:
-	test $(version)
-	echo "this"
+	git fetch --tags -f
 
 tag-remove: ## Remove a tag if found (IE: make tag-remove version=0.0.16)
 	test $(version)
 	git tag -d v$(version)
+	git fetch --tags -f
 
 tag-update: ## Update an existing tag to current commit (IE: make tag-update version=0.0.16)
 	test $(version)
 	git push --force origin HEAD:refs/tags/v$(version)
-	
+	git fetch --tags -f
+
 test: ## Runs vet, lint and ALL tests
 	go vet -v
 	golint
