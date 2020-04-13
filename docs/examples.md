@@ -97,7 +97,7 @@ ___
 
 #### Validate Paymail Setup (by Paymail or Domain)
 ```bash
-$ paymail-inspector validate simply.cash --skip-dnssec
+$ paymail-inspector validate simply.cash
 ```
 <img src="../.github/IMAGES/validate-command.gif?raw=true&v=2" alt="Validate Command">
 

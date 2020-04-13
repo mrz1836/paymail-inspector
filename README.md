@@ -88,7 +88,7 @@ ___
 ### `validate`
 > Runs several validations on the paymail service for DNSSEC, SSL, SRV and required capabilities ([view example](docs/examples.md#validate-paymail-setup-by-paymail-or-domain))
 ```bash
-$ paymail-inspector validate simply.cash --skip-dnssec
+$ paymail-inspector validate simply.cash
 ```
 
 ___
