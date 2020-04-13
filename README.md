@@ -43,42 +43,54 @@ $ ./app/paymail-inspector -h
 ## Commands
 
 ### `brfc`
-List all known brfc specifications ([view example](docs/examples.md#list-brfc-specifications))
+> List all known brfc specifications ([view example](docs/examples.md#list-brfc-specifications))
 ```bash
 $ paymail-inspector brfc list
 ```
 
-Generate a new `BRFC ID` for a new specification ([view example](docs/examples.md#generate-new-brfc-id))
+> Generate a new `BRFC ID` for a new specification ([view example](docs/examples.md#generate-new-brfc-id))
 ```bash
 $ paymail-inspector brfc generate --title "BRFC Specifications" --author "andy (nChain)" --version 1
 ```
 
+___
+
 ### `capabilities`
-Lists the available capabilities of the paymail service ([view example](docs/examples.md#get-capabilities-by-domain))
+> Lists the available capabilities of the paymail service ([view example](docs/examples.md#get-capabilities-by-domain))
 ```bash
 $ paymail-inspector capabilities simply.cash
 ```
 
+___
+
 ### `p2p`
-Starts a p2p payment request and returns (n) outputs of (`script`,`satoshis`,`address`) ([view example](docs/examples.md#start-p2p-payment-request-by-paymail))
+> Starts a p2p payment request and returns (n) outputs of (`script`,`satoshis`,`address`) ([view example](docs/examples.md#start-p2p-payment-request-by-paymail))
 ```bash
 $ paymail-inspector p2p mrz@handcash.io
 ```
 
+___
+
 ### `resolve`
-Returns the `pubkey`, `output script` and `address` for a given paymail address ([view example](docs/examples.md#resolve-paymail-address-by-paymail))
+> Returns the `pubkey`, `output script` and `address` for a given paymail address ([view example](docs/examples.md#resolve-paymail-address-by-paymail))
 ```bash
 $ paymail-inspector resolve mrz@simply.cash
 ```
 
+___
+
+
 ### `validate`
-Runs several validations on the paymail service for DNSSEC, SSL, SRV and required capabilities ([view example](docs/examples.md#validate-paymail-setup-by-paymail-or-domain))
+> Runs several validations on the paymail service for DNSSEC, SSL, SRV and required capabilities ([view example](docs/examples.md#validate-paymail-setup-by-paymail-or-domain))
 ```bash
 $ paymail-inspector validate simply.cash --skip-dnssec
 ```
 
+___
+
+
 ### `verify`
-Verifies if a paymail is associated to a pubkey ([view example](docs/examples.md#verify-public-key-owner))
+> Verifies if a paymail is associated to a pubkey ([view example](docs/examples.md#verify-public-key-owner))
 ```bash
 $ paymail-inspector verify mrz@simply.cash 022d613a707aeb7b0e2ed73157d401d7157bff7b6c692733caa656e8e4ed5570ec
 ```
