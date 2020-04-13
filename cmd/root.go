@@ -48,7 +48,6 @@ const (
 	defaultDomainName = "simply.cash"       // Used in examples
 	defaultNameServer = "8.8.8.8"           // Default DNS NameServer
 	docsLocation      = "docs/commands"     // Default location for command documentation
-	version           = "0.0.14"            // Application version
 )
 
 // These are keys for known flags that are used in the configuration
@@ -57,6 +56,9 @@ const (
 	flagSenderHandle = "sender-handle"
 	flagSenderName   = "sender-name"
 )
+
+// Set this manually (also make:build overwrites this value from Github)
+var Version = "v0.0.15"
 
 // rootCmd represents the base command when called without any sub-commands
 var rootCmd = &cobra.Command{
@@ -70,14 +72,14 @@ __________                             .__.__    .___                           
  |     ___/\__  \<   |  |/     \\__  \ |  |  |   |   |/    \ /  ___/\____ \_/ __ \_/ ___\   __\/  _ \_  __ \
  |    |     / __ \\___  |  Y Y  \/ __ \|  |  |__ |   |   |  \\___ \ |  |_> >  ___/\  \___|  | (  <_> )  | \/
  |____|    (____  / ____|__|_|  (____  /__|____/ |___|___|  /____  >|   __/ \___  >\___  >__|  \____/|__|   
-                \/\/          \/     \/                   \/     \/ |__|        \/     \/     v`+version) + `
+                \/\/          \/     \/                   \/     \/ |__|        \/     \/     `+Version) + `
 ` + chalk.Yellow.Color("Author: MrZ © 2020 github.com/mrz1836/"+configDefault) + `
 
 This CLI tool can help you inspect, validate or resolve a paymail domain/address.
 
 Help contribute via Github!
 `,
-	Version: version,
+	Version: Version,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
