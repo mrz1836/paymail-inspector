@@ -62,8 +62,7 @@ release:
 # Brews - OSX
 # ---------------------------
 brews:
-  - ids:
-      - paymail-inspector
+  -
     github:
       owner: mrz1836
       name: homebrew-paymail-inspector
