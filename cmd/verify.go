@@ -108,6 +108,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/05-verify-public-key-owner
 		parts := strings.Split(paymailAddress, "@")
 
 		// Fire the verify request
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("firing Verify request for: %s...", chalk.Cyan.Color(parts[0]+"@"+domain)))
 		var verify *paymail.VerifyPubKeyResponse
 		if verify, err = paymail.VerifyPubKey(capabilities.VerifyPublicKeyOwner, parts[0], domain, pubKey); err != nil {
 			chalker.Log(chalker.ERROR, fmt.Sprintf("get VerifyPublicKey request failed: %s", err.Error()))
@@ -119,12 +120,12 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/05-verify-public-key-owner
 
 		// Show the results
 		chalker.Log(chalker.DEFAULT, fmt.Sprintf("paymail: %s", chalk.Cyan.Color(paymailAddress)))
-		chalker.Log(chalker.INFO, fmt.Sprintf("pubkey: %s", chalk.Cyan.Color(pubKey)))
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("pubkey: %s", chalk.Cyan.Color(pubKey)))
 
 		if verify.Match {
-			chalker.Log(chalker.SUCCESS, "Paymail & PubKey Match!")
+			chalker.Log(chalker.SUCCESS, "Paymail & PubKey Match! (service responded: match=true)")
 		} else {
-			chalker.Log(chalker.ERROR, "DO NOT MATCH!")
+			chalker.Log(chalker.ERROR, "DO NOT MATCH! (service responded: match=false)")
 		}
 	},
 }
