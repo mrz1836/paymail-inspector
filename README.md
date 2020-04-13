@@ -28,12 +28,11 @@
 
 Download the application using Go and run natively! (supports: linux, mac, windows) ([requires Go](https://formulae.brew.sh/formula/go)).
 ```bash
-$ go get -u github.com/mrz1836/paymail-inspector
-$ go install github.com/mrz1836/paymail-inspector
+$ go get -u github.com/mrz1836/paymail-inspector && go install github.com/mrz1836/paymail-inspector
 $ paymail-inspector -h
 ```
 
-_(No Go?)_ [Download the binary](https://github.com/mrz1836/paymail-inspector/releases) and run manually (supports: linux, mac, windows)
+_(Don't have Go?)_ [Download the binary](https://github.com/mrz1836/paymail-inspector/releases) for Linux, Mac or Windows run manually (Mac example)
 ```bash
 $ curl -LO https://github.com/mrz1836/paymail-inspector/releases/download/v0.0.15/paymail-inspector_0.0.15_Darwin_x86_64.tar.gz
 $ mkdir ./app && tar -zxf paymail-inspector_0.0.15_Darwin_x86_64.tar.gz --directory ./app && cd ./app
