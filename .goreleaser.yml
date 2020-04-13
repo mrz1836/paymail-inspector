@@ -1,0 +1,31 @@
+# Make sure to check the documentation at http://goreleaser.com
+before:
+  hooks:
+    # run make all
+    - make all
+builds:
+- env:
+  - CGO_ENABLED=0
+  - GO111MODULE=on
+  ldflags:
+  - -s -w -X github.com/mrz1836/{{ .ProjectName }}/cmd.Version={{ .Version }}
+archives:
+- replacements:
+    darwin: Darwin
+    linux: Linux
+    windows: Windows
+    386: i386
+    amd64: x86_64
+release:
+  prerelease: true
+  name_template: "Release v{{.Version}}"
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Tag }}"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+    - '^.github:'
+    - '^test:'
