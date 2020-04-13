@@ -135,6 +135,7 @@ $ make help
 
 #### Deploy a New Version
 ```bash
+$ export GITHUB_TOKEN=<your_token>
 $ make tag version=0.1.0
 $ make release
 ```
