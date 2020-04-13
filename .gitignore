@@ -24,6 +24,5 @@
 # Notes
 todo.md
 
-# Makefile results
-releases
-venv
+# Generated binaries
+dist
