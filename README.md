@@ -32,7 +32,8 @@ $ go get -u github.com/mrz1836/paymail-inspector && go install github.com/mrz183
 $ paymail-inspector -h
 ```
 
-Run via [a binary](https://github.com/mrz1836/paymail-inspector/releases) for Linux, Mac or Windows (Mac example)
+
+Run via [a binary](https://github.com/mrz1836/paymail-inspector/releases) on Linux, Mac or Windows (Mac example)
 ```bash
 $ curl -LkSs https://github.com/mrz1836/paymail-inspector/releases/download/v0.0.16/paymail-inspector_macOS_64-bit.tar.gz -o app.tar.gz
 $ tar -zxf app.tar.gz
@@ -41,7 +42,7 @@ $ ./app/paymail-inspector -h
 
 ## Commands
 
-### brfc
+### `brfc`
 List all known brfc specifications ([view example](docs/examples.md#list-brfc-specifications))
 ```bash
 $ paymail-inspector brfc list
@@ -52,31 +53,31 @@ Generate a new `BRFC ID` for a new specification ([view example](docs/examples.m
 $ paymail-inspector brfc generate --title "BRFC Specifications" --author "andy (nChain)" --version 1
 ```
 
-### capabilities
+### `capabilities`
 Lists the available capabilities of the paymail service ([view example](docs/examples.md#get-capabilities-by-domain))
 ```bash
 $ paymail-inspector capabilities simply.cash
 ```
 
-### p2p
+### `p2p`
 Starts a p2p payment request and returns (n) outputs of (`script`,`satoshis`,`address`) ([view example](docs/examples.md#start-p2p-payment-request-by-paymail))
 ```bash
 $ paymail-inspector p2p mrz@handcash.io
 ```
 
-### resolve
+### `resolve`
 Returns the `pubkey`, `output script` and `address` for a given paymail address ([view example](docs/examples.md#resolve-paymail-address-by-paymail))
 ```bash
 $ paymail-inspector resolve mrz@simply.cash
 ```
 
-### validate
+### `validate`
 Runs several validations on the paymail service for DNSSEC, SSL, SRV and required capabilities ([view example](docs/examples.md#validate-paymail-setup-by-paymail-or-domain))
 ```bash
 $ paymail-inspector validate simply.cash --skip-dnssec
 ```
 
-### verify
+### `verify`
 Verifies if a paymail is associated to a pubkey ([view example](docs/examples.md#verify-public-key-owner))
 ```bash
 $ paymail-inspector verify mrz@simply.cash 022d613a707aeb7b0e2ed73157d401d7157bff7b6c692733caa656e8e4ed5570ec
@@ -148,13 +149,7 @@ All unit tests and [examples](docs/examples.md) run via [Travis CI](https://trav
 
 Run all tests (including integration tests)
 ```bash
-$ cd ../paymail-inspector
 $ make test
-```
-
-Run tests (_excluding_ integration tests)
-```bash
-$ make test-short
 ```
 
 ## Code Standards
