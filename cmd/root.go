@@ -57,7 +57,7 @@ const (
 	flagSenderName   = "sender-name"
 )
 
-// Set this manually (also make:build overwrites this value from Github)
+// Version is set manually (also make:build overwrites this value from Github's latest tag)
 var Version = "v0.0.15"
 
 // rootCmd represents the base command when called without any sub-commands
