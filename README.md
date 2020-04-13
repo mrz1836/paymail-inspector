@@ -3,9 +3,9 @@
 # Paymail Inspector
 
 [![Go](https://img.shields.io/github/go-mod/go-version/mrz1836/paymail-inspector)](https://golang.org/)
-[![Build Status](https://travis-ci.com/mrz1836/paymail-inspector.svg?branch=master)](https://travis-ci.com/mrz1836/paymail-inspector)
-[![Report](https://goreportcard.com/badge/github.com/mrz1836/paymail-inspector?style=flat)](https://goreportcard.com/report/github.com/mrz1836/paymail-inspector)
-[![Release](https://img.shields.io/github/release-pre/mrz1836/paymail-inspector.svg?style=flat)](https://github.com/mrz1836/paymail-inspector/releases)
+[![Build Status](https://travis-ci.com/mrz1836/paymail-inspector.svg?branch=master&v=2)](https://travis-ci.com/mrz1836/paymail-inspector)
+[![Report](https://goreportcard.com/badge/github.com/mrz1836/paymail-inspector?style=flat&v=2)](https://goreportcard.com/report/github.com/mrz1836/paymail-inspector)
+[![Release](https://img.shields.io/github/release-pre/mrz1836/paymail-inspector.svg?style=flat&v=2)](https://github.com/mrz1836/paymail-inspector/releases)
 [![standard-readme compliant](https://img.shields.io/badge/standard--readme-OK-green.svg?style=flat)](https://github.com/RichardLitt/standard-readme)
 [![GoDoc](https://godoc.org/github.com/mrz1836/paymail-inspector?status.svg&style=flat)](https://pkg.go.dev/github.com/mrz1836/paymail-inspector?tab=subdirectories)
 
@@ -26,13 +26,13 @@
 
 ## Installation
 
-Download the application using Go and run natively! (supports: linux, mac, windows) ([requires Go](https://formulae.brew.sh/formula/go)).
+Run via [Go](https://formulae.brew.sh/formula/go)
 ```bash
 $ go get -u github.com/mrz1836/paymail-inspector && go install github.com/mrz1836/paymail-inspector
 $ paymail-inspector -h
 ```
 
-_(Don't have Go?)_ [Download the binary](https://github.com/mrz1836/paymail-inspector/releases) for Linux, Mac or Windows and run manually (Mac example)
+Run via [a binary](https://github.com/mrz1836/paymail-inspector/releases) for Linux, Mac or Windows (Mac example)
 ```bash
 $ curl -LkSs https://github.com/mrz1836/paymail-inspector/releases/download/v0.0.16/paymail-inspector_macOS_64-bit.tar.gz -o app.tar.gz
 $ tar -zxf app.tar.gz
