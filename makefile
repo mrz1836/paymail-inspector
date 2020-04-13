@@ -29,6 +29,14 @@ all: test install gen-docs ## Runs test, install, clean, docs
 bench:  ## Run all benchmarks in the Go application
 	go test -bench ./... -benchmem -v
 
+brew-publish:  ## Prep the brew deployment (IE: brew version=v0.0.16)
+	brew update
+	cd $(brew --repository)
+	git checkout -b paymail-inspector-v$(version)
+	git add ../paymail-inspector.rb
+	git commit -m "paymail-inspector $(version) (new formula)"
+	git push
+
 build-go:  ## Build the Go application (locally)
 	go build -o bin/$(REPO_NAME)
 
