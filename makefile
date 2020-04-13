@@ -30,6 +30,7 @@ bench:  ## Run all benchmarks in the Go application
 	go test -bench ./... -benchmem -v
 
 brew-publish:  ## Prep the brew deployment (IE: brew version=v0.0.16)
+	test $(version)
 	brew update
 	cd $(brew --repository)
 	git checkout -b paymail-inspector-v$(version)
@@ -97,13 +98,20 @@ run: ## Runs the go application
 	go run main.go
 
 tag: ## Generate a new tag and push (IE: make tag version=0.0.16)
+	test $(version)
 	git tag -a v$(version) -m "Pending full release..."
 	git push origin v$(version)
 	
+tag-test:
+	test $(version)
+	echo "this"
+
 tag-remove: ## Remove a tag if found (IE: make tag-remove version=0.0.16)
+	test $(version)
 	git tag -d v$(version)
 
 tag-update: ## Update an existing tag to current commit (IE: make tag-update version=0.0.16)
+	test $(version)
 	git push --force origin HEAD:refs/tags/v$(version)
 	
 test: ## Runs vet, lint and ALL tests
