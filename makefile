@@ -88,9 +88,12 @@ release-snap: ## Test the full release (build binaries)
 run: ## Runs the go application
 	go run main.go
 
-tag: ## Generate a new tag and push (IE: make tag version=v0.0.16)
-	git tag -a $(version) -m "Pending full release..."
-	git push origin $(version)
+tag: ## Generate a new tag and push (IE: make tag version=0.0.16)
+	git tag -a v$(version) -m "Pending full release..."
+	git push origin v$(version)
+
+tag-remove ## Remove a tag if found (IE: make tag-remove version=0.0.16)
+    git tag -d v$(version)
 
 test: ## Runs vet, lint and ALL tests
 	go vet -v
