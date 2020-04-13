@@ -74,9 +74,6 @@ brews:
     homepage: https://github.com/mrz1836/paymail-inspector
     description: &description |
       CLI tool that inspects, validates or resolves any paymail address or domain (and more!)
-    dependencies: []
-    conflicts: []
-    plist: ""
     install: |
       bin.install "{{ .ProjectName }}"
     test: |

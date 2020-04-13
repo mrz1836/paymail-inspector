@@ -32,6 +32,11 @@ $ go get -u github.com/mrz1836/paymail-inspector && go install github.com/mrz183
 $ paymail-inspector -h
 ```
 
+**Run via [brew](https://github.com/mrz1836/homebrew-paymail-inspector)**
+```bash
+$ brew tap mrz1836/paymail-inspector && brew install paymail-inspector
+$ paymail-inspector -h
+```
 
 **Run via [a binary](https://github.com/mrz1836/paymail-inspector/releases)** on Linux, Mac or Windows _(Mac example)_
 ```bash
