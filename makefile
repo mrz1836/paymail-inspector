@@ -93,7 +93,7 @@ tag: ## Generate a new tag and push (IE: make tag version=0.0.16)
 	git push origin v$(version)
 
 tag-remove ## Remove a tag if found (IE: make tag-remove version=0.0.16)
-    git tag -d v$(version)
+	git tag -d v$(version)
 
 test: ## Runs vet, lint and ALL tests
 	go vet -v
