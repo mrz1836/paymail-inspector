@@ -37,6 +37,9 @@ brews:
       - paymail-inspector_macOS_64-bit
       - paymail-inspector_macOS_32-bit
     homepage: "https://github.com/mrz1836/{{ .ProjectName }}"
+    commit_author:
+      name: mrz1836
+      email: mrz1818@protonmail.ch
     caveats: "See the Github repo for more information"
     description: "CLI tool that inspects, validates or resolves any paymail address or domain (and more!)"
     test: |
