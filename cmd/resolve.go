@@ -179,7 +179,6 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/04-01-basic-address-resolu
 			var profile *paymail.PublicProfileResponse
 			if profile, err = paymail.GetPublicProfile(capabilities.PublicProfile, parts[0], domain); err != nil {
 				chalker.Log(chalker.ERROR, fmt.Sprintf("get public profile failed: %s", err.Error()))
-				return
 			} else if profile != nil {
 				if len(profile.Name) > 0 {
 					chalker.Log(chalker.DEFAULT, fmt.Sprintf("name: %s", chalk.Cyan.Color(profile.Name)))
