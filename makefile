@@ -11,7 +11,7 @@ REPO_OWNER=$(shell git config --get remote.origin.url | sed 's/git@$(GIT_DOMAIN)
 BUILD_DIR=${GOPATH}/src/${GIT_DOMAIN}/${REPO_OWNER}/${REPO_NAME}
 CURRENT_DIR=$(shell pwd)
 BUILD_DIR_LINK=$(shell readlink ${BUILD_DIR})
-RELEASES_DIR=./releases
+DISTRIBUTIONS_DIR=./dist
 
 ## Set the binary release names
 DARWIN=$(REPO_NAME)-darwin
@@ -37,7 +37,7 @@ build: darwin linux windows ## Build all binaries (darwin, linux, windows)
 
 clean: ## Remove previous builds and any test cache data
 	go clean -cache -testcache -i -r
-	if [ -d ${RELEASES_DIR} ]; then rm -r ${RELEASES_DIR}; fi
+	if [ -d ${DISTRIBUTIONS_DIR} ]; then rm -r ${DISTRIBUTIONS_DIR}; fi
 
 clean-mods: ## Remove all the Go mod cache
 	go clean -modcache
@@ -87,6 +87,10 @@ release-snap: ## Test the full release (build binaries)
 run: ## Runs the go application
 	go run main.go
 
+tag: ## Generate a new tag and 
+	git tag -a v$(version) -m "Pending full release..."
+	git push origin v$(version)
+
 test: ## Runs vet, lint and ALL tests
 	go vet -v
 	golint
@@ -111,10 +115,10 @@ vet: ## Run the Go vet application
 windows: $(WINDOWS) ## Build for Windows (amd64)
 
 $(WINDOWS):
-	env GOOS=windows GOARCH=amd64 go build -i -v -o ${RELEASES_DIR}/$(WINDOWS) -ldflags="-s -w -X $(GIT_DOMAIN)/$(REPO_OWNER)/$(REPO_NAME)/cmd.Version=$(VERSION_SHORT)"
+	env GOOS=windows GOARCH=amd64 go build -i -v -o ${DISTRIBUTIONS_DIR}/$(WINDOWS) -ldflags="-s -w -X $(GIT_DOMAIN)/$(REPO_OWNER)/$(REPO_NAME)/cmd.Version=$(VERSION_SHORT)"
 
 $(LINUX):
-	env GOOS=linux GOARCH=amd64 go build -i -v -o ${RELEASES_DIR}/$(LINUX) -ldflags="-s -w -X $(GIT_DOMAIN)/$(REPO_OWNER)/$(REPO_NAME)/cmd.Version=$(VERSION_SHORT)"
+	env GOOS=linux GOARCH=amd64 go build -i -v -o ${DISTRIBUTIONS_DIR}/$(LINUX) -ldflags="-s -w -X $(GIT_DOMAIN)/$(REPO_OWNER)/$(REPO_NAME)/cmd.Version=$(VERSION_SHORT)"
 
 $(DARWIN):
-	env GOOS=darwin GOARCH=amd64 go build -i -v -o ${RELEASES_DIR}/$(DARWIN) -ldflags="-s -w -X $(GIT_DOMAIN)/$(REPO_OWNER)/$(REPO_NAME)/cmd.Version=$(VERSION_SHORT)"
+	env GOOS=darwin GOARCH=amd64 go build -i -v -o ${DISTRIBUTIONS_DIR}/$(DARWIN) -ldflags="-s -w -X $(GIT_DOMAIN)/$(REPO_OWNER)/$(REPO_NAME)/cmd.Version=$(VERSION_SHORT)"
