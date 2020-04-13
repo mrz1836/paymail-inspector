@@ -1,55 +1,85 @@
 # Make sure to check the documentation at http://goreleaser.com
+# ---------------------------
+# GENERAL
+# ---------------------------
 before:
   hooks:
     # run make all
     - make all
-builds:
-- env:
-  - CGO_ENABLED=0
-  - GO111MODULE=on
-  goos:
-  - darwin
-  - linux
-  - windows
-  ldflags:
-  - -s -w -X github.com/mrz1836/{{ .ProjectName }}/cmd.Version={{ .Version }}
-archives:
-- wrap_in_directory: app
-  name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
-  replacements:
-    darwin: macOS
-    linux: Linux
-    windows: Windows
-    386: 32-bit
-    amd64: 64-bit
-release:
-  prerelease: true
-  name_template: "Release v{{.Version}}"
-checksum:
-  name_template: '{{ .ProjectName }}_checksums.txt'
 snapshot:
   name_template: "{{ .Tag }}"
-brews:
-  - github:
-      owner: mrz1836
-      name: homebrew-paymail-inspector
-    ids:
-      - paymail-inspector_macOS_64-bit
-      - paymail-inspector_macOS_32-bit
-    homepage: "https://github.com/mrz1836/{{ .ProjectName }}"
-    commit_author:
-      name: mrz1836
-      email: mrz1818@protonmail.ch
-    caveats: "See the Github repo for more information"
-    description: "CLI tool that inspects, validates or resolves any paymail address or domain (and more!)"
-    test: |
-      system "#{bin}/{{ .ProjectName }}", "--version"
-      system "#{bin}/{{ .ProjectName }}", "-h"
-    install: |
-      bin.install "{{ .ProjectName }}"
 changelog:
   sort: asc
   filters:
     exclude:
-    - '^.github:'
-    - '^test:'
+      - '^.github:'
+      - '^test:'
+
+# ---------------------------
+# BUILDER
+# ---------------------------
+builds:
+  - env:
+    - CGO_ENABLED=0
+    - GO111MODULE=on
+    goarch:
+    - amd64
+    - arm64
+    goos:
+    - darwin
+    - linux
+    - windows
+    goarm:
+    - 6
+    - 7
+    ldflags:
+    - -s -w -X github.com/mrz1836/{{ .ProjectName }}/cmd.Version={{ .Version }}
+
+# ---------------------------
+# Archives + Checksums
+# ---------------------------
+archives:
+  - wrap_in_directory: app
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+    replacements:
+      darwin: macOS
+      linux: Linux
+      windows: Windows
+      386: 32-bit
+      amd64: 64-bit
+checksum:
+  name_template: "{{ .ProjectName }}_checksums.txt"
+  algorithm: sha256
+
+# ---------------------------
+# Github Release
+# ---------------------------
+release:
+  prerelease: true
+  name_template: "Release v{{.Version}}"
+
+# ---------------------------
+# Brews - OSX
+# ---------------------------
+brews:
+  - ids:
+      - paymail-inspector
+    github:
+      owner: mrz1836
+      name: homebrew-paymail-inspector
+    commit_author:
+      name: mrz1836
+      email: mrz1818@protonmail.ch
+    caveats: |
+      See the Github repo for more information
+    homepage: https://github.com/mrz1836/paymail-inspector
+    description: &description |
+      CLI tool that inspects, validates or resolves any paymail address or domain (and more!)
+    dependencies: []
+    conflicts: []
+    plist: ""
+    install: |
+      bin.install "{{ .ProjectName }}"
+    test: |
+      system "#{bin}/{{ .ProjectName }}", "--version"
+      system "#{bin}/{{ .ProjectName }}", "-h"

@@ -109,7 +109,8 @@ tag: ## Generate a new tag and push (IE: make tag version=0.0.16)
 tag-remove: ## Remove a tag if found (IE: make tag-remove version=0.0.16)
 	test $(version)
 	git tag -d v$(version)
-	git fetch --tags -f
+	git push --delete origin v$(version)
+	git fetch --tags
 
 tag-update: ## Update an existing tag to current commit (IE: make tag-update version=0.0.16)
 	test $(version)
