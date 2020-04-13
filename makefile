@@ -135,6 +135,10 @@ update:  ## Update all project dependencies
 	go get -u ./...
 	go mod tidy
 
+update-releaser:  ## Update the goreleaser application
+	brew update
+	brew upgrade goreleaser
+
 vet: ## Run the Go vet application
 	go vet -v
 
