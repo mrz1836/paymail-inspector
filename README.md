@@ -26,6 +26,7 @@
 
 ## Installation
 
+Download application using Go (supports: linux, mac, windows)
 **paymail-inspector** requires a [supported release of Go](https://golang.org/doc/devel/release.html#policy).
 ```bash
 $ go get -u github.com/mrz1836/paymail-inspector
@@ -113,6 +114,9 @@ Additional paymail information can also be found via [MoneyButton's documentatio
 - spf13's [viper](https://github.com/spf13/viper) for easy application configuration
 - ttacon's [chalk](https://github.com/ttacon/chalk) for colorful logs
 
+### Optional Add-ons
+- [goreleaser](https://github.com/goreleaser/goreleaser) for easy binary deployment to Github (`brew install goreleaser`)
+
 #### Upgrade Dependencies & Reinstall
 ```bash
 $ make update
@@ -122,6 +126,11 @@ $ make install
 #### Uninstall Application
 ```bash
 $ make uninstall
+```
+
+#### View all `makefile` commands
+```bash
+$ make help
 ```
 
 #### Custom Configuration
