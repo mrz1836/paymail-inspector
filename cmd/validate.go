@@ -83,20 +83,19 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/index.html")),
 			srv, err = paymail.GetSRVRecord(serviceName, protocol, domain, nameServer)
 			if err != nil {
 				chalker.Log(chalker.ERROR, fmt.Sprintf("error getting SRV record: %s", err.Error()))
-				return
+			} else if srv != nil {
+				// Validate the SRV record for the domain name (using all flags or default values)
+				if err = paymail.ValidateSRVRecord(srv, nameServer, port, priority, weight); err != nil {
+					chalker.Log(chalker.ERROR, fmt.Sprintf("failed validating SRV record: %s", err.Error()))
+				} else {
+					checkDomain = srv.Target
+
+					// Success message
+					chalker.Log(chalker.SUCCESS, "SRV record passed all validations (target, port, priority, weight)")
+					chalker.Log(chalker.INFO, fmt.Sprintf("target record found: %s", chalk.Cyan.Color(checkDomain)))
+				}
 			}
 
-			// Validate the SRV record for the domain name (using all flags or default values)
-			if err = paymail.ValidateSRVRecord(srv, nameServer, port, priority, weight); err != nil {
-				chalker.Log(chalker.ERROR, fmt.Sprintf("failed validating SRV record: %s", err.Error()))
-				return
-			}
-
-			checkDomain = srv.Target
-
-			// Success message
-			chalker.Log(chalker.SUCCESS, "SRV record passed all validations (target, port, priority, weight)")
-			chalker.Log(chalker.INFO, fmt.Sprintf("target record found: %s", chalk.Cyan.Color(srv.Target)))
 		} else {
 			chalker.Log(chalker.WARN, fmt.Sprintf("skipping SRV record check for: %s", chalk.Cyan.Color(checkDomain)))
 		}
@@ -112,7 +111,6 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/index.html")),
 				if len(result.ErrorMessage) > 0 {
 					chalker.Log(chalker.ERROR, fmt.Sprintf("error checking DNSSEC: %s", result.ErrorMessage))
 				}
-				return
 			}
 		} else {
 			chalker.Log(chalker.WARN, fmt.Sprintf("skipping DNSSEC check for: %s", chalk.Cyan.Color(checkDomain)))
@@ -125,10 +123,8 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/index.html")),
 			var valid bool
 			if valid, err = paymail.CheckSSL(checkDomain, nameServer); err != nil {
 				chalker.Log(chalker.ERROR, fmt.Sprintf("error checking SSL: %s", err.Error()))
-				return
 			} else if !valid {
 				chalker.Log(chalker.ERROR, "zero SSL certificates found (or timed out)")
-				return
 			}
 			chalker.Log(chalker.SUCCESS, fmt.Sprintf("SSL found and valid for: %s", checkDomain))
 		} else {
