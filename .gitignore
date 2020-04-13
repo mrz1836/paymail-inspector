@@ -24,5 +24,8 @@
 # Notes
 todo.md
 
+# Releases
+*.tar.gz
+
 # Generated binaries
 dist
