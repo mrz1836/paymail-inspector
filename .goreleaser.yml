@@ -38,7 +38,6 @@ brews:
       - paymail-inspector_macOS_32-bit
     homepage: "https://github.com/mrz1836/{{ .ProjectName }}"
     caveats: "See the Github repo for more information"
-    skip_upload: true
     description: "CLI tool that inspects, validates or resolves any paymail address or domain (and more!)"
     test: |
       system "#{bin}/{{ .ProjectName }}", "--version"
