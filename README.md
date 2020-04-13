@@ -38,9 +38,9 @@ $ brew tap mrz1836/paymail-inspector && brew install paymail-inspector
 $ paymail-inspector -h
 ```
 
-**Run via [a binary](https://github.com/mrz1836/paymail-inspector/releases)** on Linux, Mac or Windows _(Mac example)_
+**Run via [compiled binary](https://github.com/mrz1836/paymail-inspector/releases)** on Linux, Mac or Windows _(Mac example)_
 ```bash
-$ curl -LkSs https://github.com/mrz1836/paymail-inspector/releases/download/v0.0.16/paymail-inspector_macOS_64-bit.tar.gz -o app.tar.gz
+$ curl -LkSs https://github.com/mrz1836/paymail-inspector/releases/download/v0.0.17/paymail-inspector_macOS_64-bit.tar.gz -o app.tar.gz
 $ tar -zxf app.tar.gz
 $ ./app/paymail-inspector -h
 ```
