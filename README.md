@@ -26,14 +26,14 @@
 
 ## Installation
 
-Run via [Go](https://formulae.brew.sh/formula/go)
+**Run via [Go](https://formulae.brew.sh/formula/go)**
 ```bash
 $ go get -u github.com/mrz1836/paymail-inspector && go install github.com/mrz1836/paymail-inspector
 $ paymail-inspector -h
 ```
 
 
-Run via [a binary](https://github.com/mrz1836/paymail-inspector/releases) on Linux, Mac or Windows (Mac example)
+**Run via [a binary](https://github.com/mrz1836/paymail-inspector/releases)** on Linux, Mac or Windows _(Mac example)_
 ```bash
 $ curl -LkSs https://github.com/mrz1836/paymail-inspector/releases/download/v0.0.16/paymail-inspector_macOS_64-bit.tar.gz -o app.tar.gz
 $ tar -zxf app.tar.gz
@@ -104,6 +104,11 @@ This application was built using the [official paymail specifications](http://bs
 
 Additional paymail information can also be found via [MoneyButton's documentation](https://docs.moneybutton.com/docs/paymail-overview.html).
 
+#### Custom Configuration
+The configuration file should be located in your `$HOME` folder and named `.paymail-inspector.yaml`.
+
+View the [example config file](.paymail-inspector.yaml).
+
 ### Implemented [BRFCs](http://bsvalias.org/01-brfc-specifications.html)
 - [x] BRFC ID Assignment ([assignment](http://bsvalias.org/01-02-brfc-id-assignment.html))
 - [x] Service Discovery ([b2aa66e26b43](http://bsvalias.org/02-service-discovery.html))
@@ -130,31 +135,10 @@ Additional paymail information can also be found via [MoneyButton's documentatio
 ### Optional Add-ons
 - [goreleaser](https://github.com/goreleaser/goreleaser) for easy binary deployment to Github (`brew install goreleaser`)
 
-#### Upgrade Dependencies & Reinstall
-```bash
-$ make update
-$ make install
-```
-
-#### Uninstall Application
-```bash
-$ make uninstall
-```
-
 #### View all `makefile` commands
 ```bash
 $ make help
 ```
-
-#### Deploy a New Version
-```bash
-$ export GITHUB_TOKEN=<your_token>
-$ make tag version=0.1.0
-$ make release
-```
-
-#### Custom Configuration
-The file should be located in your `$HOME` folder and named `.paymail-inspector.yaml`. View the [example config file](.paymail-inspector.yaml).
 
 ## Examples & Tests
 All unit tests and [examples](docs/examples.md) run via [Travis CI](https://travis-ci.com/mrz1836/paymail-inspector) and uses [Go version 1.14.x](https://golang.org/doc/go1.14). View the [deployment configuration file](.travis.yml).

@@ -3,6 +3,9 @@ COVER=go tool cover
 ## Default Repo Domain
 GIT_DOMAIN=github.com
 
+## Set the Github Token
+#GITHUB_TOKEN=<your_token>
+
 ## Automatically detect the repo owner and repo name
 REPO_NAME=$(shell basename `git rev-parse --show-toplevel`)
 REPO_OWNER=$(shell git config --get remote.origin.url | sed 's/git@$(GIT_DOMAIN)://g' | sed 's/\/$(REPO_NAME).git//g')
