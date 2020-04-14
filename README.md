@@ -156,10 +156,12 @@ Use `make release-snap` to create a snapshot version of the release, and finally
 
 <details>
 <summary><strong><code>Makefile Commands</code></strong></summary>
+View all `makefile` commands
 ```bash
 $ make help
 ```
 
+List of all current commands:
 ```text
 all                            Runs test, install, clean, docs
 bench                          Run all benchmarks in the Go application
