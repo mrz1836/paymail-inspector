@@ -19,12 +19,12 @@ Default:
 
 // PublicProfileResponse is the result returned
 type PublicProfileResponse struct {
-	Avatar string `json:"avatar"` // The image url
-	Name   string `json:"name"`   // Name associated to paymail
+	Avatar string `json:"avatar"` // A URL that returns a 180x180 image. It can accept an optional parameter `s` to return an image of width and height `s`. The image should be JPEG, PNG, or GIF.
+	Name   string `json:"name"`   // A string up to 100 characters long. (name or nickname)
 }
 
 // GetPublicProfile will return a valid public profile
-// Specs: "unlisted" // todo: add specs once they are found
+// Specs: https://github.com/bitcoin-sv-specs/brfc-paymail/pull/7/files
 func GetPublicProfile(publicProfileUrl, alias, domain string) (profile *PublicProfileResponse, err error) {
 
 	// Set the base url and path (assuming the url is from the GetCapabilities request)
