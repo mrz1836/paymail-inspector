@@ -85,15 +85,23 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/04-01-basic-address-resolu
 			return
 		}
 
-		// Does the paymail provider have the capability?
-		if len(capabilities.PaymentDestination) == 0 {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("%s is missing a required capability: %s", domain, paymail.CapabilityPaymentDestination))
+		// Set the URL - Does the paymail provider have the capability?
+		pkiUrl := capabilities.GetValueString(paymail.BRFCPki, paymail.BRFCPkiAlternate)
+		if len(pkiUrl) == 0 {
+			chalker.Log(chalker.ERROR, fmt.Sprintf("%s is missing a required capability: %s", domain, paymail.BRFCPki))
+			return
+		}
+
+		// Set the URL - Does the paymail provider have the capability?
+		resolveUrl := capabilities.GetValueString(paymail.BRFCPaymentDestination, paymail.BRFCBasicAddressResolution)
+		if len(resolveUrl) == 0 {
+			chalker.Log(chalker.ERROR, fmt.Sprintf("%s is missing a required capability: %s", domain, paymail.BRFCPaymentDestination))
 			return
 		}
 
 		// Does this provider require sender validation?
 		// https://bsvalias.org/04-02-sender-validation.html
-		if capabilities.SenderValidation {
+		if capabilities.GetValueBool(paymail.BRFCSenderValidation, "") {
 			chalker.Log(chalker.WARN, "sender validation is ENFORCED")
 
 			// Required if flag is enforced
@@ -118,9 +126,11 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/04-01-basic-address-resolu
 					}
 					return
 				}
-				// Does the paymail provider have the capability?
-				if len(senderCapabilities.Pki) == 0 {
-					chalker.Log(chalker.ERROR, fmt.Sprintf("%s is missing a required capability: %s", senderDomain, paymail.CapabilityPki))
+
+				// Set the URL - Does the paymail provider have the capability?
+				senderPkiUrl := senderCapabilities.GetValueString(paymail.BRFCPki, paymail.BRFCPkiAlternate)
+				if len(senderPkiUrl) == 0 {
+					chalker.Log(chalker.ERROR, fmt.Sprintf("%s is missing a required capability: %s", senderDomain, paymail.BRFCPki))
 					return
 				}
 
@@ -129,7 +139,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/04-01-basic-address-resolu
 
 				// Get the PKI for the given address
 				var senderPki *paymail.PKIResponse
-				if senderPki, err = getPki(senderCapabilities.Pki, parts[0], parts[1]); err != nil {
+				if senderPki, err = getPki(senderPkiUrl, parts[0], parts[1]); err != nil {
 					chalker.Log(chalker.ERROR, fmt.Sprintf("error: %s", err.Error()))
 					return
 				} else if senderPki != nil {
@@ -146,7 +156,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/04-01-basic-address-resolu
 
 		// Get the PKI for the given address
 		var pki *paymail.PKIResponse
-		if pki, err = getPki(capabilities.Pki, parts[0], domain); err != nil {
+		if pki, err = getPki(pkiUrl, parts[0], domain); err != nil {
 			chalker.Log(chalker.ERROR, fmt.Sprintf("error: %s", err.Error()))
 			return
 		}
@@ -165,7 +175,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/04-01-basic-address-resolu
 		chalker.Log(chalker.DEFAULT, fmt.Sprintf("resolving address: %s...", chalk.Cyan.Color(parts[0]+"@"+domain)))
 
 		var resolutionResponse *paymail.AddressResolutionResponse
-		if resolutionResponse, err = paymail.AddressResolution(capabilities.PaymentDestination, parts[0], domain, senderRequest); err != nil {
+		if resolutionResponse, err = paymail.AddressResolution(resolveUrl, parts[0], domain, senderRequest); err != nil {
 			chalker.Log(chalker.ERROR, fmt.Sprintf("address resolution failed: %s", err.Error()))
 			return
 		}
@@ -174,10 +184,11 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/04-01-basic-address-resolu
 		chalker.Log(chalker.SUCCESS, "address resolution successful")
 
 		// Attempt to get a public profile if the capability is found
-		if len(capabilities.PublicProfile) > 0 && !skipPublicProfile {
+		url := capabilities.GetValueString(paymail.BRFCPublicProfile, "")
+		if len(url) > 0 && !skipPublicProfile {
 			chalker.Log(chalker.DEFAULT, fmt.Sprintf("getting public profile for: %s...", chalk.Cyan.Color(parts[0]+"@"+domain)))
 			var profile *paymail.PublicProfileResponse
-			if profile, err = paymail.GetPublicProfile(capabilities.PublicProfile, parts[0], domain); err != nil {
+			if profile, err = paymail.GetPublicProfile(url, parts[0], domain); err != nil {
 				chalker.Log(chalker.ERROR, fmt.Sprintf("get public profile failed: %s", err.Error()))
 			} else if profile != nil {
 				if len(profile.Name) > 0 {

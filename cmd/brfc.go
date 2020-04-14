@@ -49,20 +49,28 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/01-brfc-specifications.htm
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 
+		// Load the BRFC specifications
+		if len(paymail.BRFCSpecs) == 0 {
+			if err := paymail.LoadSpecifications(); err != nil {
+				chalker.Log(chalker.ERROR, fmt.Sprintf("error loading BRFC specifications: %s", err.Error()))
+				return
+			}
+		}
+
 		// List command
 		if args[0] == "list" {
 
 			// Did we find some specifications?
-			if len(paymail.ListOfBRFCSpecs) == 0 {
-				chalker.Log(chalker.ERROR, fmt.Sprintf("no existing brfc specs found in: %s", "ListOfBRFCSpecs"))
+			if len(paymail.BRFCSpecs) == 0 {
+				chalker.Log(chalker.ERROR, fmt.Sprintf("no existing brfc specs found in: %s", "BRFCSpecs"))
 				return
 			}
 
 			// Show success message
-			chalker.Log(chalker.SUCCESS, fmt.Sprintf("total brfc specs found: %d", len(paymail.ListOfBRFCSpecs)))
+			chalker.Log(chalker.SUCCESS, fmt.Sprintf("total brfc specs found: %d", len(paymail.BRFCSpecs)))
 
 			// Loop the list
-			for _, brfc := range paymail.ListOfBRFCSpecs {
+			for _, brfc := range paymail.BRFCSpecs {
 				chalker.Log(chalker.DEFAULT, "-----------------------------------------------------------------")
 				if len(brfc.ID) == 0 {
 					chalker.Log(chalker.WARN, fmt.Sprintf("invalid brfc detected, missing attribute: %s", "id"))
@@ -125,8 +133,8 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/01-brfc-specifications.htm
 			}
 
 			// Check that it doesn't exist
-			if len(paymail.ListOfBRFCSpecs) > 0 {
-				for _, existingBrfc := range paymail.ListOfBRFCSpecs {
+			if len(paymail.BRFCSpecs) > 0 {
+				for _, existingBrfc := range paymail.BRFCSpecs {
 					if existingBrfc.ID == brfc.ID {
 						chalker.Log(chalker.ERROR, fmt.Sprintf("brfc already exists: %s", brfc.ID))
 						return

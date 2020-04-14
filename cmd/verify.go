@@ -98,9 +98,10 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/05-verify-public-key-owner
 			return
 		}
 
-		// Does the paymail provider have the capability?
-		if len(capabilities.VerifyPublicKeyOwner) == 0 {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("%s is missing a required capability: %s", domain, paymail.CapabilityVerifyPublicKeyOwner))
+		// Set the URL - Does the paymail provider have the capability?
+		url := capabilities.GetValueString(paymail.BRFCVerifyPublicKeyOwner, "")
+		if len(url) == 0 {
+			chalker.Log(chalker.ERROR, fmt.Sprintf("%s is missing a required capability: %s", domain, paymail.BRFCVerifyPublicKeyOwner))
 			return
 		}
 
@@ -110,7 +111,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/05-verify-public-key-owner
 		// Fire the verify request
 		chalker.Log(chalker.DEFAULT, fmt.Sprintf("firing Verify request for: %s...", chalk.Cyan.Color(parts[0]+"@"+domain)))
 		var verify *paymail.VerifyPubKeyResponse
-		if verify, err = paymail.VerifyPubKey(capabilities.VerifyPublicKeyOwner, parts[0], domain, pubKey); err != nil {
+		if verify, err = paymail.VerifyPubKey(url, parts[0], domain, pubKey); err != nil {
 			chalker.Log(chalker.ERROR, fmt.Sprintf("get VerifyPublicKey request failed: %s", err.Error()))
 			return
 		} else if verify == nil {

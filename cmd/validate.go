@@ -143,23 +143,25 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/index.html")),
 		}
 
 		// Missing required capabilities?
-		if len(capabilities.Pki) == 0 {
-			chalker.Log(chalker.WARN, fmt.Sprintf("missing required capability: %s", paymail.CapabilityPki))
-		} else if len(capabilities.PaymentDestination) == 0 {
-			chalker.Log(chalker.WARN, fmt.Sprintf("missing required capability: %s", paymail.CapabilityPaymentDestination))
-		} else if len(capabilities.Pki) > 0 && len(capabilities.PaymentDestination) > 0 {
-			chalker.Log(chalker.SUCCESS, fmt.Sprintf("found required capabilities: [%s] [%s]", paymail.CapabilityPki, paymail.CapabilityPaymentDestination))
+		pkiUrl := capabilities.GetValueString(paymail.BRFCPki, paymail.BRFCPkiAlternate)
+		resolveUrl := capabilities.GetValueString(paymail.BRFCPaymentDestination, paymail.BRFCBasicAddressResolution)
+		if len(pkiUrl) == 0 {
+			chalker.Log(chalker.WARN, fmt.Sprintf("missing required capability: %s", paymail.BRFCPki))
+		} else if len(resolveUrl) == 0 {
+			chalker.Log(chalker.WARN, fmt.Sprintf("missing required capability: %s", paymail.BRFCPaymentDestination))
+		} else if len(pkiUrl) > 0 && len(resolveUrl) > 0 {
+			chalker.Log(chalker.SUCCESS, fmt.Sprintf("found required capabilities: [%s] [%s]", paymail.BRFCPki, paymail.BRFCPaymentDestination))
 		}
 
 		// Only if we have an address (basic validation that the address exists)
-		if len(paymailAddress) > 0 && len(capabilities.Pki) > 0 {
+		if len(paymailAddress) > 0 && len(pkiUrl) > 0 {
 
 			// Get the alias of the address
 			parts := strings.Split(paymailAddress, "@")
 
 			// Get the PKI for the given address
 			var pki *paymail.PKIResponse
-			if pki, err = getPki(capabilities.Pki, parts[0], parts[1]); err != nil {
+			if pki, err = getPki(pkiUrl, parts[0], parts[1]); err != nil {
 				chalker.Log(chalker.ERROR, fmt.Sprintf("error: %s", err.Error()))
 				return
 			} else if pki != nil {

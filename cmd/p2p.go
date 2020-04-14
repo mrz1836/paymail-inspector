@@ -72,9 +72,10 @@ Read more at: `+chalk.Cyan.Color("https://docs.moneybutton.com/docs/paymail-07-p
 			return
 		}
 
-		// Does the paymail provider have the capability?
-		if len(capabilities.P2PPaymentDestination) == 0 {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("%s is missing a required capability: %s", domain, paymail.CapabilityP2PPaymentDestination))
+		// Set the URL - Does the paymail provider have the capability?
+		url := capabilities.GetValueString(paymail.BRFCP2PPaymentDestination, "")
+		if len(url) == 0 {
+			chalker.Log(chalker.ERROR, fmt.Sprintf("%s is missing a required capability: %s", domain, paymail.BRFCP2PPaymentDestination))
 			return
 		}
 
@@ -89,7 +90,7 @@ Read more at: `+chalk.Cyan.Color("https://docs.moneybutton.com/docs/paymail-07-p
 		// Fire the request
 		var p2pResponse *paymail.P2PPaymentDestinationResponse
 		if p2pResponse, err = paymail.GetP2PPaymentDestination(
-			capabilities.P2PPaymentDestination,
+			url,
 			parts[0],
 			domain,
 			&paymail.P2PPaymentDestinationRequest{Satoshis: satoshis},
@@ -99,10 +100,11 @@ Read more at: `+chalk.Cyan.Color("https://docs.moneybutton.com/docs/paymail-07-p
 		}
 
 		// Attempt to get a public profile if the capability is found
-		if len(capabilities.PublicProfile) > 0 && !skipPublicProfile {
+		url = capabilities.GetValueString(paymail.BRFCPublicProfile, "")
+		if len(url) > 0 && !skipPublicProfile {
 			chalker.Log(chalker.DEFAULT, fmt.Sprintf("getting public profile for: %s...", chalk.Cyan.Color(parts[0]+"@"+domain)))
 			var profile *paymail.PublicProfileResponse
-			if profile, err = paymail.GetPublicProfile(capabilities.PublicProfile, parts[0], domain); err != nil {
+			if profile, err = paymail.GetPublicProfile(url, parts[0], domain); err != nil {
 				chalker.Log(chalker.ERROR, fmt.Sprintf("get public profile failed: %s", err.Error()))
 				return
 			} else if profile != nil {

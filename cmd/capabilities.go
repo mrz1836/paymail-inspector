@@ -71,6 +71,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/02-02-capability-discovery
 		}
 
 		// Show all the found capabilities
+		// todo: loop known BRFCs and display "more" info in this display for all detected BRFCs
 		for key, val := range capabilities.Capabilities {
 			valType := reflect.TypeOf(val).String()
 			if valType == "string" {

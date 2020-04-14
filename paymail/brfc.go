@@ -3,6 +3,7 @@ package paymail
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"strings"
 )
@@ -21,101 +22,17 @@ type BRFCSpec struct {
 }
 
 var (
-	// ListOfBRFCSpecs is a public variable with a list of known BRFC specifications
-	ListOfBRFCSpecs []*BRFCSpec
+	// BRFCSpecs is a public variable with a list of known BRFC specifications
+	BRFCSpecs []*BRFCSpec
 )
 
-func init() {
-
-	// Service Discovery
-	ListOfBRFCSpecs = append(ListOfBRFCSpecs, &BRFCSpec{
-		Author:  "andy (nChain), Ryan X. Charles (Money Button)",
-		ID:      "b2aa66e26b43",
-		Title:   "bsvalias Service Discovery",
-		URL:     "http://bsvalias.org/02-service-discovery.html",
-		Version: "1",
-	})
-
-	// Public Key Infrastructure
-	ListOfBRFCSpecs = append(ListOfBRFCSpecs, &BRFCSpec{
-		Alias:   "pki",
-		Author:  "andy (nChain), Ryan X. Charles (Money Button)",
-		ID:      "0c4339ef99c2",
-		Title:   "bsvalias Public Key Infrastructure",
-		URL:     "http://bsvalias.org/03-public-key-infrastructure.html",
-		Version: "1",
-	})
-
-	// Basic Address Resolution
-	ListOfBRFCSpecs = append(ListOfBRFCSpecs, &BRFCSpec{
-		Alias:   "paymentDestination",
-		Author:  "andy (nChain), Ryan X. Charles (Money Button)",
-		ID:      "759684b1a19a",
-		Title:   "bsvalias Payment Addressing (Basic Address Resolution)",
-		URL:     "http://bsvalias.org/04-01-basic-address-resolution.html",
-		Version: "1",
-	})
-
-	// Sender Validation
-	ListOfBRFCSpecs = append(ListOfBRFCSpecs, &BRFCSpec{
-		Author:  "andy (nChain)",
-		ID:      "6745385c3fc0",
-		Title:   "bsvalias Payment Addressing (Payer Validation)",
-		URL:     "http://bsvalias.org/04-02-sender-validation.html",
-		Version: "1",
-	})
-
-	// Receiver Approvals
-	ListOfBRFCSpecs = append(ListOfBRFCSpecs, &BRFCSpec{
-		Author:  "andy (nChain)",
-		ID:      "3d7c2ca83a46",
-		Title:   "bsvalias Payment Addressing (Payee Approvals)",
-		URL:     "http://bsvalias.org/04-03-receiver-approvals.html",
-		Version: "1",
-	})
-
-	// PayTo Protocol Prefix
-	ListOfBRFCSpecs = append(ListOfBRFCSpecs, &BRFCSpec{
-		Author:  "andy (nChain)",
-		ID:      "7bd25e5a1fc6",
-		Title:   "bsvalias Payment Addressing (PayTo Protocol Prefix)",
-		URL:     "http://bsvalias.org/04-04-payto-protocol-prefix.html",
-		Version: "1",
-	})
-
-	// Verify Public Key Owner
-	ListOfBRFCSpecs = append(ListOfBRFCSpecs, &BRFCSpec{
-		Author:  "andy (nChain), Ryan X. Charles (Money Button), Miguel Duarte (Money Button)",
-		ID:      "a9f510c16bde",
-		Title:   "bsvalias public key verify (Verify Public Key Owner)",
-		URL:     "http://bsvalias.org/05-verify-public-key-owner.html",
-		Version: "1",
-	})
-
-	// P2P Transactions
-	ListOfBRFCSpecs = append(ListOfBRFCSpecs, &BRFCSpec{
-		Author:  "Ryan X. Charles (Money Button), Miguel Duarte (Money Button), Rafa Jimenez Seibane (Handcash), Ivan Mlinarić  (Handcash)",
-		ID:      "5f1323cddf31",
-		Title:   "P2P Transactions",
-		URL:     "https://docs.moneybutton.com/docs/paymail-06-p2p-transactions.html",
-		Version: "1",
-	})
-
-	// P2P Payment Destination
-	ListOfBRFCSpecs = append(ListOfBRFCSpecs, &BRFCSpec{
-		Author:  "Ryan X. Charles (Money Button), Miguel Duarte (Money Button), Rafa Jimenez Seibane (Handcash), Ivan Mlinarić  (Handcash)",
-		ID:      "2a40af698840",
-		Title:   "P2P Payment Destination",
-		URL:     "https://docs.moneybutton.com/docs/paymail-07-p2p-payment-destination.html",
-		Version: "1",
-	})
-
-	// Public Profile // todo: still unknown where the source is
-	ListOfBRFCSpecs = append(ListOfBRFCSpecs, &BRFCSpec{
-		ID:    "f12f968c92d6",
-		Title: "Public Profile",
-	})
-
+// LoadSpecifications will load the known specifications into structs from JSON
+func LoadSpecifications() (err error) {
+	err = json.Unmarshal([]byte(BRFCKnownSpecifications), &BRFCSpecs)
+	if err == nil && len(BRFCSpecs) == 0 {
+		err = fmt.Errorf("error loading BRFC specifications, zero results found")
+	}
+	return
 }
 
 // Generate will generate a new BRFC ID from the given specification
