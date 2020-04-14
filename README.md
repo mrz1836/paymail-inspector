@@ -150,11 +150,15 @@ View the [example config file](.paymail-inspector.yaml).
 </details>
 
 <details>
-<summary><strong><code>Optional Add-ons</code></strong></summary>
+<summary><strong><code>Application Deployment</code></strong></summary>
 
-- [goreleaser](https://github.com/goreleaser/goreleaser) for easy binary deployment to Github (`brew install goreleaser`)
+[goreleaser](https://github.com/goreleaser/goreleaser) for easy binary deployment to Github and can be installed via: `brew install goreleaser`.
+
+The [.goreleaser.yml](.goreleaser.yml) file is used to configure [goreleaser](https://github.com/goreleaser/goreleaser).
 
 Use `make release-snap` to create a snapshot version of the release, and finally `make release` to ship to production.
+
+The release can also be deployed to a `homebrew` repository: [homebrew-paymail-inspector](https://github.com/mrz1836/homebrew-paymail-inspector).
 </details>
 
 <details>
