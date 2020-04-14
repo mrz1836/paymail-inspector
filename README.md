@@ -156,6 +156,7 @@ Use `make release-snap` to create a snapshot version of the release, and finally
 
 <details>
 <summary><strong><code>Makefile Commands</code></strong></summary>
+
 View all `makefile` commands
 ```bash
 $ make help
