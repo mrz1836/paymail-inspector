@@ -132,6 +132,7 @@ Additional paymail information can also be found via [MoneyButton's documentatio
 
 <details>
 <summary><strong><code>Custom Configuration</code></strong></summary>
+
 The configuration file should be located in your `$HOME` folder and named `.paymail-inspector.yaml`.
 
 View the [example config file](.paymail-inspector.yaml).
@@ -139,6 +140,7 @@ View the [example config file](.paymail-inspector.yaml).
 
 <details>
 <summary><strong><code>Package Dependencies</code></strong></summary>
+
 - bitcoinsv's [bsvd](https://github.com/bitcoinsv/bsvd) and [bsvutil](https://github.com/bitcoinsv/bsvutil) for BSV script functionality
 - miekg's [dns](https://github.com/miekg/dns) package for advanced DNS functionality
 - mitchellh's [go-homedir](https://github.com/mitchellh/go-homedir) to find the home directory
@@ -149,6 +151,7 @@ View the [example config file](.paymail-inspector.yaml).
 
 <details>
 <summary><strong><code>Optional Add-ons</code></strong></summary>
+
 - [goreleaser](https://github.com/goreleaser/goreleaser) for easy binary deployment to Github (`brew install goreleaser`)
 
 Use `make release-snap` to create a snapshot version of the release, and finally `make release` to ship to production.
