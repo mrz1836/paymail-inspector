@@ -109,11 +109,6 @@ This application was built using the [official paymail specifications](http://bs
 
 Additional paymail information can also be found via [MoneyButton's documentation](https://docs.moneybutton.com/docs/paymail-overview.html).
 
-#### Custom Configuration
-The configuration file should be located in your `$HOME` folder and named `.paymail-inspector.yaml`.
-
-View the [example config file](.paymail-inspector.yaml).
-
 ### Implemented [BRFCs](http://bsvalias.org/01-brfc-specifications.html)
 - [x] BRFC ID Assignment ([assignment](http://bsvalias.org/01-02-brfc-id-assignment.html))
 - [x] Service Discovery ([b2aa66e26b43](http://bsvalias.org/02-service-discovery.html))
@@ -127,31 +122,76 @@ View the [example config file](.paymail-inspector.yaml).
 - [ ] Sender Validation ([6745385c3fc0](http://bsvalias.org/04-02-sender-validation.html))
 - [ ] Receiver Approvals ([3d7c2ca83a46](http://bsvalias.org/04-03-receiver-approvals.html))
 - [ ] Merchant API ([ce852c4c2cd1](https://github.com/bitcoin-sv-specs/brfc-merchantapi))
+- [ ] JSON Envelope Specification ([298e080a4598](https://github.com/bitcoin-sv-specs/brfc-misc/tree/master/jsonenvelope))
 - [ ] Fee Specification ([fb567267440a](https://github.com/bitcoin-sv-specs/brfc-misc/tree/master/feespec))
 - [ ] MinerID ([07f0786cdab6](https://github.com/bitcoin-sv-specs/brfc-minerid))
 - [ ] MinerID Extension: FeeSpec ([62b21572ca46](https://github.com/bitcoin-sv-specs/brfc-minerid/tree/master/extensions/feespec))
 - [ ] MinerID Extension: MinerParams ([1b1d980b5b72](https://github.com/bitcoin-sv-specs/brfc-minerid/tree/master/extensions/minerparams))
 - [ ] MinerID Extension: BlockInfo ([a224052ad433](https://github.com/bitcoin-sv-specs/brfc-minerid/tree/master/extensions/blockinfo))
 - [ ] MinerID Extension: BlockBind ([b8930c2bbf5d](https://github.com/bitcoin-sv-specs/brfc-minerid/tree/master/extensions/blockbind))
-- [ ] JSON Envelope Specification ([298e080a4598](https://github.com/bitcoin-sv-specs/brfc-misc/tree/master/jsonenvelope))
 
-### Package Dependencies
-- bitcoinsv's [bsvd](https://github.com/bitcoinsv/bsvd) for BSV script functionality
-- bitcoinsv's [bsvutil](https://github.com/bitcoinsv/bsvutil) for BSV address utilities
+<details>
+<summary><strong><code>Custom Configuration</code></strong></summary>
+The configuration file should be located in your `$HOME` folder and named `.paymail-inspector.yaml`.
+
+View the [example config file](.paymail-inspector.yaml).
+</details>
+
+<details>
+<summary><strong><code>Package Dependencies</code></strong></summary>
+- bitcoinsv's [bsvd](https://github.com/bitcoinsv/bsvd) and [bsvutil](https://github.com/bitcoinsv/bsvutil) for BSV script functionality
 - miekg's [dns](https://github.com/miekg/dns) package for advanced DNS functionality
 - mitchellh's [go-homedir](https://github.com/mitchellh/go-homedir) to find the home directory
 - MrZ's [go-validate](https://github.com/mrz1836/go-validate) for domain/email/ip validations
-- spf13's [cobra](https://github.com/spf13/cobra) for easy CLI application development
-- spf13's [viper](https://github.com/spf13/viper) for easy application configuration
+- spf13's [cobra](https://github.com/spf13/cobra) and [viper](https://github.com/spf13/viper) for easy configuration & CLI application development
 - ttacon's [chalk](https://github.com/ttacon/chalk) for colorful logs
+</details>
 
-### Optional Add-ons
+<details>
+<summary><strong><code>Optional Add-ons</code></strong></summary>
 - [goreleaser](https://github.com/goreleaser/goreleaser) for easy binary deployment to Github (`brew install goreleaser`)
 
-#### View all `makefile` commands
+Use `make release-snap` to create a snapshot version of the release, and finally `make release` to ship to production.
+</details>
+
+<details>
+<summary><strong><code>Makefile Commands</code></strong></summary>
 ```bash
 $ make help
 ```
+
+```text
+all                            Runs test, install, clean, docs
+bench                          Run all benchmarks in the Go application
+build-go                       Build the Go application (locally)
+build                          Build all binaries (darwin, linux, windows)
+clean                          Remove previous builds and any test cache data
+clean-mods                     Remove all the Go mod cache
+coverage                       Shows the test coverage
+darwin                         Build for Darwin (macOS amd64)
+gen-docs                       Generate documentation from all available commands (fresh install)
+godocs                         Sync the latest tag with GoDocs
+help                           Show all make commands available
+install                        Install the application
+lint                           Run the Go lint application
+linux                          Build for Linux (amd64)
+release                        Full production release (creates release in Github)
+release-test                   Full production test release (everything except deploy)
+release-snap                   Test the full release (build binaries)
+run                            Runs the go application
+tag                            Generate a new tag and push (IE: make tag version=0.0.16)
+tag-remove                     Remove a tag if found (IE: make tag-remove version=0.0.16)
+tag-update                     Update an existing tag to current commit (IE: make tag-update version=0.0.16)
+test                           Runs vet, lint and ALL tests
+test-short                     Runs vet, lint and tests (excludes integration tests)
+uninstall                      Uninstall the application (and remove files)
+update                         Update all project dependencies
+update-releaser                Update the goreleaser application
+vet                            Run the Go vet application
+windows                        Build for Windows (amd64)
+```
+</details>
+
 
 ## Examples & Tests
 All unit tests and [examples](docs/examples.md) run via [Travis CI](https://travis-ci.com/mrz1836/paymail-inspector) and uses [Go version 1.14.x](https://golang.org/doc/go1.14). View the [deployment configuration file](.travis.yml).

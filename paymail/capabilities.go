@@ -25,9 +25,9 @@ type CapabilitiesResponse struct {
 	Capabilities map[string]interface{} `json:"capabilities"` // Raw list of the capabilities
 }
 
-// Has will check if a BRFC ID is found in the list of capabilities
+// Has will check if a BRFC ID (or alternate) is found in the list of capabilities
 func (c *CapabilitiesResponse) Has(brfcID, alternate string) bool {
-	for key, _ := range c.Capabilities {
+	for key := range c.Capabilities {
 		if key == brfcID || (len(alternate) > 0 && key == alternate) {
 			return true
 		}
