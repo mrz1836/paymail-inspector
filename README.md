@@ -2,7 +2,7 @@
 
 # Paymail Inspector
 
-[![Go](https://img.shields.io/github/go-mod/go-version/mrz1836/paymail-inspector&v=3)](https://golang.org/)
+[![Go](https://img.shields.io/github/go-mod/go-version/mrz1836/paymail-inspector?v=3)](https://golang.org/)
 [![Build Status](https://travis-ci.com/mrz1836/paymail-inspector.svg?branch=master&v=3)](https://travis-ci.com/mrz1836/paymail-inspector)
 [![Report](https://goreportcard.com/badge/github.com/mrz1836/paymail-inspector?style=flat&v=3)](https://goreportcard.com/report/github.com/mrz1836/paymail-inspector)
 [![Release](https://img.shields.io/github/release-pre/mrz1836/paymail-inspector.svg?style=flat&v=3)](https://github.com/mrz1836/paymail-inspector/releases)
