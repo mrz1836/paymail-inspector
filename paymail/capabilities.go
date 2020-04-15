@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/go-resty/resty/v2"
 )
 
 /*
@@ -21,6 +23,7 @@ Default:
 
 // CapabilitiesResponse is the result returned (plus some custom features)
 type CapabilitiesResponse struct {
+	StandardResponse
 	BsvAlias     string                 `json:"bsvalias"`     // Version of the bsvalias
 	Capabilities map[string]interface{} `json:"capabilities"` // Raw list of the capabilities
 }
@@ -64,53 +67,46 @@ func (c *CapabilitiesResponse) GetValueBool(brfcID, alternate string) bool {
 
 // GetCapabilities will return a list of capabilities for a given domain & port
 // Specs: http://bsvalias.org/02-02-capability-discovery.html
-func GetCapabilities(target string, port int) (capabilities *CapabilitiesResponse, err error) {
+func GetCapabilities(target string, port int, tracing bool) (response *CapabilitiesResponse, err error) {
 
 	// Set the base url and path
 	// https://<host-discovery-target>:<host-discovery-port>/.well-known/bsvalias
 	reqURL := fmt.Sprintf("https://%s:%d/.well-known/bsvalias", target, port)
 
-	// Start the request
-	var req *http.Request
-	if req, err = http.NewRequest(http.MethodGet, reqURL, nil); err != nil {
+	// Create a Client and start the request
+	client := resty.New().SetTimeout(defaultGetTimeout * time.Second)
+	var resp *resty.Response
+	req := client.R().SetHeader("User-Agent", defaultUserAgent)
+	if tracing {
+		req.EnableTrace()
+	}
+	if resp, err = req.Get(reqURL); err != nil {
 		return
 	}
 
-	// Set the headers (standard user agent so it cannot be blocked)
-	req.Header.Set("User-Agent", defaultUserAgent)
+	// New struct
+	response = new(CapabilitiesResponse)
 
-	// Set the client
-	client := http.Client{
-		Timeout: defaultGetTimeout * time.Second,
+	// Tracing enabled?
+	if tracing {
+		response.Tracing = resp.Request.TraceInfo()
 	}
-
-	// Fire the request
-	var resp *http.Response
-	if resp, err = client.Do(req); err != nil {
-		return
-	}
-
-	// Close the body
-	defer func() {
-		_ = resp.Body.Close()
-	}()
 
 	// Test the status code
-	// Only 200 and 304 are accepted
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNotModified {
-		err = fmt.Errorf("bad response from paymail provider: %d", resp.StatusCode)
+	response.StatusCode = resp.StatusCode()
+	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusNotModified {
+		err = fmt.Errorf("bad response from paymail provider: %d", response.StatusCode)
 		return
 	}
 
-	// Try and decode the response
-	if err = json.NewDecoder(resp.Body).Decode(&capabilities); err != nil {
+	// Decode the body of the response
+	if err = json.Unmarshal(resp.Body(), &response); err != nil {
 		return
 	}
 
 	// Invalid version?
-	if len(capabilities.BsvAlias) == 0 {
+	if len(response.BsvAlias) == 0 {
 		err = fmt.Errorf("missing bsvalias version")
-		return
 	}
 
 	return

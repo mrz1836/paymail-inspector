@@ -8,6 +8,8 @@ import (
 	"net"
 	"strings"
 	"time"
+
+	"github.com/go-resty/resty/v2"
 )
 
 // Defaults for paymail functions
@@ -20,28 +22,25 @@ const (
 	defaultGetTimeout        = 15    // In seconds
 	defaultPostTimeout       = 15    // In seconds
 	defaultUserAgent         = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36"
-	maxSRVRecords            = 1        // Given by paymail specs
-	typeBool                 = "bool"   // For bool detection
-	typeString               = "string" // For string detection
+	maxSRVRecords            = 1 // Given by paymail specs
 )
 
-/*
-http://bsvalias.org/02-01-host-discovery.html
-
-Service	  bsvalias
-Proto	  tcp
-Name	  <domain>.<tld>.
-TTL	      3600 (see notes)
-Class	  IN
-Priority  10
-Weight	  10
-Port	  443
-Target	  <endpoint-discovery-host>
-
-Max SRV Records:  1
-*/
-
 // Public defaults for paymail specs
+/*
+	http://bsvalias.org/02-01-host-discovery.html
+
+	Service	  bsvalias
+	Proto	  tcp
+	Name	  <domain>.<tld>.
+	TTL	      3600 (see notes)
+	Class	  IN
+	Priority  10
+	Weight	  10
+	Port	  443
+	Target	  <endpoint-discovery-host>
+
+	Max SRV Records:  1
+*/
 const (
 	DefaultBsvAliasVersion = "1.0"      // Default version number for bsvalias
 	DefaultPort            = 443        // Default port (from specs)
@@ -51,6 +50,12 @@ const (
 	DefaultWeight          = 10         // Default weight (from specs)
 	PubKeyLength           = 66         // Required length for a valid PubKey (pki)
 )
+
+// StandardResponse is the standard fields returned on all responses
+type StandardResponse struct {
+	StatusCode int             `json:"status_code"` // Status code returned on the request
+	Tracing    resty.TraceInfo `json:"tracing"`     // Trace information if enabled on the request
+}
 
 // ExtractParts will check if it's a domain or address and extract the parts
 func ExtractParts(paymailInput string) (domain, address string) {

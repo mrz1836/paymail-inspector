@@ -1,7 +1,6 @@
 package paymail
 
 import (
-	"bytes"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -12,6 +11,7 @@ import (
 	"github.com/bitcoinsv/bsvd/chaincfg"
 	"github.com/bitcoinsv/bsvd/txscript"
 	"github.com/bitcoinsv/bsvutil"
+	"github.com/go-resty/resty/v2"
 )
 
 /*
@@ -38,6 +38,7 @@ type AddressResolutionRequest struct {
 
 // AddressResolutionResponse is the response frm the request
 type AddressResolutionResponse struct {
+	StandardResponse
 	Address   string `json:"address"`             // Legacy BSV address derived from the output script
 	Output    string `json:"output"`              // hex-encoded Bitcoin script, which the sender MUST use during the construction of a payment transaction
 	Signature string `json:"signature,omitempty"` // This is used if SenderValidation is enforced
@@ -45,60 +46,46 @@ type AddressResolutionResponse struct {
 
 // AddressResolution will return a hex-encoded Bitcoin script if successful
 // Specs: http://bsvalias.org/04-01-basic-address-resolution.html
-func AddressResolution(resolutionUrl, alias, domain string, senderRequest *AddressResolutionRequest) (response *AddressResolutionResponse, err error) {
+func AddressResolution(resolutionUrl, alias, domain string, senderRequest *AddressResolutionRequest, tracing bool) (response *AddressResolutionResponse, err error) {
 
 	// Set the base url and path (assuming the url is from the GetCapabilities request)
 	// https://<host-discovery-target>/{alias}@{domain.tld}/payment-destination
 	reqURL := strings.Replace(strings.Replace(resolutionUrl, "{alias}", alias, -1), "{domain.tld}", domain, -1)
 
-	// Set post value
-	var jsonValue []byte
-	if jsonValue, err = json.Marshal(senderRequest); err != nil {
+	// Create a Client and start the request
+	client := resty.New().SetTimeout(defaultPostTimeout * time.Second)
+	var resp *resty.Response
+	req := client.R().SetBody(senderRequest).SetHeader("User-Agent", defaultUserAgent)
+	if tracing {
+		req.EnableTrace()
+	}
+	if resp, err = req.Post(reqURL); err != nil {
 		return
 	}
 
-	// Start the request
-	var req *http.Request
-	if req, err = http.NewRequest(http.MethodPost, reqURL, bytes.NewBuffer(jsonValue)); err != nil {
-		return
+	// New struct
+	response = new(AddressResolutionResponse)
+
+	// Tracing enabled?
+	if tracing {
+		response.Tracing = resp.Request.TraceInfo()
 	}
-
-	// Set the headers (standard user agent so it cannot be blocked)
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("User-Agent", defaultUserAgent)
-
-	// Set the client
-	client := http.Client{
-		Timeout: defaultPostTimeout * time.Second,
-	}
-
-	// Fire the request
-	var resp *http.Response
-	if resp, err = client.Do(req); err != nil {
-		return
-	}
-
-	// Close the body
-	defer func() {
-		_ = resp.Body.Close()
-	}()
 
 	// Test the status code
-	// Only 200 and 304 are accepted
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNotModified {
-
+	response.StatusCode = resp.StatusCode()
+	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusNotModified {
 		// Paymail address not found?
-		if resp.StatusCode == http.StatusNotFound {
+		if response.StatusCode == http.StatusNotFound {
 			err = fmt.Errorf("paymail address not found")
 		} else {
-			err = fmt.Errorf("bad response from paymail provider: %d", resp.StatusCode)
+			err = fmt.Errorf("bad response from paymail provider: %d", response.StatusCode)
 		}
 
 		return
 	}
 
-	// Try and decode the response
-	if err = json.NewDecoder(resp.Body).Decode(&response); err != nil {
+	// Decode the body of the response
+	if err = json.Unmarshal(resp.Body(), &response); err != nil {
 		return
 	}
 

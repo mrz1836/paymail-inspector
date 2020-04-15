@@ -1,7 +1,6 @@
 package paymail
 
 import (
-	"bytes"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -12,6 +11,7 @@ import (
 	"github.com/bitcoinsv/bsvd/chaincfg"
 	"github.com/bitcoinsv/bsvd/txscript"
 	"github.com/bitcoinsv/bsvutil"
+	"github.com/go-resty/resty/v2"
 )
 
 /*
@@ -28,6 +28,7 @@ type P2PPaymentDestinationRequest struct {
 
 // P2PPaymentDestinationResponse is the response frm the request
 type P2PPaymentDestinationResponse struct {
+	StandardResponse
 	Outputs   []*Output `json:"outputs"`   // A list of outputs
 	Reference string    `json:"reference"` // A reference for the payment, created by the receiver of the transaction
 }
@@ -41,60 +42,46 @@ type Output struct {
 
 // GetP2PPaymentDestination will return list of outputs for the P2P transactions to use
 // Specs: https://docs.moneybutton.com/docs/paymail-07-p2p-payment-destination.html
-func GetP2PPaymentDestination(p2pUrl, alias, domain string, senderRequest *P2PPaymentDestinationRequest) (response *P2PPaymentDestinationResponse, err error) {
+func GetP2PPaymentDestination(p2pUrl, alias, domain string, senderRequest *P2PPaymentDestinationRequest, tracing bool) (response *P2PPaymentDestinationResponse, err error) {
 
 	// Set the base url and path (assuming the url is from the GetCapabilities request)
 	// https://<host-discovery-target>/api/rawtx/{alias}@{domain.tld}
 	reqURL := strings.Replace(strings.Replace(p2pUrl, "{alias}", alias, -1), "{domain.tld}", domain, -1)
 
-	// Set post value
-	var jsonValue []byte
-	if jsonValue, err = json.Marshal(senderRequest); err != nil {
+	// Create a Client and start the request
+	client := resty.New().SetTimeout(defaultPostTimeout * time.Second)
+	var resp *resty.Response
+	req := client.R().SetBody(senderRequest).SetHeader("User-Agent", defaultUserAgent)
+	if tracing {
+		req.EnableTrace()
+	}
+	if resp, err = req.Post(reqURL); err != nil {
 		return
 	}
 
-	// Start the request
-	var req *http.Request
-	if req, err = http.NewRequest(http.MethodPost, reqURL, bytes.NewBuffer(jsonValue)); err != nil {
-		return
+	// New struct
+	response = new(P2PPaymentDestinationResponse)
+
+	// Tracing enabled?
+	if tracing {
+		response.Tracing = resp.Request.TraceInfo()
 	}
-
-	// Set the headers (standard user agent so it cannot be blocked)
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("User-Agent", defaultUserAgent)
-
-	// Set the client
-	client := http.Client{
-		Timeout: defaultPostTimeout * time.Second,
-	}
-
-	// Fire the request
-	var resp *http.Response
-	if resp, err = client.Do(req); err != nil {
-		return
-	}
-
-	// Close the body
-	defer func() {
-		_ = resp.Body.Close()
-	}()
 
 	// Test the status code
-	// Only 200 and 304 are accepted
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNotModified {
-
+	response.StatusCode = resp.StatusCode()
+	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusNotModified {
 		// Paymail address not found?
-		if resp.StatusCode == http.StatusNotFound {
+		if response.StatusCode == http.StatusNotFound {
 			err = fmt.Errorf("paymail address not found")
 		} else {
-			err = fmt.Errorf("bad response from paymail provider: %d", resp.StatusCode)
+			err = fmt.Errorf("bad response from paymail provider: %d", response.StatusCode)
 		}
 
 		return
 	}
 
-	// Try and decode the response
-	if err = json.NewDecoder(resp.Body).Decode(&response); err != nil {
+	// Decode the body of the response
+	if err = json.Unmarshal(resp.Body(), &response); err != nil {
 		return
 	}
 

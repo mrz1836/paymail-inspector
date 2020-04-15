@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/go-resty/resty/v2"
 )
 
 /*
@@ -20,6 +22,7 @@ Default:
 
 // VerifyPubKeyResponse is the result returned
 type VerifyPubKeyResponse struct {
+	StandardResponse
 	BsvAlias string `json:"bsvalias"` // Version of the bsvalias
 	Handle   string `json:"handle"`   // The <alias>@<domain>.<tld>
 	Match    bool   `json:"match"`    // If the match was successful or not
@@ -28,46 +31,39 @@ type VerifyPubKeyResponse struct {
 
 // VerifyPubKey will try to match a handle and pubkey
 // Specs: https://bsvalias.org/05-verify-public-key-owner.html
-func VerifyPubKey(verifyUrl, alias, domain, pubKey string) (response *VerifyPubKeyResponse, err error) {
+func VerifyPubKey(verifyUrl, alias, domain, pubKey string, tracing bool) (response *VerifyPubKeyResponse, err error) {
 
 	// Set the base url and path (assuming the url is from the GetCapabilities request)
 	// https://<host-discovery-target>/verifypubkey/{alias}@{domain.tld}/{pubkey}
 	reqURL := strings.Replace(strings.Replace(strings.Replace(verifyUrl, "{pubkey}", pubKey, -1), "{alias}", alias, -1), "{domain.tld}", domain, -1)
 
-	// Start the request
-	var req *http.Request
-	if req, err = http.NewRequest(http.MethodGet, reqURL, nil); err != nil {
+	// Create a Client and start the request
+	client := resty.New().SetTimeout(defaultGetTimeout * time.Second)
+	var resp *resty.Response
+	req := client.R().SetHeader("User-Agent", defaultUserAgent)
+	if tracing {
+		req.EnableTrace()
+	}
+	if resp, err = req.Get(reqURL); err != nil {
 		return
 	}
 
-	// Set the headers (standard user agent so it cannot be blocked)
-	req.Header.Set("User-Agent", defaultUserAgent)
+	// New struct
+	response = new(VerifyPubKeyResponse)
 
-	// Set the client
-	client := http.Client{
-		Timeout: defaultGetTimeout * time.Second,
+	// Tracing enabled?
+	if tracing {
+		response.Tracing = resp.Request.TraceInfo()
 	}
-
-	// Fire the request
-	var resp *http.Response
-	if resp, err = client.Do(req); err != nil {
-		return
-	}
-
-	// Close the body
-	defer func() {
-		_ = resp.Body.Close()
-	}()
 
 	// Test the status code
-	// Only 200 and 304 are accepted
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNotModified {
-		err = fmt.Errorf("bad response from paymail provider: %d", resp.StatusCode)
+	response.StatusCode = resp.StatusCode()
+	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusNotModified {
+		err = fmt.Errorf("bad response from paymail provider: %d", response.StatusCode)
 		return
 	}
-
-	// Try and decode the response
-	if err = json.NewDecoder(resp.Body).Decode(&response); err != nil {
+	// Decode the body of the response
+	if err = json.Unmarshal(resp.Body(), &response); err != nil {
 		return
 	}
 
@@ -85,7 +81,9 @@ func VerifyPubKey(verifyUrl, alias, domain, pubKey string) (response *VerifyPubK
 
 	// Check the PubKey length
 	if len(response.PubKey) == 0 {
-		err = fmt.Errorf("verify response is missing a PubKey value")
+		err = fmt.Errorf("pki response is missing a PubKey value")
+	} else if len(response.PubKey) != PubKeyLength {
+		err = fmt.Errorf("returned pubkey is not the required length of %d, got: %d", PubKeyLength, len(response.PubKey))
 	}
 
 	return
