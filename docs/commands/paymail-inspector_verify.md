@@ -43,7 +43,7 @@ paymail-inspector verify mrz@moneybutton.com 02ead23149a1e33df17325ec7a7ba9e0b20
 
 ```
       --bsvalias string   The bsvalias version (default "1.0")
-      --config string     config file (default is $HOME/.paymail-inspector.yaml)
+      --config string     Config file (default is $HOME/.paymail-inspector.yaml)
       --docs              Generate docs from all commands (./docs/commands)
   -t, --skip-tracing      Turn off request tracing information
 ```
