@@ -17,6 +17,8 @@ Use the [list] argument to show all known BRFC protocols.
 
 Use the [generate] argument with required flags to generate a new BRFC ID.
 
+Use the [search] argument to show any matching BRFCs by either ID, Title or Author.
+
 BRFC (Bitcoin SV Request-For-Comments) Specifications describe functionality across the ecosystem. 
 "bsvalias" protocols and paymail implementations are described across a series of BRFC documents.
 

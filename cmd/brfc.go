@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/mrz1836/paymail-inspector/paymail"
@@ -28,6 +29,8 @@ Use the [list] argument to show all known BRFC protocols.
 
 Use the [generate] argument with required flags to generate a new BRFC ID.
 
+Use the [search] argument to show any matching BRFCs by either ID, Title or Author.
+
 BRFC (Bitcoin SV Request-For-Comments) Specifications describe functionality across the ecosystem. 
 "bsvalias" protocols and paymail implementations are described across a series of BRFC documents.
 
@@ -38,12 +41,10 @@ are defined and discovered during Service Discovery.
 Read more at: `+chalk.Cyan.Color("http://bsvalias.org/01-brfc-specifications.html")),
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
-			return chalker.Error("brfc requires either [list] or [generate]")
-		} else if len(args) > 1 {
-			return chalker.Error("brfc only supports one argument")
+			return chalker.Error("brfc requires either [list] or [generate] or [search]")
 		}
-		if args[0] != "list" && args[0] != "generate" {
-			return chalker.Error("brfc requires either [list] or [generate]")
+		if args[0] != "list" && args[0] != "generate" && args[0] != "search" {
+			return chalker.Error("brfc requires either [list] or [generate] or [search]")
 		}
 		return nil
 	},
@@ -55,6 +56,42 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/01-brfc-specifications.htm
 				chalker.Log(chalker.ERROR, fmt.Sprintf("Error loading BRFC specifications: %s", err.Error()))
 				return
 			}
+		}
+
+		// Search command
+		if args[0] == "search" {
+
+			// Did we find some specifications?
+			if len(paymail.BRFCSpecs) == 0 {
+				chalker.Log(chalker.ERROR, fmt.Sprintf("No existing brfc specs found in: %s", "BRFCSpecs"))
+				return
+			}
+
+			// No second argument?
+			if len(args) == 1 {
+				chalker.Log(chalker.ERROR, fmt.Sprintf("Search requires a second argument: %s", "search term"))
+				return
+			}
+
+			// Basic sanitation
+			searchTerm := strings.TrimSpace(args[1])
+
+			// Loop the list
+			found := 0
+			for _, brfc := range paymail.BRFCSpecs {
+				if simpleSearch(brfc.ID, searchTerm) || simpleSearch(brfc.Title, searchTerm) || simpleSearch(brfc.Author, searchTerm) {
+					showBrfc(brfc)
+					found = found + 1
+				}
+			}
+
+			// Show success message
+			if found > 0 {
+				chalker.Log(chalker.SUCCESS, fmt.Sprintf("Total BRFC specification(s) found: %d searching: %s", found, searchTerm))
+			} else {
+				chalker.Log(chalker.ERROR, fmt.Sprintf("No BRFC specifications found searching for: %s", searchTerm))
+			}
+			return
 		}
 
 		// List command
@@ -157,6 +194,40 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/01-brfc-specifications.htm
 			return
 		}
 	},
+}
+
+func simpleSearch(s, substr string) bool {
+	s, substr = strings.ToUpper(s), strings.ToUpper(substr)
+	return strings.Contains(s, substr)
+}
+
+// showBrfc will show a given brfc
+func showBrfc(brfc *paymail.BRFCSpec) {
+
+	// Header
+	displayHeader(chalker.DEFAULT, fmt.Sprintf("%s", brfc.Title+" v"+brfc.Version))
+
+	// Validate the BRFC ID
+	valid := chalk.Green.Color("(Valid)")
+	if !skipBrfcValidation {
+		if ok, id, err := brfc.Validate(); err != nil {
+			chalker.Log(chalker.ERROR, fmt.Sprintf("Error validating brfc %s: %s", brfc.ID, err.Error()))
+		} else if !ok {
+			valid = chalk.Yellow.Color("(Invalid ID, generator says: " + id + ")")
+		}
+	}
+
+	chalker.Log(chalker.DEFAULT, fmt.Sprintf("ID        : %s %s", chalk.Cyan.Color(brfc.ID), valid))
+
+	if len(brfc.Author) > 0 {
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Author(s) : %s", chalk.Cyan.Color(brfc.Author)))
+	}
+	if len(brfc.Alias) > 0 {
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Alias     : %s", chalk.Cyan.Color(brfc.Alias)))
+	}
+	if len(brfc.URL) > 0 {
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("URL       : %s", chalk.Cyan.Color(brfc.URL)))
+	}
 }
 
 func init() {

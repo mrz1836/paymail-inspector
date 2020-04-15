@@ -28,8 +28,7 @@ var (
 
 // LoadSpecifications will load the known specifications into structs from JSON
 func LoadSpecifications() (err error) {
-	err = json.Unmarshal([]byte(BRFCKnownSpecifications), &BRFCSpecs)
-	if err == nil && len(BRFCSpecs) == 0 {
+	if err = json.Unmarshal([]byte(BRFCKnownSpecifications), &BRFCSpecs); err == nil && len(BRFCSpecs) == 0 {
 		err = fmt.Errorf("error loading BRFC specifications, zero results found")
 	}
 	return

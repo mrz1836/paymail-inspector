@@ -2,16 +2,16 @@
 
 # Paymail Inspector
 
-[![Go](https://img.shields.io/github/go-mod/go-version/mrz1836/paymail-inspector)](https://golang.org/)
-[![Build Status](https://travis-ci.com/mrz1836/paymail-inspector.svg?branch=master&v=2)](https://travis-ci.com/mrz1836/paymail-inspector)
-[![Report](https://goreportcard.com/badge/github.com/mrz1836/paymail-inspector?style=flat&v=2)](https://goreportcard.com/report/github.com/mrz1836/paymail-inspector)
-[![Release](https://img.shields.io/github/release-pre/mrz1836/paymail-inspector.svg?style=flat&v=2)](https://github.com/mrz1836/paymail-inspector/releases)
+[![Go](https://img.shields.io/github/go-mod/go-version/mrz1836/paymail-inspector&v=3)](https://golang.org/)
+[![Build Status](https://travis-ci.com/mrz1836/paymail-inspector.svg?branch=master&v=3)](https://travis-ci.com/mrz1836/paymail-inspector)
+[![Report](https://goreportcard.com/badge/github.com/mrz1836/paymail-inspector?style=flat&v=3)](https://goreportcard.com/report/github.com/mrz1836/paymail-inspector)
+[![Release](https://img.shields.io/github/release-pre/mrz1836/paymail-inspector.svg?style=flat&v=3)](https://github.com/mrz1836/paymail-inspector/releases)
 [![standard-readme compliant](https://img.shields.io/badge/standard--readme-OK-green.svg?style=flat)](https://github.com/RichardLitt/standard-readme)
 [![GoDoc](https://godoc.org/github.com/mrz1836/paymail-inspector?status.svg&style=flat)](https://pkg.go.dev/github.com/mrz1836/paymail-inspector?tab=subdirectories)
 
 > **paymail-inspector** is a CLI tool for inspecting, validating or resolving paymail addresses and domains
 
-<img src=".github/IMAGES/paymail-inspector.gif?raw=true&v=2" alt="Paymail Commands">
+<img src=".github/IMAGES/paymail-inspector.gif?raw=true&v=3" alt="Paymail Commands">
 
 ## Table of Contents
 - [Installation](#installation)
@@ -56,6 +56,11 @@ $ paymail-inspector brfc list
 > Generate a new `BRFC ID` for a new specification ([view example](docs/examples.md#generate-new-brfc-id))
 ```bash
 $ paymail-inspector brfc generate --title "BRFC Specifications" --author "andy (nChain)" --version 1
+```
+
+> Search all brfc specifications (id, title, author) ([view example](docs/examples.md#search-brfc-specifications))
+```bash
+$ paymail-inspector brfc search nChain
 ```
 
 ___
