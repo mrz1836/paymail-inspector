@@ -3,12 +3,19 @@ COVER=go tool cover
 ## Default Repo Domain
 GIT_DOMAIN=github.com
 
+## Custom application binary name
+CUSTOM_BINARY_NAME=paymail
+
 ## Set the Github Token
 #GITHUB_TOKEN=<your_token>
 
 ## Automatically detect the repo owner and repo name
 REPO_NAME=$(shell basename `git rev-parse --show-toplevel`)
 REPO_OWNER=$(shell git config --get remote.origin.url | sed 's/git@$(GIT_DOMAIN)://g' | sed 's/\/$(REPO_NAME).git//g')
+
+ifeq ($(CUSTOM_BINARY_NAME),)
+CUSTOM_BINARY_NAME := $(REPO_NAME)
+endif
 
 ## Symlink into GOPATH
 BUILD_DIR=${GOPATH}/src/${GIT_DOMAIN}/${REPO_OWNER}/${REPO_NAME}
@@ -17,9 +24,9 @@ BUILD_DIR_LINK=$(shell readlink ${BUILD_DIR})
 DISTRIBUTIONS_DIR=./dist
 
 ## Set the binary release names
-DARWIN=$(REPO_NAME)-darwin
-LINUX=$(REPO_NAME)-linux
-WINDOWS=$(REPO_NAME)-windows.exe
+DARWIN=$(CUSTOM_BINARY_NAME)-darwin
+LINUX=$(CUSTOM_BINARY_NAME)-linux
+WINDOWS=$(CUSTOM_BINARY_NAME)-windows.exe
 
 ## Set the version(s) (injected into binary)
 VERSION=$(shell git describe --tags --always --long --dirty)
@@ -33,7 +40,7 @@ bench:  ## Run all benchmarks in the Go application
 	go test -bench ./... -benchmem -v
 
 build-go:  ## Build the Go application (locally)
-	go build -o bin/$(REPO_NAME)
+	go build -o bin/$(CUSTOM_BINARY_NAME)
 
 build: darwin linux windows ## Build all binaries (darwin, linux, windows)
 	@echo version: $(VERSION_SHORT)
@@ -52,7 +59,17 @@ darwin: $(DARWIN) ## Build for Darwin (macOS amd64)
 
 gen-docs: ## Generate documentation from all available commands (fresh install)
 	make install
-	$(REPO_NAME) --docs
+	$(CUSTOM_BINARY_NAME) --docs
+
+gif-render: ## Render gifs in .github dir (find/replace text etc)
+	test $(name)
+	find . -name 'gif.yml' -print0 | xargs -0 sed -i "" "s/Terminalizer/null/g"
+	find . -name 'gif.yml' -print0 | xargs -0 sed -i "" "s/MrZs-MacBook-Pro:paymail-inspector MrZ//g"
+	find . -name 'gif.yml' -print0 | xargs -0 sed -i "" "s/floating/solid/g"
+	find . -name 'gif.yml' -print0 | xargs -0 sed -i "" "s/logout//g"
+	terminalizer render gif -o $(name)
+	cp -f *.gif .github/IMAGES/
+	rm -rf *.gif && rm -rf gif.yml
 
 godocs: ## Sync the latest tag with GoDocs
 	curl https://proxy.golang.org/$(GIT_DOMAIN)/$(REPO_OWNER)/$(REPO_NAME)/@v/$(VERSION_SHORT).info
@@ -61,6 +78,9 @@ help: ## Show all make commands available
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 install: ## Install the application
+	go build -o $$GOPATH/bin/$(CUSTOM_BINARY_NAME)
+
+install-go: ## Install the application (Using Native Go)
 	go install $(GIT_DOMAIN)/$(REPO_OWNER)/$(REPO_NAME)
 
 link:
@@ -121,6 +141,7 @@ test-short: ## Runs vet, lint and tests (excludes integration tests)
 uninstall: ## Uninstall the application (and remove files)
 	go clean -i $(GIT_DOMAIN)/$(REPO_OWNER)/$(REPO_NAME)
 	rm -rf $$GOPATH/src/$(GIT_DOMAIN)/$(REPO_OWNER)/$(REPO_NAME)
+	rm -rf $$GOPATH/bin/$(CUSTOM_BINARY_NAME)
 
 update:  ## Update all project dependencies
 	go get -u ./...

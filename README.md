@@ -1,17 +1,15 @@
-<img src=".github/IMAGES/paymail-inspector.png" height="250" alt="Paymail Inspector">
-
 # Paymail Inspector
 
-[![Go](https://img.shields.io/github/go-mod/go-version/mrz1836/paymail-inspector?v=3)](https://golang.org/)
-[![Build Status](https://travis-ci.com/mrz1836/paymail-inspector.svg?branch=master&v=3)](https://travis-ci.com/mrz1836/paymail-inspector)
-[![Report](https://goreportcard.com/badge/github.com/mrz1836/paymail-inspector?style=flat&v=3)](https://goreportcard.com/report/github.com/mrz1836/paymail-inspector)
-[![Release](https://img.shields.io/github/release-pre/mrz1836/paymail-inspector.svg?style=flat&v=3)](https://github.com/mrz1836/paymail-inspector/releases)
+[![Go](https://img.shields.io/github/go-mod/go-version/mrz1836/paymail-inspector?v=4)](https://golang.org/)
+[![Build Status](https://travis-ci.com/mrz1836/paymail-inspector.svg?branch=master&v=4)](https://travis-ci.com/mrz1836/paymail-inspector)
+[![Report](https://goreportcard.com/badge/github.com/mrz1836/paymail-inspector?style=flat&v=4)](https://goreportcard.com/report/github.com/mrz1836/paymail-inspector)
+[![Release](https://img.shields.io/github/release-pre/mrz1836/paymail-inspector.svg?style=flat&v=4)](https://github.com/mrz1836/paymail-inspector/releases)
 [![standard-readme compliant](https://img.shields.io/badge/standard--readme-OK-green.svg?style=flat)](https://github.com/RichardLitt/standard-readme)
 [![GoDoc](https://godoc.org/github.com/mrz1836/paymail-inspector?status.svg&style=flat)](https://pkg.go.dev/github.com/mrz1836/paymail-inspector?tab=subdirectories)
 
-> **paymail-inspector** is a CLI tool for inspecting, validating or resolving paymail addresses and domains
+> **paymail-inspector** is a CLI app for interacting with paymail service providers
 
-<img src=".github/IMAGES/paymail-inspector.gif?raw=true&v=3" alt="Paymail Commands">
+<img src=".github/IMAGES/paymail-inspector.gif?raw=true&v=4" alt="Paymail Commands">
 
 ## Table of Contents
 - [Installation](#installation)
@@ -26,23 +24,24 @@
 
 ## Installation
 
-**Run via [brew](https://github.com/mrz1836/homebrew-paymail-inspector)**
+**Install with [brew](https://github.com/mrz1836/homebrew-paymail-inspector)**
 ```bash
 $ brew tap mrz1836/paymail-inspector && brew install paymail-inspector
-$ paymail-inspector -h
+$ paymail
 ```
 
-**Run via [Go](https://formulae.brew.sh/formula/go)**
-```bash
-$ go get -u github.com/mrz1836/paymail-inspector && go install github.com/mrz1836/paymail-inspector
-$ paymail-inspector -h
-```
-
-**Run via [compiled binary](https://github.com/mrz1836/paymail-inspector/releases)** on Linux, Mac or Windows _(Mac example)_
+**Install using a [compiled binary](https://github.com/mrz1836/paymail-inspector/releases)** on Linux, Mac or Windows _(Mac example)_
 ```bash
 $ curl -LkSs https://github.com/mrz1836/paymail-inspector/releases/download/v0.0.20/paymail-inspector_macOS_64-bit.tar.gz -o app.tar.gz
-$ tar -zxf app.tar.gz
-$ ./app/paymail-inspector -h
+$ tar -zxf app.tar.gz && cd ./app/
+$ paymail
+```
+
+**Install with [go](https://formulae.brew.sh/formula/go)**
+```bash
+$ go get -u github.com/mrz1836/paymail-inspector
+$ cd /$GOPATH/src/github.com/mrz1836/paymail-inspector && make install
+$ paymail
 ```
 
 ## Commands
@@ -50,17 +49,17 @@ $ ./app/paymail-inspector -h
 ### `brfc`
 > List all known brfc specifications ([view example](docs/examples.md#list-brfc-specifications))
 ```bash
-$ paymail-inspector brfc list
+$ paymail brfc list
 ```
 
 > Generate a new `BRFC ID` for a new specification ([view example](docs/examples.md#generate-new-brfc-id))
 ```bash
-$ paymail-inspector brfc generate --title "BRFC Specifications" --author "andy (nChain)" --version 1
+$ paymail brfc generate --title "BRFC Specifications" --author "andy (nChain)" --version 1
 ```
 
 > Search all brfc specifications (id, title, author) ([view example](docs/examples.md#search-brfc-specifications))
 ```bash
-$ paymail-inspector brfc search nChain
+$ paymail brfc search nChain
 ```
 
 ___
@@ -68,7 +67,7 @@ ___
 ### `capabilities`
 > Lists the available capabilities of the paymail service ([view example](docs/examples.md#get-capabilities-by-domain))
 ```bash
-$ paymail-inspector capabilities moneybutton.com
+$ paymail capabilities moneybutton.com
 ```
 
 ___
@@ -76,7 +75,7 @@ ___
 ### `p2p`
 > Starts a P2P payment request and returns (n) outputs of (`script`,`satoshis`,`address`) ([view example](docs/examples.md#start-p2p-payment-request-by-paymail))
 ```bash
-$ paymail-inspector p2p mrz@moneybutton.com
+$ paymail p2p mrz@moneybutton.com
 ```
 
 ___
@@ -84,7 +83,7 @@ ___
 ### `resolve`
 > Returns the `pubkey`, `output script` and `address` for a given paymail address ([view example](docs/examples.md#resolve-paymail-address-by-paymail))
 ```bash
-$ paymail-inspector resolve mrz@moneybutton.com
+$ paymail resolve mrz@moneybutton.com
 ```
 
 ___
@@ -93,7 +92,7 @@ ___
 ### `validate`
 > Runs several validations on the paymail service for DNSSEC, SSL, SRV and required capabilities ([view example](docs/examples.md#validate-paymail-setup-by-paymail-or-domain))
 ```bash
-$ paymail-inspector validate moneybutton.com
+$ paymail validate moneybutton.com
 ```
 
 ___
@@ -102,7 +101,7 @@ ___
 ### `verify`
 > Verifies if a paymail is associated to a pubkey ([view example](docs/examples.md#verify-public-key-owner))
 ```bash
-$ paymail-inspector verify mrz@moneybutton.com 02ead23149a1e33df17325ec7a7ba9e0b20c674c57c630f527d69b866aa9b65b10
+$ paymail verify mrz@moneybutton.com 02ead23149a1e33df17325ec7a7ba9e0b20c674c57c630f527d69b866aa9b65b10
 ```
 
 ## Documentation
@@ -187,9 +186,11 @@ clean-mods                     Remove all the Go mod cache
 coverage                       Shows the test coverage
 darwin                         Build for Darwin (macOS amd64)
 gen-docs                       Generate documentation from all available commands (fresh install)
+gif-render                     Render gifs in .github dir (find/replace text etc)
 godocs                         Sync the latest tag with GoDocs
 help                           Show all make commands available
 install                        Install the application
+install-go                     Install the application (Using Native Go)
 lint                           Run the Go lint application
 linux                          Build for Linux (amd64)
 release                        Full production release (creates release in Github)
