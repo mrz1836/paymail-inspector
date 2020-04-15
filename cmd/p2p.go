@@ -36,7 +36,7 @@ after basic address resolution is deprecated.
 Read more at: `+chalk.Cyan.Color("https://docs.moneybutton.com/docs/paymail-07-p2p-payment-destination.html")),
 	Aliases:    []string{"send"},
 	SuggestFor: []string{"sending"},
-	Example:    configDefault + " p2p this@address.com",
+	Example:    applicationName + " p2p mrz@" + defaultDomainName,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return chalker.Error("p2p requires a paymail address")

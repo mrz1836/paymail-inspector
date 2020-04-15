@@ -34,7 +34,7 @@ dictates that a machine-readable document is placed in a predictable location on
 
 Read more at: `+chalk.Cyan.Color("http://bsvalias.org/02-02-capability-discovery.html")),
 	Aliases: []string{"c", "abilities", "inspect", "lookup"},
-	Example: configDefault + " capabilities " + defaultDomainName,
+	Example: applicationName + " capabilities " + defaultDomainName,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return chalker.Error("capabilities requires either a domain or paymail address")

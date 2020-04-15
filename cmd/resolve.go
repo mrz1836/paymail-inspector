@@ -32,7 +32,7 @@ the receiver and request a payment destination from the receiver's paymail servi
 Read more at: `+chalk.Cyan.Color("http://bsvalias.org/04-01-basic-address-resolution.html")),
 	Aliases:    []string{"r", "resolution"},
 	SuggestFor: []string{"address", "destination", "payment", "addressing"},
-	Example:    configDefault + " resolve this@address.com",
+	Example:    applicationName + " resolve mrz@" + defaultDomainName,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return chalker.Error("resolve requires either a paymail address")

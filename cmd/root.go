@@ -45,17 +45,14 @@ var (
 
 // Defaults for the application
 const (
-	configDefault     = "paymail-inspector" // Config file and application name
+	applicationName   = "paymail"           // Application name (binary)
+	configFileDefault = "paymail-inspector" // Config file and application name
 	defaultDomainName = "moneybutton.com"   // Used in examples
 	defaultNameServer = "8.8.8.8"           // Default DNS NameServer
 	docsLocation      = "docs/commands"     // Default location for command documentation
-)
-
-// These are keys for known flags that are used in the configuration
-const (
-	flagBsvAlias     = "bsvalias"
-	flagSenderHandle = "sender-handle"
-	flagSenderName   = "sender-name"
+	flagBsvAlias      = "bsvalias"          // Flag for a known, common key
+	flagSenderHandle  = "sender-handle"
+	flagSenderName    = "sender-name"
 )
 
 // Version is set manually (also make:build overwrites this value from Github's latest tag)
@@ -64,9 +61,9 @@ var Version = "v0.0.20"
 // rootCmd represents the base command when called without any sub-commands
 var rootCmd = &cobra.Command{
 	DisableAutoGenTag: true,
-	Use:               configDefault,
-	Short:             "Inspect, validate or resolve paymail domains and addresses",
-	Example:           configDefault + " -h",
+	Use:               applicationName,
+	Short:             "Inspect, validate domains or resolve paymail addresses",
+	Example:           applicationName + " -h",
 	Long: chalk.Green.Color(`
 __________                             .__.__    .___                                     __                
 \______   \_____  ___.__. _____ _____  |__|  |   |   | ____   ____________   ____   _____/  |_  ___________ 
@@ -74,9 +71,9 @@ __________                             .__.__    .___                           
  |    |     / __ \\___  |  Y Y  \/ __ \|  |  |__ |   |   |  \\___ \ |  |_> >  ___/\  \___|  | (  <_> )  | \/
  |____|    (____  / ____|__|_|  (____  /__|____/ |___|___|  /____  >|   __/ \___  >\___  >__|  \____/|__|   
                 \/\/          \/     \/                   \/     \/ |__|        \/     \/     `+Version) + `
-` + chalk.Yellow.Color("Author: MrZ © 2020 github.com/mrz1836/"+configDefault) + `
+` + chalk.Yellow.Color("Author: MrZ © 2020 github.com/mrz1836/"+configFileDefault) + `
 
-This CLI tool can help you inspect, validate or resolve a paymail domain/address.
+This CLI app is used for interacting with paymail service providers.
 
 Help contribute via Github!
 `,
@@ -119,7 +116,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	// Add config option
-	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "Config file (default is $HOME/."+configDefault+".yaml)")
+	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "Config file (default is $HOME/."+configFileDefault+".yaml)")
 
 	// Add document generation for all commands
 	rootCmd.PersistentFlags().BoolVar(&generateDocs, "docs", false, "Generate docs from all commands (./"+docsLocation+")")
@@ -144,22 +141,22 @@ func er(err error) {
 func initConfig() {
 	if configFile != "" {
 
-		// Use config file from the flag.
+		// Use config file from the flag
 		viper.SetConfigFile(configFile)
 	} else {
 
-		// Find home directory.
+		// Find home directory
 		home, err := homedir.Dir()
 		er(err)
 
-		// Search config in home directory with name "."+configDefault (without extension).
+		// Search config in home directory with name "." (without extension)
 		viper.AddConfigPath(home)
-		viper.SetConfigName("." + configDefault)
+		viper.SetConfigName("." + configFileDefault)
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
 
-	// If a config file is found, read it in.
+	// If a config file is found, read it in
 	if err := viper.ReadInConfig(); err == nil {
 		chalker.Log(chalker.INFO, fmt.Sprintf("...loaded config file: %s", viper.ConfigFileUsed()))
 	}

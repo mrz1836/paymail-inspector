@@ -15,9 +15,9 @@ import (
 var brfcCmd = &cobra.Command{
 	Use:   "brfc",
 	Short: "List all specs, search by keyword, or generate a new BRFC ID",
-	Example: configDefault + ` brfc list
-` + configDefault + ` brfc search nChain
-` + configDefault + ` brfc generate --title "BRFC Specifications" --author "andy (nChain)" --version 1`,
+	Example: applicationName + ` brfc list
+` + applicationName + ` brfc search nChain
+` + applicationName + ` brfc generate --title "BRFC Specifications" --author "andy (nChain)" --version 1`,
 	Long: chalk.Green.Color(`
 ___.           _____       
 \_ |__________/ ____\____  
