@@ -22,7 +22,11 @@ ___
 ```bash
 $ paymail brfc list
 ```
+<details>
+<summary><strong><code>Show Example</code></strong></summary>
+
 <img src="../.github/IMAGES/brfc-list-command.gif?raw=true&v=5" alt="BRFC List Command">
+</details>
 
 Custom flags for the brfc:list command [(view command specs)](commands/paymail_brfc.md)
 ```
