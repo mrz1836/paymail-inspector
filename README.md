@@ -68,7 +68,7 @@ ___
 ### `capabilities`
 > Lists the available capabilities of the paymail service ([view example](docs/examples.md#get-capabilities-by-domain))
 ```bash
-$ paymail-inspector capabilities simply.cash
+$ paymail-inspector capabilities moneybutton.com
 ```
 
 ___
@@ -76,7 +76,7 @@ ___
 ### `p2p`
 > Starts a P2P payment request and returns (n) outputs of (`script`,`satoshis`,`address`) ([view example](docs/examples.md#start-p2p-payment-request-by-paymail))
 ```bash
-$ paymail-inspector p2p mrz@handcash.io
+$ paymail-inspector p2p mrz@moneybutton.com
 ```
 
 ___
@@ -84,7 +84,7 @@ ___
 ### `resolve`
 > Returns the `pubkey`, `output script` and `address` for a given paymail address ([view example](docs/examples.md#resolve-paymail-address-by-paymail))
 ```bash
-$ paymail-inspector resolve mrz@simply.cash
+$ paymail-inspector resolve mrz@moneybutton.com
 ```
 
 ___
@@ -93,7 +93,7 @@ ___
 ### `validate`
 > Runs several validations on the paymail service for DNSSEC, SSL, SRV and required capabilities ([view example](docs/examples.md#validate-paymail-setup-by-paymail-or-domain))
 ```bash
-$ paymail-inspector validate simply.cash
+$ paymail-inspector validate moneybutton.com
 ```
 
 ___
@@ -102,7 +102,7 @@ ___
 ### `verify`
 > Verifies if a paymail is associated to a pubkey ([view example](docs/examples.md#verify-public-key-owner))
 ```bash
-$ paymail-inspector verify mrz@simply.cash 022d613a707aeb7b0e2ed73157d401d7157bff7b6c692733caa656e8e4ed5570ec
+$ paymail-inspector verify mrz@moneybutton.com 02ead23149a1e33df17325ec7a7ba9e0b20c674c57c630f527d69b866aa9b65b10
 ```
 
 ## Documentation

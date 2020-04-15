@@ -46,7 +46,7 @@ var (
 // Defaults for the application
 const (
 	configDefault     = "paymail-inspector" // Config file and application name
-	defaultDomainName = "simply.cash"       // Used in examples
+	defaultDomainName = "moneybutton.com"   // Used in examples
 	defaultNameServer = "8.8.8.8"           // Default DNS NameServer
 	docsLocation      = "docs/commands"     // Default location for command documentation
 )

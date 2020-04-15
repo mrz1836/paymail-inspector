@@ -30,7 +30,7 @@ paymail-inspector capabilities [flags]
 ### Examples
 
 ```
-paymail-inspector capabilities simply.cash
+paymail-inspector capabilities moneybutton.com
 ```
 
 ### Options

@@ -38,7 +38,7 @@ paymail-inspector -h
 
 ### SEE ALSO
 
-* [paymail-inspector brfc](paymail-inspector_brfc.md)	 - List all known BRFC specs or Generate a new BRFC number
+* [paymail-inspector brfc](paymail-inspector_brfc.md)	 - List all specs, search by keyword, or generate a new BRFC ID
 * [paymail-inspector capabilities](paymail-inspector_capabilities.md)	 - Get the capabilities of the paymail domain
 * [paymail-inspector p2p](paymail-inspector_p2p.md)	 - Starts a new P2P payment request
 * [paymail-inspector resolve](paymail-inspector_resolve.md)	 - Resolves a paymail address

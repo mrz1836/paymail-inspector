@@ -79,9 +79,9 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/02-02-capability-discovery
 				chalker.Log(chalker.INFO, fmt.Sprintf("%s: %-28v %s: %s", chalk.White.Color("Capability"), chalk.Cyan.Color(key), chalk.White.Color("Target"), chalk.Yellow.Color(fmt.Sprintf("%s", val))))
 			} else if valType == "bool" { // See: http://bsvalias.org/04-02-sender-validation.html
 				if val.(bool) {
-					chalker.Log(chalker.INFO, fmt.Sprintf("%s: %-28v is      %s", chalk.White.Color("Capability"), chalk.Cyan.Color(key), chalk.Green.Color("Enabled")))
+					chalker.Log(chalker.INFO, fmt.Sprintf("%s: %-28v Is    : %s", chalk.White.Color("Capability"), chalk.Cyan.Color(key), chalk.Green.Color("Enabled")))
 				} else {
-					chalker.Log(chalker.INFO, fmt.Sprintf("%s: %-28v is      %s", chalk.White.Color("Capability"), chalk.Cyan.Color(key), chalk.Magenta.Color("Disabled")))
+					chalker.Log(chalker.INFO, fmt.Sprintf("%s: %-28v Is    : %s", chalk.White.Color("Capability"), chalk.Cyan.Color(key), chalk.Magenta.Color("Disabled")))
 				}
 			}
 		}

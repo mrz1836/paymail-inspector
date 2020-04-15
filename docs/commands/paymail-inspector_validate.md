@@ -30,7 +30,7 @@ paymail-inspector validate [flags]
 ### Examples
 
 ```
-paymail-inspector validate simply.cash
+paymail-inspector validate moneybutton.com
 ```
 
 ### Options

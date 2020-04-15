@@ -64,7 +64,7 @@ ___
 
 #### Get Capabilities (by Domain)
 ```bash
-$ paymail-inspector capabilities simply.cash
+$ paymail-inspector capabilities moneybutton.com
 ```
 <img src="../.github/IMAGES/capabilities-command.gif?raw=true&v=3" alt="Capabilities Command">
 
@@ -91,7 +91,7 @@ ___
 
 #### Resolve Paymail Address (by Paymail)
 ```bash
-$ paymail-inspector resolve mrz@simply.cash
+$ paymail-inspector resolve mrz@moneybutton.com
 ```
 <img src="../.github/IMAGES/resolve-command.gif?raw=true&v=3" alt="Resolve Command">
 
@@ -111,7 +111,7 @@ ___
 
 #### Validate Paymail Setup (by Paymail or Domain)
 ```bash
-$ paymail-inspector validate simply.cash
+$ paymail-inspector validate moneybutton.com
 ```
 <img src="../.github/IMAGES/validate-command.gif?raw=true&v=3" alt="Validate Command">
 
@@ -133,7 +133,7 @@ ___
 
 #### Verify Public Key Owner
 ```bash
-$ paymail-inspector verify mrz@simply.cash 022d613a707aeb7b0e2ed73157d401d7157bff7b6c692733caa656e8e4ed5570ec
+$ paymail-inspector verify mrz@moneybutton.com 02ead23149a1e33df17325ec7a7ba9e0b20c674c57c630f527d69b866aa9b65b10
 ```
 <img src="../.github/IMAGES/verify-command.gif?raw=true&v=3" alt="Verify Command">
 

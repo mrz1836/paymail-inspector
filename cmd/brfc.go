@@ -14,8 +14,9 @@ import (
 // http://bsvalias.org/01-brfc-specifications.html
 var brfcCmd = &cobra.Command{
 	Use:   "brfc",
-	Short: "List all known BRFC specs or Generate a new BRFC number",
+	Short: "List all specs, search by keyword, or generate a new BRFC ID",
 	Example: configDefault + ` brfc list
+` + configDefault + ` brfc search nChain
 ` + configDefault + ` brfc generate --title "BRFC Specifications" --author "andy (nChain)" --version 1`,
 	Long: chalk.Green.Color(`
 ___.           _____       

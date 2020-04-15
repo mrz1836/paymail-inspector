@@ -33,7 +33,7 @@ the verifier doesn't know if the public key actually belongs to the right user.
 Read more at: `+chalk.Cyan.Color("http://bsvalias.org/05-verify-public-key-owner.html")),
 	Aliases:    []string{"verification"},
 	SuggestFor: []string{"pubkey"},
-	Example:    configDefault + " verify mrz@" + defaultDomainName + " 022d613a707aeb7b0e2ed73157d401d7157bff7b6c692733caa656e8e4ed5570ec",
+	Example:    configDefault + " verify mrz@" + defaultDomainName + " 02ead23149a1e33df17325ec7a7ba9e0b20c674c57c630f527d69b866aa9b65b10",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 2 {
 			return chalker.Error("verify requires a paymail address AND pubkey")

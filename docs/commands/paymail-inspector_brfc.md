@@ -1,6 +1,6 @@
 ## paymail-inspector brfc
 
-List all known BRFC specs or Generate a new BRFC number
+List all specs, search by keyword, or generate a new BRFC ID
 
 ### Synopsis
 
@@ -36,6 +36,7 @@ paymail-inspector brfc [flags]
 
 ```
 paymail-inspector brfc list
+paymail-inspector brfc search nChain
 paymail-inspector brfc generate --title "BRFC Specifications" --author "andy (nChain)" --version 1
 ```
 
