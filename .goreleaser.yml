@@ -22,6 +22,7 @@ builds:
   - env:
     - CGO_ENABLED=0
     - GO111MODULE=on
+    binary: "paymail"
     goarch:
     - amd64
     - arm64
@@ -73,9 +74,9 @@ brews:
       See the Github repo for more information
     homepage: https://github.com/mrz1836/paymail-inspector
     description: &description |
-      CLI tool that inspects, validates or resolves any paymail address or domain (and more!)
+      CLI app for interacting with paymail service providers
     install: |
-      bin.install "{{ .ProjectName }}"
+      bin.install "paymail"
     test: |
-      system "#{bin}/{{ .ProjectName }}", "--version"
-      system "#{bin}/{{ .ProjectName }}", "-h"
+      system "#{bin}/paymail", "--version"
+      system "#{bin}/paymail", "-h"
