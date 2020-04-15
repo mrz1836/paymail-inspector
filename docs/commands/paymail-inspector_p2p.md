@@ -1,6 +1,6 @@
 ## paymail-inspector p2p
 
-Starts a new p2p payment request
+Starts a new P2P payment request
 
 ### Synopsis
 
@@ -13,7 +13,7 @@ ______ \_____  \______
 |__|           \/__|
 ```
 
-This command will start a new p2p request with the receiver and optional amount expected (in Satoshis).
+This command will start a new P2P request with the receiver and optional amount expected (in Satoshis).
 
 This protocol is an alternative protocol to basic address resolution. 
 Instead of returning one address, it returns a list of outputs with a reference number. 
@@ -45,6 +45,7 @@ paymail-inspector p2p this@address.com
       --bsvalias string   The bsvalias version (default "1.0")
       --config string     config file (default is $HOME/.paymail-inspector.yaml)
       --docs              Generate docs from all commands (./docs/commands)
+  -t, --skip-tracing      Turn off request tracing information
 ```
 
 ### SEE ALSO

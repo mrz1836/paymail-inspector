@@ -45,6 +45,7 @@ paymail-inspector verify mrz@simply.cash 022d613a707aeb7b0e2ed73157d401d7157bff7
       --bsvalias string   The bsvalias version (default "1.0")
       --config string     config file (default is $HOME/.paymail-inspector.yaml)
       --docs              Generate docs from all commands (./docs/commands)
+  -t, --skip-tracing      Turn off request tracing information
 ```
 
 ### SEE ALSO
