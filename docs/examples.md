@@ -46,6 +46,26 @@ $ paymail brfc generate --title "BRFC Specifications" --author "andy (nChain)" -
 <img src="../.github/IMAGES/brfc-generate-command.gif?raw=true&v=5" alt="BRFC Generate Command">
 </details>
 
+<details>
+<summary><strong><code>Test Cases</code></strong></summary>
+
+Expected ID: `57dd1f54fc67`
+```bash
+$ paymail brfc generate --title "BRFC Specifications" --author "andy (nChain)" --version 1
+```
+
+Expected ID: `74524c4d6274`
+```bash
+$ paymail brfc generate --title "bsvalias Payment Addressing (PayTo Protocol Prefix)" --author "andy (nChain)" --version 1
+```
+
+Expected ID: `0036f9b8860f`
+```bash
+$ paymail brfc generate --title "bsvalias Integration with Simplified Payment Protocol" --author "andy (nChain)" --version 1
+```
+
+</details>
+
 Custom flags for the brfc:generate command [(view command specs)](commands/paymail_brfc.md)
 ```
       --author string     Author(s) new BRFC specification
