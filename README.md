@@ -34,12 +34,12 @@ $ paymail
 ```bash
 $ curl -LkSs https://github.com/mrz1836/paymail-inspector/releases/download/v0.1.0/paymail-inspector_macOS_64-bit.tar.gz -o app.tar.gz
 $ tar -zxf app.tar.gz && cd ./app/
-$ paymail
+$ ./paymail
 ```
 
 **Install with [go](https://formulae.brew.sh/formula/go)**
 ```bash
-$ go get -u github.com/mrz1836/paymail-inspector
+$ go get github.com/mrz1836/paymail-inspector
 $ cd /$GOPATH/src/github.com/mrz1836/paymail-inspector && make install
 $ paymail
 ```
