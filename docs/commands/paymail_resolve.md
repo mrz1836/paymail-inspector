@@ -1,4 +1,4 @@
-## paymail-inspector resolve
+## paymail resolve
 
 Resolves a paymail address
 
@@ -22,13 +22,13 @@ the receiver and request a payment destination from the receiver's paymail servi
 Read more at: http://bsvalias.org/04-01-basic-address-resolution.html
 
 ```
-paymail-inspector resolve [flags]
+paymail resolve [flags]
 ```
 
 ### Examples
 
 ```
-paymail-inspector resolve this@address.com
+paymail resolve mrz@moneybutton.com
 ```
 
 ### Options
@@ -55,5 +55,5 @@ paymail-inspector resolve this@address.com
 
 ### SEE ALSO
 
-* [paymail-inspector](paymail-inspector.md)	 - Inspect, validate or resolve paymail domains and addresses
+* [paymail](paymail.md)	 - Inspect, validate domains or resolve paymail addresses
 

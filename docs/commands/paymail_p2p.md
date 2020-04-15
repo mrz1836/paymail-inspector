@@ -1,4 +1,4 @@
-## paymail-inspector p2p
+## paymail p2p
 
 Starts a new P2P payment request
 
@@ -23,13 +23,13 @@ after basic address resolution is deprecated.
 Read more at: https://docs.moneybutton.com/docs/paymail-07-p2p-payment-destination.html
 
 ```
-paymail-inspector p2p [flags]
+paymail p2p [flags]
 ```
 
 ### Examples
 
 ```
-paymail-inspector p2p this@address.com
+paymail p2p mrz@moneybutton.com
 ```
 
 ### Options
@@ -50,5 +50,5 @@ paymail-inspector p2p this@address.com
 
 ### SEE ALSO
 
-* [paymail-inspector](paymail-inspector.md)	 - Inspect, validate or resolve paymail domains and addresses
+* [paymail](paymail.md)	 - Inspect, validate domains or resolve paymail addresses
 

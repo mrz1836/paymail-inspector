@@ -1,4 +1,4 @@
-## paymail-inspector capabilities
+## paymail capabilities
 
 Get the capabilities of the paymail domain
 
@@ -24,13 +24,13 @@ dictates that a machine-readable document is placed in a predictable location on
 Read more at: http://bsvalias.org/02-02-capability-discovery.html
 
 ```
-paymail-inspector capabilities [flags]
+paymail capabilities [flags]
 ```
 
 ### Examples
 
 ```
-paymail-inspector capabilities moneybutton.com
+paymail capabilities moneybutton.com
 ```
 
 ### Options
@@ -50,5 +50,5 @@ paymail-inspector capabilities moneybutton.com
 
 ### SEE ALSO
 
-* [paymail-inspector](paymail-inspector.md)	 - Inspect, validate or resolve paymail domains and addresses
+* [paymail](paymail.md)	 - Inspect, validate domains or resolve paymail addresses
 

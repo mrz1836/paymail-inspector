@@ -1,6 +1,6 @@
-## paymail-inspector
+## paymail
 
-Inspect, validate or resolve paymail domains and addresses
+Inspect, validate domains or resolve paymail addresses
 
 ### Synopsis
 
@@ -14,7 +14,7 @@ __________                             .__.__    .___                           
 ```
 Author: MrZ © 2020 github.com/mrz1836/paymail-inspector
 
-This CLI tool can help you inspect, validate or resolve a paymail domain/address.
+This CLI app is used for interacting with paymail service providers.
 
 Help contribute via Github!
 
@@ -22,7 +22,7 @@ Help contribute via Github!
 ### Examples
 
 ```
-paymail-inspector -h
+paymail -h
 ```
 
 ### Options
@@ -31,17 +31,17 @@ paymail-inspector -h
       --bsvalias string   The bsvalias version (default "1.0")
       --config string     Config file (default is $HOME/.paymail-inspector.yaml)
       --docs              Generate docs from all commands (./docs/commands)
-  -h, --help              help for paymail-inspector
+  -h, --help              help for paymail
   -t, --skip-tracing      Turn off request tracing information
-  -v, --version           version for paymail-inspector
+  -v, --version           version for paymail
 ```
 
 ### SEE ALSO
 
-* [paymail-inspector brfc](paymail-inspector_brfc.md)	 - List all specs, search by keyword, or generate a new BRFC ID
-* [paymail-inspector capabilities](paymail-inspector_capabilities.md)	 - Get the capabilities of the paymail domain
-* [paymail-inspector p2p](paymail-inspector_p2p.md)	 - Starts a new P2P payment request
-* [paymail-inspector resolve](paymail-inspector_resolve.md)	 - Resolves a paymail address
-* [paymail-inspector validate](paymail-inspector_validate.md)	 - Validate a paymail address or domain
-* [paymail-inspector verify](paymail-inspector_verify.md)	 - Verifies if a paymail is associated to a pubkey
+* [paymail brfc](paymail_brfc.md)	 - List all specs, search by keyword, or generate a new BRFC ID
+* [paymail capabilities](paymail_capabilities.md)	 - Get the capabilities of the paymail domain
+* [paymail p2p](paymail_p2p.md)	 - Starts a new P2P payment request
+* [paymail resolve](paymail_resolve.md)	 - Resolves a paymail address
+* [paymail validate](paymail_validate.md)	 - Validate a paymail address or domain
+* [paymail verify](paymail_verify.md)	 - Verifies if a paymail is associated to a pubkey
 

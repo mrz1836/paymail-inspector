@@ -1,4 +1,4 @@
-## paymail-inspector validate
+## paymail validate
 
 Validate a paymail address or domain
 
@@ -24,13 +24,13 @@ All these validations are suggestions/requirements from bsvalias spec.
 Read more at: http://bsvalias.org/index.html
 
 ```
-paymail-inspector validate [flags]
+paymail validate [flags]
 ```
 
 ### Examples
 
 ```
-paymail-inspector validate moneybutton.com
+paymail validate moneybutton.com
 ```
 
 ### Options
@@ -59,5 +59,5 @@ paymail-inspector validate moneybutton.com
 
 ### SEE ALSO
 
-* [paymail-inspector](paymail-inspector.md)	 - Inspect, validate or resolve paymail domains and addresses
+* [paymail](paymail.md)	 - Inspect, validate domains or resolve paymail addresses
 

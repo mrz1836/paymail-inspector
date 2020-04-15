@@ -1,4 +1,4 @@
-## paymail-inspector verify
+## paymail verify
 
 Verifies if a paymail is associated to a pubkey
 
@@ -24,13 +24,13 @@ the verifier doesn't know if the public key actually belongs to the right user.
 Read more at: http://bsvalias.org/05-verify-public-key-owner.html
 
 ```
-paymail-inspector verify [flags]
+paymail verify [flags]
 ```
 
 ### Examples
 
 ```
-paymail-inspector verify mrz@moneybutton.com 02ead23149a1e33df17325ec7a7ba9e0b20c674c57c630f527d69b866aa9b65b10
+paymail verify mrz@moneybutton.com 02ead23149a1e33df17325ec7a7ba9e0b20c674c57c630f527d69b866aa9b65b10
 ```
 
 ### Options
@@ -50,5 +50,5 @@ paymail-inspector verify mrz@moneybutton.com 02ead23149a1e33df17325ec7a7ba9e0b20
 
 ### SEE ALSO
 
-* [paymail-inspector](paymail-inspector.md)	 - Inspect, validate or resolve paymail domains and addresses
+* [paymail](paymail.md)	 - Inspect, validate domains or resolve paymail addresses
 

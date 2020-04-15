@@ -1,4 +1,4 @@
-## paymail-inspector brfc
+## paymail brfc
 
 List all specs, search by keyword, or generate a new BRFC ID
 
@@ -29,15 +29,15 @@ are defined and discovered during Service Discovery.
 Read more at: http://bsvalias.org/01-brfc-specifications.html
 
 ```
-paymail-inspector brfc [flags]
+paymail brfc [flags]
 ```
 
 ### Examples
 
 ```
-paymail-inspector brfc list
-paymail-inspector brfc search nChain
-paymail-inspector brfc generate --title "BRFC Specifications" --author "andy (nChain)" --version 1
+paymail brfc list
+paymail brfc search nChain
+paymail brfc generate --title "BRFC Specifications" --author "andy (nChain)" --version 1
 ```
 
 ### Options
@@ -61,5 +61,5 @@ paymail-inspector brfc generate --title "BRFC Specifications" --author "andy (nC
 
 ### SEE ALSO
 
-* [paymail-inspector](paymail-inspector.md)	 - Inspect, validate or resolve paymail domains and addresses
+* [paymail](paymail.md)	 - Inspect, validate domains or resolve paymail addresses
 
