@@ -56,7 +56,7 @@ const (
 )
 
 // Version is set manually (also make:build overwrites this value from Github's latest tag)
-var Version = "v0.0.20"
+var Version = "v0.1.0"
 
 // rootCmd represents the base command when called without any sub-commands
 var rootCmd = &cobra.Command{
