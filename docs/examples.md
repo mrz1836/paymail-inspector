@@ -5,7 +5,7 @@ Below are some examples using the **paymail** cli app
 ```bash
 $ paymail
 ```
-<img src="../.github/IMAGES/help-command.gif?raw=true&v=4" alt="Help Command">
+<img src="../.github/IMAGES/help-command.gif?raw=true&v=5" alt="Help Command">
 
 Global flags for the entire application [(view command specs)](commands/paymail.md)
 ```
@@ -22,7 +22,7 @@ ___
 ```bash
 $ paymail brfc list
 ```
-<img src="../.github/IMAGES/brfc-list-command.gif?raw=true&v=4" alt="BRFC List Command">
+<img src="../.github/IMAGES/brfc-list-command.gif?raw=true&v=5" alt="BRFC List Command">
 
 Custom flags for the brfc:list command [(view command specs)](commands/paymail_brfc.md)
 ```
@@ -36,7 +36,7 @@ ___
 ```bash
 $ paymail brfc generate --title "BRFC Specifications" --author "andy (nChain)" --version 1
 ```
-<img src="../.github/IMAGES/brfc-generate-command.gif?raw=true&v=4" alt="BRFC Generate Command">
+<img src="../.github/IMAGES/brfc-generate-command.gif?raw=true&v=5" alt="BRFC Generate Command">
 
 Custom flags for the brfc:generate command [(view command specs)](commands/paymail_brfc.md)
 ```
@@ -52,7 +52,7 @@ ___
 ```bash
 $ paymail brfc search nChain
 ```
-<img src="../.github/IMAGES/brfc-search-command.gif?raw=true&v=4" alt="BRFC Search Command">
+<img src="../.github/IMAGES/brfc-search-command.gif?raw=true&v=5" alt="BRFC Search Command">
 
 Custom flags for the brfc:search command [(view command specs)](commands/paymail_brfc.md)
 ```
@@ -66,7 +66,7 @@ ___
 ```bash
 $ paymail capabilities moneybutton.com
 ```
-<img src="../.github/IMAGES/capabilities-command.gif?raw=true&v=4" alt="Capabilities Command">
+<img src="../.github/IMAGES/capabilities-command.gif?raw=true&v=5" alt="Capabilities Command">
 
 Custom flags for the capabilities request [(view command specs)](commands/paymail_capabilities.md)
 ```
@@ -79,7 +79,7 @@ ___
 ```bash
 $ paymail p2p mrz@moneybutton.com
 ```
-<img src="../.github/IMAGES/p2p-command.gif?raw=true&v=4" alt="P2P Command">
+<img src="../.github/IMAGES/p2p-command.gif?raw=true&v=5" alt="P2P Command">
 
 Custom flags for the p2p command [(view command specs)](commands/paymail_p2p.md)
 ```
@@ -93,7 +93,7 @@ ___
 ```bash
 $ paymail resolve mrz@moneybutton.com
 ```
-<img src="../.github/IMAGES/resolve-command.gif?raw=true&v=4" alt="Resolve Command">
+<img src="../.github/IMAGES/resolve-command.gif?raw=true&v=5" alt="Resolve Command">
 
 Custom flags for the resolve command [(view command specs)](commands/paymail_resolve.md)
 ```
@@ -113,7 +113,7 @@ ___
 ```bash
 $ paymail validate moneybutton.com
 ```
-<img src="../.github/IMAGES/validate-command.gif?raw=true&v=4" alt="Validate Command">
+<img src="../.github/IMAGES/validate-command.gif?raw=true&v=5" alt="Validate Command">
 
 Custom flags for the validation command [(view command specs)](commands/paymail_validate.md)
 ```
@@ -135,7 +135,7 @@ ___
 ```bash
 $ paymail verify mrz@moneybutton.com 02ead23149a1e33df17325ec7a7ba9e0b20c674c57c630f527d69b866aa9b65b10
 ```
-<img src="../.github/IMAGES/verify-command.gif?raw=true&v=4" alt="Verify Command">
+<img src="../.github/IMAGES/verify-command.gif?raw=true&v=5" alt="Verify Command">
 
 Custom flags for the verify command [(view command specs)](commands/paymail_verify.md)
 ```
