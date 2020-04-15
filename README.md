@@ -26,21 +26,21 @@
 
 ## Installation
 
-**Run via [Go](https://formulae.brew.sh/formula/go)**
-```bash
-$ go get -u github.com/mrz1836/paymail-inspector && go install github.com/mrz1836/paymail-inspector
-$ paymail-inspector -h
-```
-
 **Run via [brew](https://github.com/mrz1836/homebrew-paymail-inspector)**
 ```bash
 $ brew tap mrz1836/paymail-inspector && brew install paymail-inspector
 $ paymail-inspector -h
 ```
 
+**Run via [Go](https://formulae.brew.sh/formula/go)**
+```bash
+$ go get -u github.com/mrz1836/paymail-inspector && go install github.com/mrz1836/paymail-inspector
+$ paymail-inspector -h
+```
+
 **Run via [compiled binary](https://github.com/mrz1836/paymail-inspector/releases)** on Linux, Mac or Windows _(Mac example)_
 ```bash
-$ curl -LkSs https://github.com/mrz1836/paymail-inspector/releases/download/v0.0.19/paymail-inspector_macOS_64-bit.tar.gz -o app.tar.gz
+$ curl -LkSs https://github.com/mrz1836/paymail-inspector/releases/download/v0.0.20/paymail-inspector_macOS_64-bit.tar.gz -o app.tar.gz
 $ tar -zxf app.tar.gz
 $ ./app/paymail-inspector -h
 ```
@@ -69,7 +69,7 @@ $ paymail-inspector capabilities simply.cash
 ___
 
 ### `p2p`
-> Starts a p2p payment request and returns (n) outputs of (`script`,`satoshis`,`address`) ([view example](docs/examples.md#start-p2p-payment-request-by-paymail))
+> Starts a P2P payment request and returns (n) outputs of (`script`,`satoshis`,`address`) ([view example](docs/examples.md#start-p2p-payment-request-by-paymail))
 ```bash
 $ paymail-inspector p2p mrz@handcash.io
 ```
@@ -118,8 +118,8 @@ Additional paymail information can also be found via [MoneyButton's documentatio
 - [x] PayTo Protocol Prefix ([7bd25e5a1fc6](http://bsvalias.org/04-04-payto-protocol-prefix.html))
 - [x] Public Profile [(f12f968c92d6)](https://github.com/bitcoin-sv-specs/brfc-paymail/pull/7/files)
 - [x] P2P Payment Destination ([2a40af698840](https://docs.moneybutton.com/docs/paymail-07-p2p-payment-destination.html))
+- [x] Sender Validation ([6745385c3fc0](http://bsvalias.org/04-02-sender-validation.html))
 - [ ] P2P Transactions ([5f1323cddf31](https://docs.moneybutton.com/docs/paymail-06-p2p-transactions.html))
-- [ ] Sender Validation ([6745385c3fc0](http://bsvalias.org/04-02-sender-validation.html))
 - [ ] Receiver Approvals ([3d7c2ca83a46](http://bsvalias.org/04-03-receiver-approvals.html))
 - [ ] Merchant API ([ce852c4c2cd1](https://github.com/bitcoin-sv-specs/brfc-merchantapi))
 - [ ] JSON Envelope Specification ([298e080a4598](https://github.com/bitcoin-sv-specs/brfc-misc/tree/master/jsonenvelope))
@@ -142,9 +142,11 @@ View the [example config file](.paymail-inspector.yaml).
 <summary><strong><code>Package Dependencies</code></strong></summary>
 
 - bitcoinsv's [bsvd](https://github.com/bitcoinsv/bsvd) and [bsvutil](https://github.com/bitcoinsv/bsvutil) for BSV script functionality
+- go-resty's [resty](https://github.com/go-resty/resty) for custom HTTP client support
 - miekg's [dns](https://github.com/miekg/dns) package for advanced DNS functionality
 - mitchellh's [go-homedir](https://github.com/mitchellh/go-homedir) to find the home directory
 - MrZ's [go-validate](https://github.com/mrz1836/go-validate) for domain/email/ip validations
+- ryanuber's [columnize](https://github.com/ryanuber/columnize) for displaying terminal data in columns
 - spf13's [cobra](https://github.com/spf13/cobra) and [viper](https://github.com/spf13/viper) for easy configuration & CLI application development
 - ttacon's [chalk](https://github.com/ttacon/chalk) for colorful logs
 </details>
@@ -189,9 +191,9 @@ release                        Full production release (creates release in Githu
 release-test                   Full production test release (everything except deploy)
 release-snap                   Test the full release (build binaries)
 run                            Runs the go application
-tag                            Generate a new tag and push (IE: make tag version=0.0.16)
-tag-remove                     Remove a tag if found (IE: make tag-remove version=0.0.16)
-tag-update                     Update an existing tag to current commit (IE: make tag-update version=0.0.16)
+tag                            Generate a new tag and push (IE: make tag version=0.0.0)
+tag-remove                     Remove a tag if found (IE: make tag-remove version=0.0.0)
+tag-update                     Update an existing tag to current commit (IE: make tag-update version=0.0.0)
 test                           Runs vet, lint and ALL tests
 test-short                     Runs vet, lint and tests (excludes integration tests)
 uninstall                      Uninstall the application (and remove files)
