@@ -1,7 +1,7 @@
 ## Paymail Inspector: Examples & Docs
 Below are some examples using the **paymail** cli app
 
-#### View All Commands (Help)
+### View All Commands (Help)
 ```bash
 $ paymail
 ```
@@ -18,7 +18,7 @@ Global flags for the entire application [(view command specs)](commands/paymail.
 ___
 
 
-#### List BRFC Specifications
+### List BRFC Specifications
 ```bash
 $ paymail brfc list
 ```
@@ -36,7 +36,7 @@ Custom flags for the brfc:list command [(view command specs)](commands/paymail_b
 
 ___
 
-#### Generate new BRFC ID
+### Generate new BRFC ID
 ```bash
 $ paymail brfc generate --title "BRFC Specifications" --author "andy (nChain)" --version 1
 ```
@@ -56,7 +56,7 @@ Custom flags for the brfc:generate command [(view command specs)](commands/payma
 
 ___
 
-#### Search BRFC Specifications
+### Search BRFC Specifications
 ```bash
 $ paymail brfc search nChain
 ```
@@ -75,7 +75,7 @@ Custom flags for the brfc:search command [(view command specs)](commands/paymail
 
 ___
 
-#### Get Capabilities (by Domain)
+### Get Capabilities (by Domain)
 ```bash
 $ paymail capabilities moneybutton.com
 ```
@@ -92,7 +92,7 @@ Custom flags for the capabilities request [(view command specs)](commands/paymai
 
 ___
 
-#### Start P2P Payment Request (by Paymail)
+### Start P2P Payment Request (by Paymail)
 ```bash
 $ paymail p2p mrz@moneybutton.com
 ```
@@ -110,7 +110,7 @@ Custom flags for the p2p command [(view command specs)](commands/paymail_p2p.md)
 
 ___
 
-#### Resolve Paymail Address (by Paymail)
+### Resolve Paymail Address (by Paymail)
 ```bash
 $ paymail resolve mrz@moneybutton.com
 ```
@@ -134,7 +134,7 @@ Custom flags for the resolve command [(view command specs)](commands/paymail_res
 
 ___
 
-#### Validate Paymail Setup (by Paymail or Domain)
+### Validate Paymail Setup (by Paymail or Domain)
 ```bash
 $ paymail validate moneybutton.com
 ```
@@ -160,7 +160,7 @@ Custom flags for the validation command [(view command specs)](commands/paymail_
 
 ___
 
-#### Verify Public Key Owner
+### Verify Public Key Owner
 ```bash
 $ paymail verify mrz@moneybutton.com 02ead23149a1e33df17325ec7a7ba9e0b20c674c57c630f527d69b866aa9b65b10
 ```
