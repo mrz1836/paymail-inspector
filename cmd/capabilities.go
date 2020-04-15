@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"net"
 	"reflect"
 	"strings"
 
@@ -10,7 +9,6 @@ import (
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/mrz1836/paymail-inspector/paymail"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"github.com/ttacon/chalk"
 )
 
@@ -52,10 +50,10 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/02-02-capability-discovery
 
 		// Check for a real domain (require at least one period)
 		if !strings.Contains(domain, ".") {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("domain name is invalid: %s", domain))
+			chalker.Log(chalker.ERROR, fmt.Sprintf("Domain name is invalid: %s", domain))
 			return
 		} else if !validate.IsValidDNSName(domain) { // Basic DNS check (not a REAL domain name check)
-			chalker.Log(chalker.ERROR, fmt.Sprintf("domain name failed DNS check: %s", domain))
+			chalker.Log(chalker.ERROR, fmt.Sprintf("Domain name failed DNS check: %s", domain))
 			return
 		}
 
@@ -63,65 +61,31 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/02-02-capability-discovery
 		capabilities, err := getCapabilities(domain)
 		if err != nil {
 			if strings.Contains(err.Error(), "context deadline exceeded") {
-				chalker.Log(chalker.WARN, fmt.Sprintf("no capabilities found for: %s", domain))
+				chalker.Log(chalker.WARN, fmt.Sprintf("No capabilities found for: %s", domain))
 			} else {
-				chalker.Log(chalker.ERROR, fmt.Sprintf("error: %s", err.Error()))
+				chalker.Log(chalker.ERROR, fmt.Sprintf("Error: %s", err.Error()))
 			}
 			return
 		}
+
+		// Rendering profile information
+		displayHeader(chalker.DEFAULT, fmt.Sprintf("Listing %d capabilities...", len(capabilities.Capabilities)))
 
 		// Show all the found capabilities
 		// todo: loop known BRFCs and display "more" info in this display for all detected BRFCs
 		for key, val := range capabilities.Capabilities {
 			valType := reflect.TypeOf(val).String()
 			if valType == "string" {
-				chalker.Log(chalker.INFO, fmt.Sprintf("%s: %-28v %s: %s", chalk.White.Color("capability"), chalk.Cyan.Color(key), chalk.White.Color("target"), chalk.Yellow.Color(fmt.Sprintf("%s", val))))
+				chalker.Log(chalker.INFO, fmt.Sprintf("%s: %-28v %s: %s", chalk.White.Color("Capability"), chalk.Cyan.Color(key), chalk.White.Color("Target"), chalk.Yellow.Color(fmt.Sprintf("%s", val))))
 			} else if valType == "bool" { // See: http://bsvalias.org/04-02-sender-validation.html
 				if val.(bool) {
-					chalker.Log(chalker.INFO, fmt.Sprintf("%s: %-28v is      %s", chalk.White.Color("capability"), chalk.Cyan.Color(key), chalk.Green.Color("enabled")))
+					chalker.Log(chalker.INFO, fmt.Sprintf("%s: %-28v is      %s", chalk.White.Color("Capability"), chalk.Cyan.Color(key), chalk.Green.Color("Enabled")))
 				} else {
-					chalker.Log(chalker.INFO, fmt.Sprintf("%s: %-28v is      %s", chalk.White.Color("capability"), chalk.Cyan.Color(key), chalk.Magenta.Color("disabled")))
+					chalker.Log(chalker.INFO, fmt.Sprintf("%s: %-28v is      %s", chalk.White.Color("Capability"), chalk.Cyan.Color(key), chalk.Magenta.Color("Disabled")))
 				}
 			}
 		}
 	},
-}
-
-// getCapabilities will check SRV first, then attempt default domain:port check
-func getCapabilities(domain string) (capabilities *paymail.CapabilitiesResponse, err error) {
-
-	chalker.Log(chalker.DEFAULT, fmt.Sprintf("getting SRV record for: %s...", chalk.Cyan.Color(domain)))
-
-	// Get the details from the SRV record
-	capabilityDomain := ""
-	capabilityPort := paymail.DefaultPort
-	var srv *net.SRV
-	if srv, err = paymail.GetSRVRecord(serviceName, protocol, domain, nameServer); err != nil {
-		chalker.Log(chalker.ERROR, fmt.Sprintf("get SRV record failed: %s", err.Error()))
-		capabilityDomain = domain
-	} else if srv != nil {
-		chalker.Log(chalker.SUCCESS, fmt.Sprintf("SRV record found, target: %s:%d", srv.Target, srv.Port))
-		capabilityDomain = srv.Target
-		capabilityPort = int(srv.Port)
-	}
-
-	// Get the capabilities for the given target domain
-	chalker.Log(chalker.DEFAULT, fmt.Sprintf("getting capabilities from: %s...", chalk.Cyan.Color(fmt.Sprintf("%s:%d", capabilityDomain, capabilityPort))))
-	if capabilities, err = paymail.GetCapabilities(capabilityDomain, capabilityPort); err != nil {
-		return
-	}
-
-	// Check the version
-	if capabilities.BsvAlias != viper.GetString(flagBsvAlias) {
-		err = fmt.Errorf("capabilities %s version mismatch, expected: %s but got: %s", flagBsvAlias, chalk.Cyan.Color(viper.GetString(flagBsvAlias)), chalk.Magenta.Color(capabilities.BsvAlias))
-		return
-	}
-
-	// Success
-	chalker.Log(chalker.SUCCESS, fmt.Sprintf("capabilities found: %d", len(capabilities.Capabilities)))
-	chalker.Log(chalker.DEFAULT, fmt.Sprintf("%s version: %s", flagBsvAlias, chalk.Cyan.Color(capabilities.BsvAlias)))
-
-	return
 }
 
 func init() {

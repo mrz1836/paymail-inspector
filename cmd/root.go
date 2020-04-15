@@ -39,6 +39,7 @@ var (
 	skipPublicProfile  bool
 	skipSrvCheck       bool
 	skipSSLCheck       bool
+	skipTracing        bool
 	weight             int
 )
 
@@ -58,7 +59,7 @@ const (
 )
 
 // Version is set manually (also make:build overwrites this value from Github's latest tag)
-var Version = "v0.0.19"
+var Version = "v0.0.20"
 
 // rootCmd represents the base command when called without any sub-commands
 var rootCmd = &cobra.Command{
@@ -114,9 +115,6 @@ func Execute() {
 
 func init() {
 
-	// Set chalker application prefix
-	chalker.SetPrefix(configDefault + ":")
-
 	// Load the configuration
 	cobra.OnInitialize(initConfig)
 
@@ -125,6 +123,9 @@ func init() {
 
 	// Add document generation for all commands
 	rootCmd.PersistentFlags().BoolVar(&generateDocs, "docs", false, "Generate docs from all commands (./"+docsLocation+")")
+
+	// Add a toggle for request tracing
+	rootCmd.PersistentFlags().BoolVarP(&skipTracing, "skip-tracing", "t", false, "Turn off request tracing information")
 
 	// Add a bsvalias version to target
 	rootCmd.PersistentFlags().String(flagBsvAlias, paymail.DefaultBsvAliasVersion, fmt.Sprintf("The %s version", flagBsvAlias))
@@ -160,6 +161,6 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		chalker.Log(chalker.INFO, fmt.Sprintf("loaded config file: %s", viper.ConfigFileUsed()))
+		chalker.Log(chalker.INFO, fmt.Sprintf("...loaded config file: %s", viper.ConfigFileUsed()))
 	}
 }

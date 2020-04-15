@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mrz1836/go-validate"
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/mrz1836/paymail-inspector/paymail"
 	"github.com/spf13/cobra"
@@ -59,31 +58,27 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/05-verify-public-key-owner
 
 		// Require a paymail address
 		if len(paymailAddress) == 0 {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("one argument must be a paymail address [%s] [%s]", args[0], args[1]))
+			chalker.Log(chalker.ERROR, fmt.Sprintf("One argument must be a paymail address [%s] [%s]", args[0], args[1]))
 			return
 		}
 
 		// Require a pubkey
 		if len(pubKey) == 0 {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("one argument must be a pubkey [%s] [%s]", args[0], args[1]))
+			chalker.Log(chalker.ERROR, fmt.Sprintf("One argument must be a pubkey [%s] [%s]", args[0], args[1]))
 			return
 		}
 
 		// Extract the parts given
 		domain, _ := paymail.ExtractParts(paymailAddress)
 
-		// Check for a real domain (require at least one period)
-		if !strings.Contains(domain, ".") {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("domain name is invalid: %s", domain))
-			return
-		} else if !validate.IsValidDNSName(domain) { // Basic DNS check (not a REAL domain name check)
-			chalker.Log(chalker.ERROR, fmt.Sprintf("domain name failed DNS check: %s", domain))
+		// Validate the paymail address and domain (error already shown)
+		if ok := validatePaymailAndDomain(paymailAddress, domain); !ok {
 			return
 		}
 
 		// Validate pubkey
 		if len(pubKey) != paymail.PubKeyLength {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("pubkey is an invalid length, expected: %d but got: %d", paymail.PubKeyLength, len(pubKey)))
+			chalker.Log(chalker.ERROR, fmt.Sprintf("PubKey is an invalid length, expected: %d but got: %d", paymail.PubKeyLength, len(pubKey)))
 			return
 		}
 
@@ -91,9 +86,9 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/05-verify-public-key-owner
 		capabilities, err := getCapabilities(domain)
 		if err != nil {
 			if strings.Contains(err.Error(), "context deadline exceeded") {
-				chalker.Log(chalker.WARN, fmt.Sprintf("no capabilities found for: %s", domain))
+				chalker.Log(chalker.WARN, fmt.Sprintf("No capabilities found for: %s", domain))
 			} else {
-				chalker.Log(chalker.ERROR, fmt.Sprintf("error: %s", err.Error()))
+				chalker.Log(chalker.ERROR, fmt.Sprintf("Error: %s", err.Error()))
 			}
 			return
 		}
@@ -101,7 +96,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/05-verify-public-key-owner
 		// Set the URL - Does the paymail provider have the capability?
 		url := capabilities.GetValueString(paymail.BRFCVerifyPublicKeyOwner, "")
 		if len(url) == 0 {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("%s is missing a required capability: %s", domain, paymail.BRFCVerifyPublicKeyOwner))
+			chalker.Log(chalker.ERROR, fmt.Sprintf("The provider %s is missing a required capability: %s", domain, paymail.BRFCVerifyPublicKeyOwner))
 			return
 		}
 
@@ -109,19 +104,18 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/05-verify-public-key-owner
 		parts := strings.Split(paymailAddress, "@")
 
 		// Fire the verify request
-		chalker.Log(chalker.DEFAULT, fmt.Sprintf("firing Verify request for: %s...", chalk.Cyan.Color(parts[0]+"@"+domain)))
 		var verify *paymail.VerifyPubKeyResponse
-		if verify, err = paymail.VerifyPubKey(url, parts[0], domain, pubKey); err != nil {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("get VerifyPublicKey request failed: %s", err.Error()))
-			return
-		} else if verify == nil {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("failed parsing VerifyPublicKey response for: %s", paymailAddress))
+		if verify, err = verifyPubKey(url, parts[0], domain, pubKey); err != nil {
+			chalker.Log(chalker.ERROR, fmt.Sprintf("verify pubkey request failed: %s", err.Error()))
 			return
 		}
 
+		// Rendering profile information
+		displayHeader(chalker.DEFAULT, fmt.Sprintf("Rendering verify response for %s...", chalk.Cyan.Color(paymailAddress)))
+
 		// Show the results
-		chalker.Log(chalker.DEFAULT, fmt.Sprintf("paymail: %s", chalk.Cyan.Color(paymailAddress)))
-		chalker.Log(chalker.DEFAULT, fmt.Sprintf("pubkey: %s", chalk.Cyan.Color(pubKey)))
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Paymail: %s", chalk.Cyan.Color(paymailAddress)))
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("PubKey : %s", chalk.Cyan.Color(pubKey)))
 
 		if verify.Match {
 			chalker.Log(chalker.SUCCESS, "Paymail & PubKey Match! (service responded: match=true)")

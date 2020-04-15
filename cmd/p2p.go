@@ -17,7 +17,7 @@ const (
 // p2pCmd represents the p2p command
 var p2pCmd = &cobra.Command{
 	Use:   "p2p",
-	Short: "Starts a new p2p payment request",
+	Short: "Starts a new P2P payment request",
 	Long: chalk.Green.Color(`
        ________         
 ______ \_____  \______  
@@ -26,7 +26,7 @@ ______ \_____  \______
 |   __/\_______ \   __/ 
 |__|           \/__|`) + `
 ` + chalk.Yellow.Color(`
-This command will start a new p2p request with the receiver and optional amount expected (in Satoshis).
+This command will start a new P2P request with the receiver and optional amount expected (in Satoshis).
 
 This protocol is an alternative protocol to basic address resolution. 
 Instead of returning one address, it returns a list of outputs with a reference number. 
@@ -52,7 +52,7 @@ Read more at: `+chalk.Cyan.Color("https://docs.moneybutton.com/docs/paymail-07-p
 
 		// Did we get a paymail address?
 		if len(paymailAddress) == 0 {
-			chalker.Log(chalker.ERROR, "paymail address not found or invalid")
+			chalker.Log(chalker.ERROR, "Paymail address not found or invalid")
 			return
 		}
 
@@ -65,9 +65,9 @@ Read more at: `+chalk.Cyan.Color("https://docs.moneybutton.com/docs/paymail-07-p
 		capabilities, err := getCapabilities(domain)
 		if err != nil {
 			if strings.Contains(err.Error(), "context deadline exceeded") {
-				chalker.Log(chalker.WARN, fmt.Sprintf("no capabilities found for: %s", domain))
+				chalker.Log(chalker.WARN, fmt.Sprintf("No capabilities found for: %s", domain))
 			} else {
-				chalker.Log(chalker.ERROR, fmt.Sprintf("error: %s", err.Error()))
+				chalker.Log(chalker.ERROR, fmt.Sprintf("Error: %s", err.Error()))
 			}
 			return
 		}
@@ -75,7 +75,7 @@ Read more at: `+chalk.Cyan.Color("https://docs.moneybutton.com/docs/paymail-07-p
 		// Set the URL - Does the paymail provider have the capability?
 		url := capabilities.GetValueString(paymail.BRFCP2PPaymentDestination, "")
 		if len(url) == 0 {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("%s is missing a required capability: %s", domain, paymail.BRFCP2PPaymentDestination))
+			chalker.Log(chalker.ERROR, fmt.Sprintf("The provider %s is missing a required capability: %s", domain, paymail.BRFCP2PPaymentDestination))
 			return
 		}
 
@@ -87,48 +87,48 @@ Read more at: `+chalk.Cyan.Color("https://docs.moneybutton.com/docs/paymail-07-p
 		// Get the alias of the address
 		parts := strings.Split(paymailAddress, "@")
 
-		// Fire the request
+		// Fire the P2P request
 		var p2pResponse *paymail.P2PPaymentDestinationResponse
-		if p2pResponse, err = paymail.GetP2PPaymentDestination(
-			url,
-			parts[0],
-			domain,
-			&paymail.P2PPaymentDestinationRequest{Satoshis: satoshis},
-		); err != nil {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("p2p payment request failed: %s", err.Error()))
+		if p2pResponse, err = getP2PPaymentDestination(url, parts[0], domain, satoshis); err != nil {
+			chalker.Log(chalker.ERROR, fmt.Sprintf("P2P payment destination request failed: %s", err.Error()))
 			return
 		}
 
 		// Attempt to get a public profile if the capability is found
 		url = capabilities.GetValueString(paymail.BRFCPublicProfile, "")
+		var profile *paymail.PublicProfileResponse
 		if len(url) > 0 && !skipPublicProfile {
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("getting public profile for: %s...", chalk.Cyan.Color(parts[0]+"@"+domain)))
-			var profile *paymail.PublicProfileResponse
-			if profile, err = paymail.GetPublicProfile(url, parts[0], domain); err != nil {
-				chalker.Log(chalker.ERROR, fmt.Sprintf("get public profile failed: %s", err.Error()))
-				return
-			} else if profile != nil {
-				if len(profile.Name) > 0 {
-					chalker.Log(chalker.DEFAULT, fmt.Sprintf("name: %s", chalk.Cyan.Color(profile.Name)))
-				}
-				if len(profile.Avatar) > 0 {
-					chalker.Log(chalker.DEFAULT, fmt.Sprintf("avatar: %s", chalk.Cyan.Color(profile.Avatar)))
-				}
+			if profile, err = getPublicProfile(url, parts[0], domain); err != nil {
+				chalker.Log(chalker.ERROR, fmt.Sprintf("Get public profile failed: %s", err.Error()))
+			}
+		}
+
+		// Rendering profile information
+		displayHeader(chalker.DEFAULT, fmt.Sprintf("Rendering P2P information for %s...", chalk.Cyan.Color(paymailAddress)))
+
+		// Display the public profile if found
+		if profile != nil {
+			if len(profile.Name) > 0 {
+				chalker.Log(chalker.DEFAULT, fmt.Sprintf("Name     : %s", chalk.Cyan.Color(profile.Name)))
+			}
+			if len(profile.Avatar) > 0 {
+				chalker.Log(chalker.DEFAULT, fmt.Sprintf("Avatar   : %s", chalk.Cyan.Color(profile.Avatar)))
 			}
 		}
 
 		// If there is a reference
 		if len(p2pResponse.Reference) > 0 {
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("payment reference: %s", chalk.Cyan.Color(p2pResponse.Reference)))
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Reference: %s", chalk.Cyan.Color(p2pResponse.Reference)))
 		}
 
 		// Output the results
 		for index, output := range p2pResponse.Outputs {
 
 			// Show output script & amount
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("output #%d: script: %s", index+1, chalk.Cyan.Color(output.Script)))
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("output #%d: satoshis: %s", index+1, chalk.Cyan.Color(fmt.Sprintf("%d", output.Satoshis))))
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("output #%d: address: %s", index+1, chalk.Cyan.Color(output.Address)))
+			displayHeader(chalker.DEFAULT, fmt.Sprintf("Output #%d", index+1))
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Script  : %s", chalk.Cyan.Color(output.Script)))
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Satoshis: %s", chalk.Cyan.Color(fmt.Sprintf("%d", output.Satoshis))))
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Address : %s", chalk.Cyan.Color(output.Address)))
 		}
 	},
 }
