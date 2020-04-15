@@ -52,7 +52,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/01-brfc-specifications.htm
 		// Load the BRFC specifications
 		if len(paymail.BRFCSpecs) == 0 {
 			if err := paymail.LoadSpecifications(); err != nil {
-				chalker.Log(chalker.ERROR, fmt.Sprintf("error loading BRFC specifications: %s", err.Error()))
+				chalker.Log(chalker.ERROR, fmt.Sprintf("Error loading BRFC specifications: %s", err.Error()))
 				return
 			}
 		}
@@ -62,50 +62,47 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/01-brfc-specifications.htm
 
 			// Did we find some specifications?
 			if len(paymail.BRFCSpecs) == 0 {
-				chalker.Log(chalker.ERROR, fmt.Sprintf("no existing brfc specs found in: %s", "BRFCSpecs"))
+				chalker.Log(chalker.ERROR, fmt.Sprintf("No existing brfc specs found in: %s", "BRFCSpecs"))
 				return
 			}
 
-			// Show success message
-			chalker.Log(chalker.SUCCESS, fmt.Sprintf("total brfc specs found: %d", len(paymail.BRFCSpecs)))
-
 			// Loop the list
 			for _, brfc := range paymail.BRFCSpecs {
-				chalker.Log(chalker.DEFAULT, "-----------------------------------------------------------------")
-				if len(brfc.ID) == 0 {
-					chalker.Log(chalker.WARN, fmt.Sprintf("invalid brfc detected, missing attribute: %s", "id"))
+
+				// Skip an invalid specs in the JSON (there should NOT be any invalid specs)
+				if len(brfc.Title) == 0 || len(brfc.Version) == 0 || len(brfc.ID) == 0 {
 					continue
 				}
-				if len(brfc.ID) > 0 {
-					chalker.Log(chalker.DEFAULT, fmt.Sprintf("id: %s", chalk.Cyan.Color(brfc.ID)))
-				}
-				if len(brfc.Title) > 0 {
-					chalker.Log(chalker.DEFAULT, fmt.Sprintf("title: %s", chalk.Cyan.Color(brfc.Title)))
-				}
-				if len(brfc.Author) > 0 {
-					chalker.Log(chalker.DEFAULT, fmt.Sprintf("author: %s", chalk.Cyan.Color(brfc.Author)))
-				}
-				if len(brfc.Version) > 0 {
-					chalker.Log(chalker.DEFAULT, fmt.Sprintf("version: %s", chalk.Cyan.Color(brfc.Version)))
-				}
-				if len(brfc.Alias) > 0 {
-					chalker.Log(chalker.DEFAULT, fmt.Sprintf("alias: %s", chalk.Cyan.Color(brfc.Alias)))
-				}
-				if len(brfc.URL) > 0 {
-					chalker.Log(chalker.DEFAULT, fmt.Sprintf("url: %s", chalk.Cyan.Color(brfc.URL)))
-				}
 
+				displayHeader(chalker.DEFAULT, fmt.Sprintf("%s", brfc.Title+" v"+brfc.Version))
+
+				valid := chalk.Green.Color("(Valid)")
 				// Validate the BRFC ID
 				if !skipBrfcValidation {
 					if ok, id, err := brfc.Validate(); err != nil {
-						chalker.Log(chalker.ERROR, fmt.Sprintf("error validating brfc %s: %s", brfc.ID, err.Error()))
-					} else if ok {
-						chalker.Log(chalker.DEFAULT, fmt.Sprintf("validation: %s", chalk.Green.Color("success")))
-					} else {
-						chalker.Log(chalker.DEFAULT, fmt.Sprintf("validation: %s", chalk.Magenta.Color("failed, generated id: "+id)))
+						chalker.Log(chalker.ERROR, fmt.Sprintf("Error validating brfc %s: %s", brfc.ID, err.Error()))
+					} else if !ok {
+						valid = chalk.Yellow.Color("(Invalid ID, generator says: " + id + ")")
+						// valid = chalk.Magenta.Color("(Invalid ID)")
 					}
 				}
+
+				chalker.Log(chalker.DEFAULT, fmt.Sprintf("ID        : %s %s", chalk.Cyan.Color(brfc.ID), valid))
+
+				if len(brfc.Author) > 0 {
+					chalker.Log(chalker.DEFAULT, fmt.Sprintf("Author(s) : %s", chalk.Cyan.Color(brfc.Author)))
+				}
+				if len(brfc.Alias) > 0 {
+					chalker.Log(chalker.DEFAULT, fmt.Sprintf("Alias     : %s", chalk.Cyan.Color(brfc.Alias)))
+				}
+				if len(brfc.URL) > 0 {
+					chalker.Log(chalker.DEFAULT, fmt.Sprintf("URL       : %s", chalk.Cyan.Color(brfc.URL)))
+				}
 			}
+
+			// Show success message
+			chalker.Log(chalker.SUCCESS, fmt.Sprintf("Total BRFC specifications found: %d", len(paymail.BRFCSpecs)))
+
 			return
 		}
 
@@ -114,7 +111,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/01-brfc-specifications.htm
 
 			// Validate title, author, version
 			if len(brfcTitle) == 0 {
-				chalker.Log(chalker.ERROR, fmt.Sprintf("missing required flag: %s", "--title"))
+				chalker.Log(chalker.ERROR, fmt.Sprintf("Missing required flag: %s", "--title"))
 				return
 			}
 
@@ -128,7 +125,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/01-brfc-specifications.htm
 			// Generate the ID
 			var err error
 			if brfc.ID, err = brfc.Generate(); err != nil {
-				chalker.Log(chalker.ERROR, fmt.Sprintf("error generating id: %s", err.Error()))
+				chalker.Log(chalker.ERROR, fmt.Sprintf("Error generating BRFC ID: %s", err.Error()))
 				return
 			}
 
@@ -136,22 +133,24 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/01-brfc-specifications.htm
 			if len(paymail.BRFCSpecs) > 0 {
 				for _, existingBrfc := range paymail.BRFCSpecs {
 					if existingBrfc.ID == brfc.ID {
-						chalker.Log(chalker.ERROR, fmt.Sprintf("brfc already exists: %s", brfc.ID))
+						chalker.Log(chalker.ERROR, fmt.Sprintf("BRFC already exists: %s", brfc.ID))
 						return
 					}
 				}
 			}
 
+			displayHeader(chalker.DEFAULT, "Generating BRFC ID...")
+
 			// Show the generated ID
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("generated id: %s", chalk.Cyan.Color(brfc.ID)))
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("title: %s", chalk.Cyan.Color(brfc.Title)))
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Generated ID: %s", chalk.Cyan.Color(brfc.ID)))
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Title       : %s", chalk.Cyan.Color(brfc.Title)))
 
 			// Show optional fields
 			if len(brfc.Author) > 0 {
-				chalker.Log(chalker.DEFAULT, fmt.Sprintf("author: %s", chalk.Cyan.Color(brfc.Author)))
+				chalker.Log(chalker.DEFAULT, fmt.Sprintf("Author      : %s", chalk.Cyan.Color(brfc.Author)))
 			}
 			if len(brfc.Version) > 0 {
-				chalker.Log(chalker.DEFAULT, fmt.Sprintf("version: %s", chalk.Cyan.Color(brfc.Version)))
+				chalker.Log(chalker.DEFAULT, fmt.Sprintf("Version     : %s", chalk.Cyan.Color(brfc.Version)))
 			}
 
 			// Done

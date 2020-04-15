@@ -303,5 +303,5 @@ func displayTracingResults(tracing resty.TraceInfo, statusCode int) {
 
 // displayHeader will display a standard header
 func displayHeader(level, text string) {
-	chalker.Log(level, "\n=========| "+text)
+	chalker.Log(level, "\n==========| "+text)
 }
