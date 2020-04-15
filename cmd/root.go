@@ -106,10 +106,10 @@ func Execute() {
 
 		// Generate the markdown docs
 		if err := doc.GenMarkdownTree(rootCmd, docsLocation); err != nil {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("error generating docs: %s", err.Error()))
+			chalker.Log(chalker.ERROR, fmt.Sprintf("Error generating docs: %s", err.Error()))
 			return
 		}
-		chalker.Log(chalker.SUCCESS, fmt.Sprintf("successfully generated documentation for %d commands", len(rootCmd.Commands())))
+		chalker.Log(chalker.SUCCESS, fmt.Sprintf("Successfully generated documentation for %d commands", len(rootCmd.Commands())))
 	}
 }
 
@@ -119,7 +119,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	// Add config option
-	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "config file (default is $HOME/."+configDefault+".yaml)")
+	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "Config file (default is $HOME/."+configDefault+".yaml)")
 
 	// Add document generation for all commands
 	rootCmd.PersistentFlags().BoolVar(&generateDocs, "docs", false, "Generate docs from all commands (./"+docsLocation+")")
