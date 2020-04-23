@@ -4,7 +4,6 @@
 [![Build Status](https://travis-ci.com/mrz1836/paymail-inspector.svg?branch=master&v=5)](https://travis-ci.com/mrz1836/paymail-inspector)
 [![Report](https://goreportcard.com/badge/github.com/mrz1836/paymail-inspector?style=flat&v=5)](https://goreportcard.com/report/github.com/mrz1836/paymail-inspector)
 [![Release](https://img.shields.io/github/release-pre/mrz1836/paymail-inspector.svg?style=flat&v=5)](https://github.com/mrz1836/paymail-inspector/releases)
-[![standard-readme compliant](https://img.shields.io/badge/standard--readme-OK-green.svg?style=flat)](https://github.com/RichardLitt/standard-readme)
 [![GoDoc](https://godoc.org/github.com/mrz1836/paymail-inspector?status.svg&style=flat)](https://pkg.go.dev/github.com/mrz1836/paymail-inspector?tab=subdirectories)
 
 > **paymail-inspector** is a CLI app for interacting with paymail service providers
@@ -244,7 +243,7 @@ View the [contributing guidelines](CONTRIBUTING.md) and follow the [code of cond
 
 Support the development of this project 🙏
 
-[![Donate](https://img.shields.io/badge/donate-bitcoin-brightgreen.svg)](https://mrz1818.com/?tab=tips&af=paymail-inspector)
+[![Donate](https://img.shields.io/badge/donate-bitcoin-brightgreen.svg)](https://mrz1818.com/?tab=tips&af=paymail-inspector) [![Twetch](https://img.shields.io/badge/share-twitter-00ACEE.svg)](https://twitter.com/intent/tweet?text=Paymail%20Inspector%20Rocks!%20Check%20it%20out:%20https%3A%2F%2Ftncpw.co%2F2d429aee) [![Twitter](https://img.shields.io/badge/share-twetch-085AF6.svg)](https://twetch.app/compose?description=Paymail%20Inspector%20Rocks!%20Check%20it%20out:%20https%3A%2F%2Ftncpw.co%2F2d429aee)
 
 ## License
 
