@@ -51,7 +51,7 @@ func GetP2PPaymentDestination(p2pUrl, alias, domain string, senderRequest *P2PPa
 	// Create a Client and start the request
 	client := resty.New().SetTimeout(defaultPostTimeout * time.Second)
 	var resp *resty.Response
-	req := client.R().SetBody(senderRequest).SetHeader("User-Agent", defaultUserAgent)
+	req := client.R().SetBody(senderRequest).SetHeader("User-Agent", UserAgent)
 	if tracing {
 		req.EnableTrace()
 	}

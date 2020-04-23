@@ -14,16 +14,19 @@ import (
 
 // Defaults for paymail functions
 const (
-	defaultDnsPort           = "53"  // Default port for DNS / NameServer checks
-	defaultDnsTimeout        = 5     // In seconds
-	defaultNameServerNetwork = "udp" // Default for NS dialer
-	defaultSSLDeadline       = 10    // In seconds
-	defaultSSLTimeout        = 10    // In seconds
-	defaultGetTimeout        = 15    // In seconds
-	defaultPostTimeout       = 15    // In seconds
-	defaultUserAgent         = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36"
-	maxSRVRecords            = 1 // Given by paymail specs
+	defaultDnsPort           = "53"         // Default port for DNS / NameServer checks
+	defaultDnsTimeout        = 5            // In seconds
+	defaultGetTimeout        = 15           // In seconds
+	defaultNameServerNetwork = "udp"        // Default for NS dialer
+	defaultPostTimeout       = 15           // In seconds
+	defaultSSLDeadline       = 10           // In seconds
+	defaultSSLTimeout        = 10           // In seconds
+	defaultUserAgent         = "go:paymail" // Default user agent
+	maxSRVRecords            = 1            // Given by paymail specs
 )
+
+// Customize the user agent
+var UserAgent = defaultUserAgent
 
 // Public defaults for paymail specs
 /*

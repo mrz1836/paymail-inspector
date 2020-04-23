@@ -37,7 +37,7 @@ func GetPublicProfile(publicProfileUrl, alias, domain string, tracing bool) (res
 	// Create a Client and start the request
 	client := resty.New().SetTimeout(defaultGetTimeout * time.Second)
 	var resp *resty.Response
-	req := client.R().SetHeader("User-Agent", defaultUserAgent)
+	req := client.R().SetHeader("User-Agent", UserAgent)
 	if tracing {
 		req.EnableTrace()
 	}
