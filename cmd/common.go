@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-resty/resty/v2"
 	"github.com/mrz1836/go-validate"
+	"github.com/mrz1836/paymail-inspector/bitpic"
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/mrz1836/paymail-inspector/paymail"
 	"github.com/ryanuber/columnize"
@@ -221,6 +222,24 @@ func getPublicProfile(url, alias, domain string) (profile *paymail.PublicProfile
 	// Success
 	if len(profile.Name) > 0 && len(profile.Avatar) > 0 {
 		chalker.Log(chalker.SUCCESS, "Valid profile found [name, avatar]")
+	}
+
+	return
+}
+
+// getBitPic will get a bitpic if the pic exists
+func getBitPic(alias, domain string) (url string, err error) {
+
+	// Start the request
+	displayHeader(chalker.DEFAULT, fmt.Sprintf("Checking %s for a Bitpic...", chalk.Cyan.Color(alias+"@"+domain)))
+
+	// Does this paymail have a bitpic profile?
+	var found bool
+	if found, err = bitpic.HasPic(alias, domain); found {
+		url = bitpic.Url(alias, domain)
+		chalker.Log(chalker.SUCCESS, "Bitpic was found for "+alias+"@"+domain)
+	} else {
+		chalker.Log(chalker.DEFAULT, "Bitpic was not found for "+alias+"@"+domain)
 	}
 
 	return

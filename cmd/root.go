@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/mitchellh/go-homedir"
+	"github.com/mrz1836/paymail-inspector/bitpic"
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/mrz1836/paymail-inspector/paymail"
 	"github.com/spf13/cobra"
@@ -114,6 +115,10 @@ func init() {
 
 	// Load the configuration
 	cobra.OnInitialize(initConfig)
+
+	// Set the user agent for the application's external integrations
+	bitpic.UserAgent = configFileDefault + ": v" + Version
+	paymail.UserAgent = configFileDefault + ": v" + Version
 
 	// Add config option
 	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "Config file (default is $HOME/."+configFileDefault+".yaml)")

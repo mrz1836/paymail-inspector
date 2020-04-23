@@ -31,7 +31,7 @@ the receiver and request a payment destination from the receiver's paymail servi
 
 Read more at: `+chalk.Cyan.Color("http://bsvalias.org/04-01-basic-address-resolution.html")),
 	Aliases:    []string{"r", "resolution"},
-	SuggestFor: []string{"address", "destination", "payment", "addressing"},
+	SuggestFor: []string{"address", "destination", "payment", "addressing", "whois"},
 	Example:    applicationName + " resolve mrz@" + defaultDomainName,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
@@ -179,8 +179,14 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/04-01-basic-address-resolu
 			}
 		}
 
+		// Attempt to get a bitpic
+		var bitPicURL string
+		if bitPicURL, err = getBitPic(parts[0], domain); err != nil {
+			chalker.Log(chalker.ERROR, fmt.Sprintf("Checking for bitpic failed: %s", err.Error()))
+		}
+
 		// Rendering profile information
-		displayHeader(chalker.DEFAULT, fmt.Sprintf("Rendering profile for %s...", chalk.Cyan.Color(paymailAddress)))
+		displayHeader(chalker.DEFAULT, fmt.Sprintf("Profile for %s", chalk.Cyan.Color(paymailAddress)))
 
 		// Display the public profile if found
 		if profile != nil {
@@ -190,6 +196,11 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/04-01-basic-address-resolu
 			if len(profile.Avatar) > 0 {
 				chalker.Log(chalker.DEFAULT, fmt.Sprintf("Avatar       : %s", chalk.Cyan.Color(profile.Avatar)))
 			}
+		}
+
+		// Display bitpic if found
+		if len(bitPicURL) > 0 {
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Bitpic       : %s", chalk.Cyan.Color(bitPicURL)))
 		}
 
 		// Show pubkey

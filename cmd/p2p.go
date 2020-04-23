@@ -103,22 +103,33 @@ Read more at: `+chalk.Cyan.Color("https://docs.moneybutton.com/docs/paymail-07-p
 			}
 		}
 
+		// Attempt to get a bitpic
+		var bitPicURL string
+		if bitPicURL, err = getBitPic(parts[0], domain); err != nil {
+			chalker.Log(chalker.ERROR, fmt.Sprintf("Checking for bitpic failed: %s", err.Error()))
+		}
+
 		// Rendering profile information
-		displayHeader(chalker.DEFAULT, fmt.Sprintf("Rendering P2P information for %s...", chalk.Cyan.Color(paymailAddress)))
+		displayHeader(chalker.DEFAULT, fmt.Sprintf("P2P information for %s", chalk.Cyan.Color(paymailAddress)))
 
 		// Display the public profile if found
 		if profile != nil {
 			if len(profile.Name) > 0 {
-				chalker.Log(chalker.DEFAULT, fmt.Sprintf("Name     : %s", chalk.Cyan.Color(profile.Name)))
+				chalker.Log(chalker.DEFAULT, fmt.Sprintf("Name      : %s", chalk.Cyan.Color(profile.Name)))
 			}
 			if len(profile.Avatar) > 0 {
-				chalker.Log(chalker.DEFAULT, fmt.Sprintf("Avatar   : %s", chalk.Cyan.Color(profile.Avatar)))
+				chalker.Log(chalker.DEFAULT, fmt.Sprintf("Avatar    : %s", chalk.Cyan.Color(profile.Avatar)))
 			}
+		}
+
+		// Display bitpic if found
+		if len(bitPicURL) > 0 {
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Bitpic    : %s", chalk.Cyan.Color(bitPicURL)))
 		}
 
 		// If there is a reference
 		if len(p2pResponse.Reference) > 0 {
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Reference: %s", chalk.Cyan.Color(p2pResponse.Reference)))
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Reference : %s", chalk.Cyan.Color(p2pResponse.Reference)))
 		}
 
 		// Output the results
@@ -126,9 +137,9 @@ Read more at: `+chalk.Cyan.Color("https://docs.moneybutton.com/docs/paymail-07-p
 
 			// Show output script & amount
 			displayHeader(chalker.DEFAULT, fmt.Sprintf("Output #%d", index+1))
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Script  : %s", chalk.Cyan.Color(output.Script)))
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Satoshis: %s", chalk.Cyan.Color(fmt.Sprintf("%d", output.Satoshis))))
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Address : %s", chalk.Cyan.Color(output.Address)))
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Script    : %s", chalk.Cyan.Color(output.Script)))
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Satoshis  : %s", chalk.Cyan.Color(fmt.Sprintf("%d", output.Satoshis))))
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Address   : %s", chalk.Cyan.Color(output.Address)))
 		}
 	},
 }
