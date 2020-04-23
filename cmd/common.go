@@ -13,6 +13,7 @@ import (
 	"github.com/mrz1836/paymail-inspector/bitpic"
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/mrz1836/paymail-inspector/paymail"
+	"github.com/mrz1836/paymail-inspector/roundesk"
 	"github.com/ryanuber/columnize"
 	"github.com/spf13/viper"
 	"github.com/ttacon/chalk"
@@ -234,12 +235,48 @@ func getBitPic(alias, domain string) (url string, err error) {
 	displayHeader(chalker.DEFAULT, fmt.Sprintf("Checking %s for a Bitpic...", chalk.Cyan.Color(alias+"@"+domain)))
 
 	// Does this paymail have a bitpic profile?
-	var found bool
-	if found, err = bitpic.HasPic(alias, domain); found {
-		url = bitpic.Url(alias, domain)
+	var resp *bitpic.Response
+	if resp, err = bitpic.GetPic(alias, domain, !skipTracing); err != nil {
+		return
+	}
+
+	// Display the tracing results
+	if !skipTracing {
+		displayTracingResults(resp.Tracing, resp.StatusCode)
+	}
+
+	// Checks if the response was good
+	if resp != nil && resp.Found {
+		url = resp.URL
 		chalker.Log(chalker.SUCCESS, "Bitpic was found for "+alias+"@"+domain)
 	} else {
-		chalker.Log(chalker.DEFAULT, "Bitpic was not found for "+alias+"@"+domain)
+		chalker.Log(chalker.DEFAULT, "Bitpic was not found")
+	}
+
+	return
+}
+
+// getRoundeskProfile will get a Roundesk profile if it exists
+func getRoundeskProfile(alias, domain string) (profile *roundesk.Response, err error) {
+
+	// Start the request
+	displayHeader(chalker.DEFAULT, fmt.Sprintf("Checking %s for a Roundesk profile...", chalk.Cyan.Color(alias+"@"+domain)))
+
+	// Find a roundesk profile
+	if profile, err = roundesk.GetProfile(alias, domain, !skipTracing); err != nil {
+		return
+	}
+
+	// Display the tracing results
+	if !skipTracing {
+		displayTracingResults(profile.Tracing, profile.StatusCode)
+	}
+
+	// Success or failure
+	if profile != nil && profile.Profile != nil && len(profile.Profile.ID) > 0 {
+		chalker.Log(chalker.SUCCESS, "Roundesk profile was found")
+	} else {
+		chalker.Log(chalker.DEFAULT, "Roundesk profile was not found")
 	}
 
 	return

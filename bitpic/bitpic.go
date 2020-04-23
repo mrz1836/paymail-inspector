@@ -6,28 +6,37 @@ package bitpic
 
 import (
 	"fmt"
+	"net/http"
 	"time"
 
-	"gopkg.in/resty.v1"
+	"github.com/go-resty/resty/v2"
 )
 
-// Defaults for bitpic functions
+// Defaults for bitpic package
 const (
 	bitPicURL         = "https://bitpic.network" // Network to use
 	defaultGetTimeout = 15                       // In seconds
 	defaultUserAgent  = "go:bitpic"              // Default user agent
 )
 
-// Override defaults
+// Override the package defaults
 var (
 	DefaultImage string             // custom default image (if no image is found)
 	Network      = bitPicURL        // override the default network
 	UserAgent    = defaultUserAgent // override the default user agent
 )
 
-// HasPic will check if a bitpic exists for the given paymail address
+// Response is the standard fields returned on all responses
+type Response struct {
+	Found      bool            `json:"found"`       // Flag if the bitpic was found
+	StatusCode int             `json:"status_code"` // Status code returned on the request
+	Tracing    resty.TraceInfo `json:"tracing"`     // Trace information if enabled on the request
+	URL        string          `json:"url"`         // The bitpic url for the image
+}
+
+// GetPic will check if a bitpic exists for the given paymail address and fetch the url if found
 // Specs: https://bitpic.network/about
-func HasPic(alias, domain string) (found bool, err error) {
+func GetPic(alias, domain string, tracing bool) (response *Response, err error) {
 
 	// Set the url for the request
 	reqURL := fmt.Sprintf("%s/exists/%s@%s", Network, alias, domain)
@@ -36,13 +45,32 @@ func HasPic(alias, domain string) (found bool, err error) {
 	client := resty.New().SetTimeout(defaultGetTimeout * time.Second)
 	var resp *resty.Response
 	req := client.R().SetHeader("User-Agent", UserAgent)
+	if tracing {
+		req.EnableTrace()
+	}
 	if resp, err = req.Get(reqURL); err != nil {
 		return
 	}
 
+	// Start the response
+	response = new(Response)
+
+	// Tracing enabled?
+	if tracing {
+		response.Tracing = resp.Request.TraceInfo()
+	}
+
+	// Check for a successful status code
+	response.StatusCode = resp.StatusCode()
+	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusNotModified {
+		err = fmt.Errorf("bad response from bitpic provider: %d", response.StatusCode)
+		return
+	}
+
 	// Test the response
-	if string(resp.Body()) == "1" {
-		found = true
+	response.Found = string(resp.Body()) == "1"
+	if response.Found {
+		response.URL = Url(alias, domain)
 	}
 
 	return

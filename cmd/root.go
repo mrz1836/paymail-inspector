@@ -12,6 +12,7 @@ import (
 	"github.com/mrz1836/paymail-inspector/bitpic"
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/mrz1836/paymail-inspector/paymail"
+	"github.com/mrz1836/paymail-inspector/roundesk"
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
 	"github.com/spf13/viper"
@@ -34,10 +35,12 @@ var (
 	satoshis           uint64
 	serviceName        string
 	signature          string
+	skipBitpic         bool
 	skipBrfcValidation bool
 	skipDnsCheck       bool
 	skipPki            bool
 	skipPublicProfile  bool
+	skipRoundesk       bool
 	skipSrvCheck       bool
 	skipSSLCheck       bool
 	skipTracing        bool
@@ -57,7 +60,7 @@ const (
 )
 
 // Version is set manually (also make:build overwrites this value from Github's latest tag)
-var Version = "v0.1.1"
+var Version = "v0.1.2"
 
 // rootCmd represents the base command when called without any sub-commands
 var rootCmd = &cobra.Command{
@@ -119,6 +122,7 @@ func init() {
 	// Set the user agent for the application's external integrations
 	bitpic.UserAgent = configFileDefault + ": v" + Version
 	paymail.UserAgent = configFileDefault + ": v" + Version
+	roundesk.UserAgent = configFileDefault + ": v" + Version
 
 	// Add config option
 	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "Config file (default is $HOME/."+configFileDefault+".yaml)")

@@ -103,10 +103,12 @@ Read more at: `+chalk.Cyan.Color("https://docs.moneybutton.com/docs/paymail-07-p
 			}
 		}
 
-		// Attempt to get a bitpic
+		// Attempt to get a bitpic (if enabled)
 		var bitPicURL string
-		if bitPicURL, err = getBitPic(parts[0], domain); err != nil {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("Checking for bitpic failed: %s", err.Error()))
+		if !skipPublicProfile {
+			if bitPicURL, err = getBitPic(parts[0], domain); err != nil {
+				chalker.Log(chalker.ERROR, fmt.Sprintf("Checking for bitpic failed: %s", err.Error()))
+			}
 		}
 
 		// Rendering profile information

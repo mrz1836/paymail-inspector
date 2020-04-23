@@ -6,6 +6,7 @@ import (
 
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/mrz1836/paymail-inspector/paymail"
+	"github.com/mrz1836/paymail-inspector/roundesk"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/ttacon/chalk"
@@ -179,14 +180,51 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/04-01-basic-address-resolu
 			}
 		}
 
-		// Attempt to get a bitpic
+		// Attempt to get a bitpic (if enabled)
 		var bitPicURL string
-		if bitPicURL, err = getBitPic(parts[0], domain); err != nil {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("Checking for bitpic failed: %s", err.Error()))
+		if !skipPublicProfile {
+			if bitPicURL, err = getBitPic(parts[0], domain); err != nil {
+				chalker.Log(chalker.ERROR, fmt.Sprintf("Checking for bitpic failed: %s", err.Error()))
+			}
+		}
+
+		// Attempt to get a Roundesk profile (if enabled)
+		if !skipRoundesk {
+			var roundesk *roundesk.Response
+			if roundesk, err = getRoundeskProfile(parts[0], domain); err != nil {
+				chalker.Log(chalker.ERROR, fmt.Sprintf("Checking for roundesk profile failed: %s", err.Error()))
+			}
+
+			// Display the roundesk profile if found
+			if roundesk != nil && roundesk.Profile != nil {
+
+				// Rendering profile information
+				displayHeader(chalker.DEFAULT, fmt.Sprintf("Roundesk profile for %s", chalk.Cyan.Color(paymailAddress)))
+
+				if len(roundesk.Profile.Name) > 0 {
+					chalker.Log(chalker.DEFAULT, fmt.Sprintf("Name      : %s", chalk.Cyan.Color(roundesk.Profile.Name)))
+				}
+				if len(roundesk.Profile.Headline) > 0 {
+					chalker.Log(chalker.DEFAULT, fmt.Sprintf("Headline  : %s", chalk.Cyan.Color(roundesk.Profile.Headline)))
+				}
+				if len(roundesk.Profile.Bio) > 0 {
+					roundesk.Profile.Bio = strings.TrimSuffix(roundesk.Profile.Bio, "\n")
+					chalker.Log(chalker.DEFAULT, fmt.Sprintf("Bio       : %s", chalk.Cyan.Color(roundesk.Profile.Bio)))
+				}
+				if len(roundesk.Profile.Twetch) > 0 {
+					chalker.Log(chalker.DEFAULT, fmt.Sprintf("Twetch    : %s", chalk.Cyan.Color("https://twetch.app/u/"+roundesk.Profile.Twetch)))
+				}
+
+				chalker.Log(chalker.DEFAULT, fmt.Sprintf("URL       : %s", chalk.Cyan.Color("https://roundesk.co/u/"+parts[0]+"@"+domain)))
+
+				if len(roundesk.Profile.Nonce) > 0 {
+					chalker.Log(chalker.DEFAULT, fmt.Sprintf("Nonce     : %s", chalk.Cyan.Color(roundesk.Profile.Nonce)))
+				}
+			}
 		}
 
 		// Rendering profile information
-		displayHeader(chalker.DEFAULT, fmt.Sprintf("Profile for %s", chalk.Cyan.Color(paymailAddress)))
+		displayHeader(chalker.DEFAULT, fmt.Sprintf("Public profile for %s", chalk.Cyan.Color(paymailAddress)))
 
 		// Display the public profile if found
 		if profile != nil {
@@ -242,8 +280,14 @@ func init() {
 	resolveCmd.Flags().StringVarP(&signature, "signature", "s", "", "The signature of the entire request")
 
 	// Skip getting the PubKey
-	resolveCmd.Flags().BoolVar(&skipPki, "skip-pki", false, "Skip firing pki request and getting the pubkey")
+	resolveCmd.Flags().BoolVar(&skipPki, "skip-pki", false, "Skip the pki request")
 
 	// Skip getting public profile
-	resolveCmd.Flags().BoolVar(&skipPublicProfile, "skip-public-profile", false, "Skip firing public profile request and getting the avatar")
+	resolveCmd.Flags().BoolVar(&skipPublicProfile, "skip-public-profile", false, "Skip the public profile request")
+
+	// Skip getting Bitpic avatar
+	resolveCmd.Flags().BoolVar(&skipBitpic, "skip-bitpic", false, "Skip trying to get an associated Bitpic")
+
+	// Skip getting Roundesk profile
+	resolveCmd.Flags().BoolVar(&skipRoundesk, "skip-roundesk", false, "Skip trying to get an associated Roundesk profile")
 }
