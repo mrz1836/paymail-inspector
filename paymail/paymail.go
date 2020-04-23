@@ -25,7 +25,7 @@ const (
 	maxSRVRecords            = 1            // Given by paymail specs
 )
 
-// Customize the user agent
+// UserAgent is for customizing the user agent
 var UserAgent = defaultUserAgent
 
 // Public defaults for paymail specs
