@@ -21,30 +21,30 @@ import (
 
 // Default flag values for various commands
 var (
-	amount             uint64
-	brfcAuthor         string
-	brfcTitle          string
-	brfcVersion        string
-	configFile         string
-	generateDocs       bool
-	nameServer         string
-	port               int
-	priority           int
-	protocol           string
-	purpose            string
-	satoshis           uint64
-	serviceName        string
-	signature          string
-	skipBitpic         bool
-	skipBrfcValidation bool
-	skipDnsCheck       bool
-	skipPki            bool
-	skipPublicProfile  bool
-	skipRoundesk       bool
-	skipSrvCheck       bool
-	skipSSLCheck       bool
-	skipTracing        bool
-	weight             int
+	amount             uint64 // cmd: resolve
+	brfcAuthor         string // cmd: brfc
+	brfcTitle          string // cmd: brfc
+	brfcVersion        string // cmd: brfc
+	configFile         string // cmd: root
+	generateDocs       bool   // cmd: root
+	nameServer         string // cmd: validate
+	port               int    // cmd: validate
+	priority           int    // cmd: validate
+	protocol           string // cmd: validate
+	purpose            string // cmd: resolve
+	satoshis           uint64 // cmd: resolve
+	serviceName        string // cmd: validate
+	signature          string // cmd: resolve
+	skipBitpic         bool   // cmd: resolve
+	skipBrfcValidation bool   // cmd: brfc
+	skipDnsCheck       bool   // cmd: validate
+	skipPki            bool   // cmd: resolve
+	skipPublicProfile  bool   // cmd: resolve
+	skipRoundesk       bool   // cmd: resolve
+	skipSrvCheck       bool   // cmd: validate
+	skipSSLCheck       bool   // cmd: validate
+	skipTracing        bool   // cmd: root
+	weight             int    // cmd: validate
 )
 
 // Defaults for the application
