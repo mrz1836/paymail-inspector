@@ -136,15 +136,18 @@ Additional paymail information can also be found via [MoneyButton's documentatio
 <details>
 <summary><strong><code>Custom Configuration</code></strong></summary>
 
-The configuration file should be located in your `$HOME` folder and named `.paymail-inspector.yaml`.
+The configuration file should be located in your `$HOME/paymail` folder and named `config.yaml`.
 
-View the [example config file](.paymail-inspector.yaml).
+View the [example config file](config-example.yaml).
+
+You can also specify a custom configuration file using `--config "/folder/path/file.yaml"`
 </details>
 
 <details>
 <summary><strong><code>Package Dependencies</code></strong></summary>
 
 - bitcoinsv's [bsvd](https://github.com/bitcoinsv/bsvd) and [bsvutil](https://github.com/bitcoinsv/bsvutil) for BSV script functionality
+- dgraph's [badger](https://github.com/dgraph-io/badger/v2) for persistent database storage
 - go-resty's [resty](https://github.com/go-resty/resty) for custom HTTP client support
 - miekg's [dns](https://github.com/miekg/dns) package for advanced DNS functionality
 - mitchellh's [go-homedir](https://github.com/mitchellh/go-homedir) to find the home directory
