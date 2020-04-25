@@ -151,6 +151,9 @@ update-releaser:  ## Update the goreleaser application
 	brew update
 	brew upgrade goreleaser
 
+update-terminalizer:  ## Update the terminalizer application
+	npm update -g terminalizer
+
 vet: ## Run the Go vet application
 	go vet -v
 
