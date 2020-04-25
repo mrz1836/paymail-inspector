@@ -1,0 +1,9 @@
+# Example configuration
+# Move this file to your home directory: ~/
+
+# Global Flag - Set the bsvalias version to target
+bsvalias: "1.0"
+
+# Resolve Command - Default sender-handle and name is useful if you are making a lot of the transactions
+sender-name: "your name"
+sender-handle: "your@address.com"
