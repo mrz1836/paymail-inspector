@@ -31,10 +31,28 @@ func RandomHex(n int) (hexString string, err error) {
 }
 
 // getPki will get a pki response (logging and basic error handling)
-func getPki(url, alias, domain string) (pki *paymail.PKIResponse, err error) {
+func getPki(url, alias, domain string, allowCache bool) (pki *paymail.PKIResponse, err error) {
 
 	// Start the request
 	displayHeader(chalker.DEFAULT, fmt.Sprintf("Retrieving public key information for %s...", chalk.Cyan.Color(alias+"@"+domain)))
+
+	// Cache key
+	keyName := "model-pki-" + alias + "@" + domain
+
+	// Do we have cache and db?
+	if !disableCache && databaseEnabled && allowCache {
+		var jsonStr string
+		if jsonStr, err = database.Get(keyName); err != nil {
+			return
+		}
+		if len(jsonStr) > 0 {
+			if err = json.Unmarshal([]byte(jsonStr), &pki); err != nil {
+				return
+			}
+			chalker.Log(chalker.SUCCESS, fmt.Sprintf("Found pubkey %s... (from cache)", pki.PubKey[:10]))
+			return
+		}
+	}
 
 	// Get the PKI for the given address
 	if pki, err = paymail.GetPKI(url, alias, domain, !skipTracing); err != nil {
@@ -60,16 +78,45 @@ func getPki(url, alias, domain string) (pki *paymail.PKIResponse, err error) {
 	// Success
 	if len(pki.PubKey) > 0 {
 		chalker.Log(chalker.SUCCESS, fmt.Sprintf("Found pubkey %s...", pki.PubKey[:10]))
+
+		// Store in db?
+		if databaseEnabled {
+			var jsonStr []byte
+			if jsonStr, err = json.Marshal(pki); err != nil {
+				return
+			}
+			if err = database.Set(keyName, string(jsonStr), 1*time.Hour); err != nil {
+				return
+			}
+		}
 	}
 
 	return
 }
 
 // getSrvRecord will return an srv record, and optional validation
-func getSrvRecord(domain string, validate bool) (srv *net.SRV, err error) {
+func getSrvRecord(domain string, validate bool, allowCache bool) (srv *net.SRV, err error) {
 
 	// Start the request
 	displayHeader(chalker.DEFAULT, fmt.Sprintf("Retrieving SRV record for %s...", chalk.Cyan.Color(domain)))
+
+	// Cache key
+	keyName := "model-srv-" + domain
+
+	// Do we have cache and db?
+	if !disableCache && databaseEnabled && allowCache {
+		var jsonStr string
+		if jsonStr, err = database.Get(keyName); err != nil {
+			return
+		}
+		if len(jsonStr) > 0 {
+			if err = json.Unmarshal([]byte(jsonStr), &srv); err != nil {
+				return
+			}
+			chalker.Log(chalker.SUCCESS, fmt.Sprintf("SRV target: %s:%d --weight %d --priority %d (from cache)", srv.Target, srv.Port, srv.Weight, srv.Priority))
+			return
+		}
+	}
 
 	// Get the record
 	if srv, err = paymail.GetSRVRecord(serviceName, protocol, domain, nameServer); err != nil {
@@ -95,20 +142,31 @@ func getSrvRecord(domain string, validate bool) (srv *net.SRV, err error) {
 
 	if srv != nil {
 		chalker.Log(chalker.SUCCESS, fmt.Sprintf("SRV target: %s:%d --weight %d --priority %d", srv.Target, srv.Port, srv.Weight, srv.Priority))
+
+		// Store in db?
+		if databaseEnabled {
+			var jsonStr []byte
+			if jsonStr, err = json.Marshal(srv); err != nil {
+				return
+			}
+			if err = database.Set(keyName, string(jsonStr), 1*time.Hour); err != nil {
+				return
+			}
+		}
 	}
 
 	return
 }
 
 // getCapabilities will check SRV first, then attempt default domain:port check (logging and basic error handling)
-func getCapabilities(domain string) (capabilities *paymail.CapabilitiesResponse, err error) {
+func getCapabilities(domain string, allowCache bool) (capabilities *paymail.CapabilitiesResponse, err error) {
 
 	capabilityDomain := ""
 	capabilityPort := paymail.DefaultPort
 
 	// Get the details from the SRV record
 	var srv *net.SRV
-	if srv, err = getSrvRecord(domain, false); err != nil {
+	if srv, err = getSrvRecord(domain, false, allowCache); err != nil {
 		chalker.Log(chalker.ERROR, fmt.Sprintf("retrieving SRV record failed: %s", err.Error()))
 		capabilityDomain = domain
 	} else if srv != nil {
@@ -118,6 +176,26 @@ func getCapabilities(domain string) (capabilities *paymail.CapabilitiesResponse,
 
 	// Get the capabilities for the given target domain
 	displayHeader(chalker.DEFAULT, fmt.Sprintf("Retrieving available capabilities for %s...", chalk.Cyan.Color(fmt.Sprintf("%s:%d", capabilityDomain, capabilityPort))))
+
+	// Cache key
+	keyName := "model-capabilities-" + domain
+
+	// Do we have cache and db?
+	if !disableCache && databaseEnabled && allowCache {
+		var jsonStr string
+		if jsonStr, err = database.Get(keyName); err != nil {
+			return
+		}
+		if len(jsonStr) > 0 {
+			if err = json.Unmarshal([]byte(jsonStr), &capabilities); err != nil {
+				return
+			}
+			chalker.Log(chalker.SUCCESS, fmt.Sprintf("Found [%d] capabilities (from cache)", len(capabilities.Capabilities)))
+			return
+		}
+	}
+
+	// Look up the capabilities
 	if capabilities, err = paymail.GetCapabilities(capabilityDomain, capabilityPort, !skipTracing); err != nil {
 		return
 	}
@@ -135,6 +213,17 @@ func getCapabilities(domain string) (capabilities *paymail.CapabilitiesResponse,
 
 	// Success
 	chalker.Log(chalker.SUCCESS, fmt.Sprintf("Found [%d] capabilities", len(capabilities.Capabilities)))
+
+	// Store in db?
+	if databaseEnabled {
+		var jsonStr []byte
+		if jsonStr, err = json.Marshal(capabilities); err != nil {
+			return
+		}
+		if err = database.Set(keyName, string(jsonStr), 1*time.Hour); err != nil {
+			return
+		}
+	}
 
 	return
 }
@@ -207,10 +296,28 @@ func getP2PPaymentDestination(url, alias, domain string, satoshis uint64) (respo
 }
 
 // getPublicProfile will get a public profile (logging and basic error handling)
-func getPublicProfile(url, alias, domain string) (profile *paymail.PublicProfileResponse, err error) {
+func getPublicProfile(url, alias, domain string, allowCache bool) (profile *paymail.PublicProfileResponse, err error) {
 
 	// Start the request
 	displayHeader(chalker.DEFAULT, fmt.Sprintf("Retrieving public profile for %s...", chalk.Cyan.Color(alias+"@"+domain)))
+
+	// Cache key
+	keyName := "model-public-profile-" + alias + "@" + domain
+
+	// Do we have cache and db?
+	if !disableCache && databaseEnabled && allowCache {
+		var jsonStr string
+		if jsonStr, err = database.Get(keyName); err != nil {
+			return
+		}
+		if len(jsonStr) > 0 {
+			if err = json.Unmarshal([]byte(jsonStr), &profile); err != nil {
+				return
+			}
+			chalker.Log(chalker.SUCCESS, "Valid profile found [name, avatar] (from cache)")
+			return
+		}
+	}
 
 	// Get the profile
 	if profile, err = paymail.GetPublicProfile(url, alias, domain, !skipTracing); err != nil {
@@ -225,13 +332,24 @@ func getPublicProfile(url, alias, domain string) (profile *paymail.PublicProfile
 	// Success
 	if len(profile.Name) > 0 && len(profile.Avatar) > 0 {
 		chalker.Log(chalker.SUCCESS, "Valid profile found [name, avatar]")
+
+		// Store in db?
+		if databaseEnabled {
+			var jsonStr []byte
+			if jsonStr, err = json.Marshal(profile); err != nil {
+				return
+			}
+			if err = database.Set(keyName, string(jsonStr), 1*time.Hour); err != nil {
+				return
+			}
+		}
 	}
 
 	return
 }
 
 // getBitPic will get a bitpic if the pic exists
-func getBitPic(alias, domain string) (url string, err error) {
+func getBitPic(alias, domain string, allowCache bool) (url string, err error) {
 
 	// Start the request
 	displayHeader(chalker.DEFAULT, fmt.Sprintf("Checking %s for a Bitpic...", chalk.Cyan.Color(alias+"@"+domain)))
@@ -240,12 +358,12 @@ func getBitPic(alias, domain string) (url string, err error) {
 	keyName := "app-bitpic-" + alias + "@" + domain
 
 	// Do we have caching and db?
-	if !disableCache && databaseEnabled {
+	if !disableCache && databaseEnabled && allowCache {
 		if url, err = database.Get(keyName); err != nil {
 			return
 		}
 		if len(url) > 0 {
-			chalker.Log(chalker.SUCCESS, "Bitpic was found for "+alias+"@"+domain+" from local cache")
+			chalker.Log(chalker.SUCCESS, "Bitpic was found for "+alias+"@"+domain+" (from cache)")
 			return
 		}
 	}
@@ -280,7 +398,7 @@ func getBitPic(alias, domain string) (url string, err error) {
 }
 
 // getRoundeskProfile will get a Roundesk profile if it exists
-func getRoundeskProfile(alias, domain string) (profile *roundesk.Response, err error) {
+func getRoundeskProfile(alias, domain string, allowCache bool) (profile *roundesk.Response, err error) {
 
 	// Start the request
 	displayHeader(chalker.DEFAULT, fmt.Sprintf("Checking %s for a Roundesk profile...", chalk.Cyan.Color(alias+"@"+domain)))
@@ -289,16 +407,16 @@ func getRoundeskProfile(alias, domain string) (profile *roundesk.Response, err e
 	keyName := "app-roundesk-" + alias + "@" + domain
 
 	// Do we have caching and db?
-	if !disableCache && databaseEnabled {
-		var jsonProfile string
-		if jsonProfile, err = database.Get(keyName); err != nil {
+	if !disableCache && databaseEnabled && allowCache {
+		var jsonStr string
+		if jsonStr, err = database.Get(keyName); err != nil {
 			return
 		}
-		if len(jsonProfile) > 0 {
-			if err = json.Unmarshal([]byte(jsonProfile), &profile); err != nil {
+		if len(jsonStr) > 0 {
+			if err = json.Unmarshal([]byte(jsonStr), &profile); err != nil {
 				return
 			}
-			chalker.Log(chalker.SUCCESS, "Roundesk profile was found from local cache")
+			chalker.Log(chalker.SUCCESS, "Roundesk profile was found (from cache)")
 			return
 		}
 	}
@@ -319,11 +437,11 @@ func getRoundeskProfile(alias, domain string) (profile *roundesk.Response, err e
 
 		// Store in db?
 		if databaseEnabled {
-			var jsonProfile []byte
-			if jsonProfile, err = json.Marshal(profile); err != nil {
+			var jsonStr []byte
+			if jsonStr, err = json.Marshal(profile); err != nil {
 				return
 			}
-			if err = database.Set(keyName, string(jsonProfile), 1*time.Hour); err != nil {
+			if err = database.Set(keyName, string(jsonStr), 1*time.Hour); err != nil {
 				return
 			}
 		}

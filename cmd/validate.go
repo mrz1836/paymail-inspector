@@ -81,7 +81,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/index.html")),
 
 			// Get & Validate srv record
 			var srv *net.SRV
-			if srv, err = getSrvRecord(domain, true); err != nil {
+			if srv, err = getSrvRecord(domain, true, false); err != nil {
 				chalker.Log(chalker.ERROR, fmt.Sprintf("Error getting SRV record: %s", err.Error()))
 			}
 			if srv != nil && len(srv.Target) > 0 {
@@ -125,7 +125,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/index.html")),
 
 		// Get the capabilities
 		var capabilities *paymail.CapabilitiesResponse
-		if capabilities, err = getCapabilities(domain); err != nil {
+		if capabilities, err = getCapabilities(domain, false); err != nil {
 			if strings.Contains(err.Error(), "context deadline exceeded") {
 				chalker.Log(chalker.WARN, fmt.Sprintf("No capabilities found for: %s", domain))
 			} else {
@@ -153,7 +153,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/index.html")),
 
 			// Get the PKI for the given address
 			var pki *paymail.PKIResponse
-			if pki, err = getPki(pkiUrl, parts[0], parts[1]); err != nil {
+			if pki, err = getPki(pkiUrl, parts[0], parts[1], false); err != nil {
 				chalker.Log(chalker.ERROR, fmt.Sprintf("error: %s", err.Error()))
 				return
 			} else if pki != nil {

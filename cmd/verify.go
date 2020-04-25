@@ -83,7 +83,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/05-verify-public-key-owner
 		}
 
 		// Get the capabilities
-		capabilities, err := getCapabilities(domain)
+		capabilities, err := getCapabilities(domain, true)
 		if err != nil {
 			if strings.Contains(err.Error(), "context deadline exceeded") {
 				chalker.Log(chalker.WARN, fmt.Sprintf("No capabilities found for: %s", domain))

@@ -14,7 +14,6 @@
 - [Installation](#installation)
 - [Documentation](#documentation)
 - [Examples & Tests](#examples--tests)
-- [Benchmarks](#benchmarks)
 - [Code Standards](#code-standards)
 - [Usage](#usage)
 - [Maintainers](#maintainers)
@@ -31,7 +30,7 @@ $ paymail
 
 **Install using a [compiled binary](https://github.com/mrz1836/paymail-inspector/releases)** on Linux, Mac or Windows _(Mac example)_
 ```bash
-$ curl -LkSs https://github.com/mrz1836/paymail-inspector/releases/download/v0.1.3/paymail-inspector_macOS_64-bit.tar.gz -o app.tar.gz
+$ curl -LkSs https://github.com/mrz1836/paymail-inspector/releases/download/v0.1.4/paymail-inspector_macOS_64-bit.tar.gz -o app.tar.gz
 $ tar -zxf app.tar.gz && cd ./app/
 $ ./paymail
 ```
@@ -153,7 +152,7 @@ You can also specify a custom configuration file using `--config "/folder/path/f
 - mitchellh's [go-homedir](https://github.com/mitchellh/go-homedir) to find the home directory
 - MrZ's [go-validate](https://github.com/mrz1836/go-validate) for domain/email/ip validations
 - ryanuber's [columnize](https://github.com/ryanuber/columnize) for displaying terminal data in columns
-- spf13's [cobra](https://github.com/spf13/cobra) and [viper](https://github.com/spf13/viper) for easy configuration & CLI application development
+- spf13's [cobra](https://github.com/spf13/cobra) and [viper](https://github.com/spf13/viper) for an easy configuration & CLI application development
 - ttacon's [chalk](https://github.com/ttacon/chalk) for colorful logs
 </details>
 

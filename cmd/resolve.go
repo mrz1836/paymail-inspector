@@ -75,7 +75,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/04-01-basic-address-resolu
 		}
 
 		// Get the capabilities
-		capabilities, err := getCapabilities(domain)
+		capabilities, err := getCapabilities(domain, true)
 		if err != nil {
 			if strings.Contains(err.Error(), "context deadline exceeded") {
 				chalker.Log(chalker.WARN, fmt.Sprintf("No capabilities found for: %s", domain))
@@ -120,7 +120,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/04-01-basic-address-resolu
 			if senderHandle != paymailAddress {
 
 				// Get the capabilities
-				senderCapabilities, getErr := getCapabilities(senderDomain)
+				senderCapabilities, getErr := getCapabilities(senderDomain, true)
 				if getErr != nil {
 					if strings.Contains(getErr.Error(), "context deadline exceeded") {
 						chalker.Log(chalker.WARN, fmt.Sprintf("No capabilities found for: %s", domain))
@@ -142,7 +142,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/04-01-basic-address-resolu
 
 				// Get the PKI for the given address
 				var senderPki *paymail.PKIResponse
-				if senderPki, err = getPki(senderPkiUrl, parts[0], parts[1]); err != nil {
+				if senderPki, err = getPki(senderPkiUrl, parts[0], parts[1], true); err != nil {
 					chalker.Log(chalker.ERROR, fmt.Sprintf("Error: %s", err.Error()))
 					return
 				} else if senderPki != nil {
@@ -159,7 +159,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/04-01-basic-address-resolu
 
 		// Get the PKI for the given address
 		var pki *paymail.PKIResponse
-		if pki, err = getPki(pkiUrl, parts[0], domain); err != nil {
+		if pki, err = getPki(pkiUrl, parts[0], domain, true); err != nil {
 			chalker.Log(chalker.ERROR, fmt.Sprintf("Error: %s", err.Error()))
 			return
 		}
@@ -175,7 +175,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/04-01-basic-address-resolu
 		url := capabilities.GetValueString(paymail.BRFCPublicProfile, "")
 		var profile *paymail.PublicProfileResponse
 		if len(url) > 0 && !skipPublicProfile {
-			if profile, err = getPublicProfile(url, parts[0], domain); err != nil {
+			if profile, err = getPublicProfile(url, parts[0], domain, true); err != nil {
 				chalker.Log(chalker.ERROR, fmt.Sprintf("Get public profile failed: %s", err.Error()))
 			}
 		}
@@ -183,7 +183,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/04-01-basic-address-resolu
 		// Attempt to get a bitpic (if enabled)
 		var bitPicURL string
 		if !skipBitpic {
-			if bitPicURL, err = getBitPic(parts[0], domain); err != nil {
+			if bitPicURL, err = getBitPic(parts[0], domain, true); err != nil {
 				chalker.Log(chalker.ERROR, fmt.Sprintf("Checking for bitpic failed: %s", err.Error()))
 			}
 		}
@@ -191,7 +191,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/04-01-basic-address-resolu
 		// Attempt to get a Roundesk profile (if enabled)
 		if !skipRoundesk {
 			var roundesk *roundesk.Response
-			if roundesk, err = getRoundeskProfile(parts[0], domain); err != nil {
+			if roundesk, err = getRoundeskProfile(parts[0], domain, true); err != nil {
 				chalker.Log(chalker.ERROR, fmt.Sprintf("Checking for roundesk profile failed: %s", err.Error()))
 			}
 

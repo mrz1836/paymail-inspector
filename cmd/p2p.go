@@ -62,7 +62,7 @@ Read more at: `+chalk.Cyan.Color("https://docs.moneybutton.com/docs/paymail-07-p
 		}
 
 		// Get the capabilities
-		capabilities, err := getCapabilities(domain)
+		capabilities, err := getCapabilities(domain, true)
 		if err != nil {
 			if strings.Contains(err.Error(), "context deadline exceeded") {
 				chalker.Log(chalker.WARN, fmt.Sprintf("No capabilities found for: %s", domain))
@@ -98,7 +98,7 @@ Read more at: `+chalk.Cyan.Color("https://docs.moneybutton.com/docs/paymail-07-p
 		url = capabilities.GetValueString(paymail.BRFCPublicProfile, "")
 		var profile *paymail.PublicProfileResponse
 		if len(url) > 0 && !skipPublicProfile {
-			if profile, err = getPublicProfile(url, parts[0], domain); err != nil {
+			if profile, err = getPublicProfile(url, parts[0], domain, true); err != nil {
 				chalker.Log(chalker.ERROR, fmt.Sprintf("Get public profile failed: %s", err.Error()))
 			}
 		}
@@ -106,7 +106,7 @@ Read more at: `+chalk.Cyan.Color("https://docs.moneybutton.com/docs/paymail-07-p
 		// Attempt to get a bitpic (if enabled)
 		var bitPicURL string
 		if !skipBitpic {
-			if bitPicURL, err = getBitPic(parts[0], domain); err != nil {
+			if bitPicURL, err = getBitPic(parts[0], domain, true); err != nil {
 				chalker.Log(chalker.ERROR, fmt.Sprintf("Checking for bitpic failed: %s", err.Error()))
 			}
 		}

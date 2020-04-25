@@ -58,7 +58,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/02-02-capability-discovery
 		}
 
 		// Get the capabilities
-		capabilities, err := getCapabilities(domain)
+		capabilities, err := getCapabilities(domain, false)
 		if err != nil {
 			if strings.Contains(err.Error(), "context deadline exceeded") {
 				chalker.Log(chalker.WARN, fmt.Sprintf("No capabilities found for: %s", domain))
