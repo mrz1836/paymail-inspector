@@ -3,6 +3,7 @@ package cmd
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"net"
 	"strings"
@@ -10,10 +11,11 @@ import (
 
 	"github.com/go-resty/resty/v2"
 	"github.com/mrz1836/go-validate"
-	"github.com/mrz1836/paymail-inspector/bitpic"
 	"github.com/mrz1836/paymail-inspector/chalker"
+	"github.com/mrz1836/paymail-inspector/database"
+	"github.com/mrz1836/paymail-inspector/integrations/bitpic"
+	"github.com/mrz1836/paymail-inspector/integrations/roundesk"
 	"github.com/mrz1836/paymail-inspector/paymail"
-	"github.com/mrz1836/paymail-inspector/roundesk"
 	"github.com/ryanuber/columnize"
 	"github.com/spf13/viper"
 	"github.com/ttacon/chalk"
@@ -234,6 +236,20 @@ func getBitPic(alias, domain string) (url string, err error) {
 	// Start the request
 	displayHeader(chalker.DEFAULT, fmt.Sprintf("Checking %s for a Bitpic...", chalk.Cyan.Color(alias+"@"+domain)))
 
+	// Cache key
+	keyName := "app-bitpic-" + alias + "@" + domain
+
+	// Do we have caching and db?
+	if !disableCache && databaseEnabled {
+		if url, err = database.Get(keyName); err != nil {
+			return
+		}
+		if len(url) > 0 {
+			chalker.Log(chalker.SUCCESS, "Bitpic was found for "+alias+"@"+domain+" from local cache")
+			return
+		}
+	}
+
 	// Does this paymail have a bitpic profile?
 	var resp *bitpic.Response
 	if resp, err = bitpic.GetPic(alias, domain, !skipTracing); err != nil {
@@ -249,6 +265,13 @@ func getBitPic(alias, domain string) (url string, err error) {
 	if resp != nil && resp.Found {
 		url = resp.URL
 		chalker.Log(chalker.SUCCESS, "Bitpic was found for "+alias+"@"+domain)
+
+		// Store in db?
+		if databaseEnabled {
+			if err = database.Set(keyName, url, 1*time.Hour); err != nil {
+				return
+			}
+		}
 	} else {
 		chalker.Log(chalker.DEFAULT, "Bitpic was not found")
 	}
@@ -261,6 +284,24 @@ func getRoundeskProfile(alias, domain string) (profile *roundesk.Response, err e
 
 	// Start the request
 	displayHeader(chalker.DEFAULT, fmt.Sprintf("Checking %s for a Roundesk profile...", chalk.Cyan.Color(alias+"@"+domain)))
+
+	// Cache key
+	keyName := "app-roundesk-" + alias + "@" + domain
+
+	// Do we have caching and db?
+	if !disableCache && databaseEnabled {
+		var jsonProfile string
+		if jsonProfile, err = database.Get(keyName); err != nil {
+			return
+		}
+		if len(jsonProfile) > 0 {
+			if err = json.Unmarshal([]byte(jsonProfile), &profile); err != nil {
+				return
+			}
+			chalker.Log(chalker.SUCCESS, "Roundesk profile was found from local cache")
+			return
+		}
+	}
 
 	// Find a roundesk profile
 	if profile, err = roundesk.GetProfile(alias, domain, !skipTracing); err != nil {
@@ -275,6 +316,18 @@ func getRoundeskProfile(alias, domain string) (profile *roundesk.Response, err e
 	// Success or failure
 	if profile != nil && profile.Profile != nil && len(profile.Profile.ID) > 0 {
 		chalker.Log(chalker.SUCCESS, "Roundesk profile was found")
+
+		// Store in db?
+		if databaseEnabled {
+			var jsonProfile []byte
+			if jsonProfile, err = json.Marshal(profile); err != nil {
+				return
+			}
+			if err = database.Set(keyName, string(jsonProfile), 1*time.Hour); err != nil {
+				return
+			}
+		}
+
 	} else {
 		chalker.Log(chalker.DEFAULT, "Roundesk profile was not found")
 	}

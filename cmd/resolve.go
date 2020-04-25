@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/mrz1836/paymail-inspector/chalker"
+	"github.com/mrz1836/paymail-inspector/integrations/roundesk"
 	"github.com/mrz1836/paymail-inspector/paymail"
-	"github.com/mrz1836/paymail-inspector/roundesk"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/ttacon/chalk"
