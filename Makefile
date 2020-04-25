@@ -129,13 +129,13 @@ tag-update: ## Update an existing tag to current commit (IE: make tag-update ver
 	git fetch --tags -f
 
 test: ## Runs vet, lint and ALL tests
-	go vet -v
-	golint
+	make vet
+	make lint
 	go test ./... -v
 
 test-short: ## Runs vet, lint and tests (excludes integration tests)
-	go vet -v
-	golint
+	make vet
+	make lint
 	go test ./... -v -test.short
 
 uninstall: ## Uninstall the application (and remove files)
