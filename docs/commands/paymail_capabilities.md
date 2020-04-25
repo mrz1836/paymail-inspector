@@ -43,8 +43,10 @@ paymail capabilities moneybutton.com
 
 ```
       --bsvalias string   The bsvalias version (default "1.0")
-      --config string     Config file (default is $HOME/.paymail-inspector.yaml)
+      --config string     Custom config file (default is $HOME/paymail/config.yaml)
       --docs              Generate docs from all commands (./docs/commands)
+      --flush-cache       Flushes ALL cache, empties local database
+      --no-cache          Turn off caching for this specific command
   -t, --skip-tracing      Turn off request tracing information
 ```
 
