@@ -79,7 +79,7 @@ $ paymail p2p mrz@moneybutton.com
 ___
 
 ### `resolve`
-> Returns the `pubkey`, `output script` and `address` for a given paymail address ([view example](docs/examples.md#resolve-paymail-address-by-paymail))
+> Returns the `pubkey`, `output script`, `address` and `profile` for a given paymail address ([view example](docs/examples.md#resolve-paymail-address-by-paymail))
 ```bash
 $ paymail resolve mrz@moneybutton.com
 ```
@@ -131,6 +131,15 @@ Additional paymail information can also be found via [MoneyButton's documentatio
 - [ ] MinerID Extension: MinerParams ([1b1d980b5b72](https://github.com/bitcoin-sv-specs/brfc-minerid/tree/master/extensions/minerparams))
 - [ ] MinerID Extension: BlockInfo ([a224052ad433](https://github.com/bitcoin-sv-specs/brfc-minerid/tree/master/extensions/blockinfo))
 - [ ] MinerID Extension: BlockBind ([b8930c2bbf5d](https://github.com/bitcoin-sv-specs/brfc-minerid/tree/master/extensions/blockbind))
+
+<details>
+<summary><strong><code>Integrated Service Providers</code></strong></summary>
+
+- Unwriter's [bitpic](https://bitpic.network/)
+- Deggen's [Roundesk](https://roundesk.co/)
+- Anons's [2paymail](https://2paymail.com/)
+
+</details>
 
 <details>
 <summary><strong><code>Custom Configuration</code></strong></summary>
