@@ -99,11 +99,11 @@ lint: ## Run the Go lint application
 linux: $(LINUX) ## Build for Linux (amd64)
 
 release: ## Full production release (creates release in Github)
-	 goreleaser --rm-dist
-	 make godocs
+	goreleaser --rm-dist
+	make godocs
 
 release-test: ## Full production test release (everything except deploy)
-	 goreleaser --skip-publish --rm-dist
+	goreleaser --skip-publish --rm-dist
 
 release-snap: ## Test the full release (build binaries)
 	goreleaser --snapshot --skip-publish --rm-dist
