@@ -7,6 +7,7 @@ package twopaymail
 import (
 	"fmt"
 	"net/http"
+	"regexp"
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -30,6 +31,8 @@ type Response struct {
 	Found      bool            `json:"found"`       // Flag if the bitpic was found
 	StatusCode int             `json:"status_code"` // Status code returned on the request
 	Tracing    resty.TraceInfo `json:"tracing"`     // Trace information if enabled on the request
+	Twitter    string          `json:"twitter"`     // The associated twitter account if found
+	TX         string          `json:"tx"`          // The associated tx to validate the association
 	URL        string          `json:"url"`         // The bitpic url for the image
 }
 
@@ -71,6 +74,27 @@ func GetAccount(alias, domain string, tracing bool) (response *Response, err err
 	}
 
 	// todo: better detection if the account is present (api req? html parse?)
+
+	// Try to get the twitter account (hack for now)
+	var reg *regexp.Regexp
+	if reg, err = regexp.Compile(`https://twitter.com/(.*?)/status/`); err != nil {
+		return
+	}
+
+	// Extract the twitter user name
+	if found := reg.FindStringSubmatch(string(resp.Body())); len(found) > 1 {
+		response.Twitter = found[1]
+	}
+
+	// Try to get the TX for authentication (hack for now)
+	if reg, err = regexp.Compile(`https://whatsonchain.com/tx/(.*?)">View Transaction`); err != nil {
+		return
+	}
+
+	// Extract the TX
+	if found := reg.FindStringSubmatch(string(resp.Body())); len(found) > 1 {
+		response.TX = found[1]
+	}
 
 	// Set the url
 	response.Found = true

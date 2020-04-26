@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/mrz1836/paymail-inspector/chalker"
+	twopaymail "github.com/mrz1836/paymail-inspector/integrations/2paymail"
 	"github.com/mrz1836/paymail-inspector/integrations/roundesk"
 	"github.com/mrz1836/paymail-inspector/paymail"
 	"github.com/spf13/cobra"
@@ -189,9 +190,9 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/04-01-basic-address-resolu
 		}
 
 		// Attempt to get a 2paymail (if enabled)
-		var twoPaymailUrl string
+		var twoPaymail *twopaymail.Response
 		if !skip2paymail {
-			if twoPaymailUrl, err = get2paymail(parts[0], domain, true); err != nil {
+			if twoPaymail, err = get2paymail(parts[0], domain, true); err != nil {
 				chalker.Log(chalker.ERROR, fmt.Sprintf("Checking for 2paymail failed: %s", err.Error()))
 			}
 		}
@@ -244,14 +245,20 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/04-01-basic-address-resolu
 			}
 		}
 
-		// Display 2paymail if found
-		if len(twoPaymailUrl) > 0 {
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("2paymail     : %s", chalk.Cyan.Color(twoPaymailUrl)))
-		}
-
 		// Display bitpic if found
 		if len(bitPicURL) > 0 {
 			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Bitpic       : %s", chalk.Cyan.Color(bitPicURL)))
+		}
+
+		// Display 2paymail if found
+		if twoPaymail != nil && len(twoPaymail.URL) > 0 {
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("2paymail     : %s", chalk.Cyan.Color(twoPaymail.URL)))
+			if len(twoPaymail.TX) > 0 {
+				chalker.Log(chalker.DEFAULT, fmt.Sprintf("2paymail TX  : %s", chalk.Cyan.Color(twoPaymail.TX)))
+			}
+			if len(twoPaymail.Twitter) > 0 {
+				chalker.Log(chalker.DEFAULT, fmt.Sprintf("Twitter      : %s", chalk.Cyan.Color(twoPaymail.Twitter)))
+			}
 		}
 
 		// Show pubkey

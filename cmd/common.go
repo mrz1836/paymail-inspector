@@ -455,7 +455,7 @@ func getRoundeskProfile(alias, domain string, allowCache bool) (profile *roundes
 }
 
 // get2paymail will get a 2paymail account if it exists
-func get2paymail(alias, domain string, allowCache bool) (url string, err error) {
+func get2paymail(alias, domain string, allowCache bool) (profile *twopaymail.Response, err error) {
 
 	// Start the request
 	displayHeader(chalker.DEFAULT, fmt.Sprintf("Checking %s for a 2paymail...", chalk.Cyan.Color(alias+"@"+domain)))
@@ -465,34 +465,40 @@ func get2paymail(alias, domain string, allowCache bool) (url string, err error) 
 
 	// Do we have caching and db?
 	if !disableCache && databaseEnabled && allowCache {
-		if url, err = database.Get(keyName); err != nil {
+		var jsonStr string
+		if jsonStr, err = database.Get(keyName); err != nil {
 			return
 		}
-		if len(url) > 0 {
+		if len(jsonStr) > 0 {
+			if err = json.Unmarshal([]byte(jsonStr), &profile); err != nil {
+				return
+			}
 			chalker.Log(chalker.SUCCESS, "2paymail was found for "+alias+"@"+domain+" (from cache)")
 			return
 		}
 	}
 
 	// Does this paymail have a profile?
-	var resp *twopaymail.Response
-	if resp, err = twopaymail.GetAccount(alias, domain, !skipTracing); err != nil {
+	if profile, err = twopaymail.GetAccount(alias, domain, !skipTracing); err != nil {
 		return
 	}
 
 	// Display the tracing results
 	if !skipTracing {
-		displayTracingResults(resp.Tracing, resp.StatusCode)
+		displayTracingResults(profile.Tracing, profile.StatusCode)
 	}
 
 	// Checks if the response was good
-	if resp != nil && resp.Found {
-		url = resp.URL
+	if profile != nil && profile.Found {
 		chalker.Log(chalker.SUCCESS, "2paymail was found for "+alias+"@"+domain)
 
 		// Store in db?
 		if databaseEnabled {
-			if err = database.Set(keyName, url, 1*time.Hour); err != nil {
+			var jsonStr []byte
+			if jsonStr, err = json.Marshal(profile); err != nil {
+				return
+			}
+			if err = database.Set(keyName, string(jsonStr), 1*time.Hour); err != nil {
 				return
 			}
 		}
