@@ -1,8 +1,8 @@
 /*
-Package _2paymail interfaces with 2paymail.com
+Package twopaymail interfaces with 2paymail.com
 Read more at: https://2paymail.com/login
 */
-package _2paymail
+package twopaymail
 
 import (
 	"fmt"
@@ -12,7 +12,7 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-// Defaults for 2paymail package
+// Defaults for twopaymail (2paymail) package
 const (
 	defaultUrl        = "https://2paymail.com" // Network to use
 	defaultGetTimeout = 15                     // In seconds

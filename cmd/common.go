@@ -13,7 +13,7 @@ import (
 	"github.com/mrz1836/go-validate"
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/mrz1836/paymail-inspector/database"
-	_2paymail "github.com/mrz1836/paymail-inspector/integrations/2paymail"
+	twopaymail "github.com/mrz1836/paymail-inspector/integrations/2paymail"
 	"github.com/mrz1836/paymail-inspector/integrations/bitpic"
 	"github.com/mrz1836/paymail-inspector/integrations/roundesk"
 	"github.com/mrz1836/paymail-inspector/paymail"
@@ -475,8 +475,8 @@ func get2paymail(alias, domain string, allowCache bool) (url string, err error) 
 	}
 
 	// Does this paymail have a profile?
-	var resp *_2paymail.Response
-	if resp, err = _2paymail.GetAccount(alias, domain, !skipTracing); err != nil {
+	var resp *twopaymail.Response
+	if resp, err = twopaymail.GetAccount(alias, domain, !skipTracing); err != nil {
 		return
 	}
 
