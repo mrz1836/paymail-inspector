@@ -1,14 +1,14 @@
 # Paymail Inspector
 
-[![Go](https://img.shields.io/github/go-mod/go-version/mrz1836/paymail-inspector?v=5)](https://golang.org/)
-[![Build Status](https://travis-ci.com/mrz1836/paymail-inspector.svg?branch=master&v=5)](https://travis-ci.com/mrz1836/paymail-inspector)
-[![Report](https://goreportcard.com/badge/github.com/mrz1836/paymail-inspector?style=flat&v=5)](https://goreportcard.com/report/github.com/mrz1836/paymail-inspector)
-[![Release](https://img.shields.io/github/release-pre/mrz1836/paymail-inspector.svg?style=flat&v=5)](https://github.com/mrz1836/paymail-inspector/releases)
+[![Go](https://img.shields.io/github/go-mod/go-version/mrz1836/paymail-inspector?v=6)](https://golang.org/)
+[![Build Status](https://travis-ci.com/mrz1836/paymail-inspector.svg?branch=master&v=6)](https://travis-ci.com/mrz1836/paymail-inspector)
+[![Report](https://goreportcard.com/badge/github.com/mrz1836/paymail-inspector?style=flat&v=6)](https://goreportcard.com/report/github.com/mrz1836/paymail-inspector)
+[![Release](https://img.shields.io/github/release-pre/mrz1836/paymail-inspector.svg?style=flat&v=6)](https://github.com/mrz1836/paymail-inspector/releases)
 [![GoDoc](https://godoc.org/github.com/mrz1836/paymail-inspector?status.svg&style=flat)](https://pkg.go.dev/github.com/mrz1836/paymail-inspector?tab=subdirectories)
 
 > **paymail-inspector** is a CLI app for interacting with paymail service providers
 
-<img src=".github/IMAGES/paymail-inspector.gif?raw=true&v=5" alt="Paymail Commands">
+<img src=".github/IMAGES/paymail-inspector.gif?raw=true&v=6" alt="Paymail Commands">
 
 ## Table of Contents
 - [Installation](#installation)
@@ -137,7 +137,7 @@ Additional paymail information can also be found via [MoneyButton's documentatio
 
 - Unwriter's [bitpic](https://bitpic.network/)
 - Deggen's [Roundesk](https://roundesk.co/)
-- Anons's [2paymail](https://2paymail.com/)
+- Anon's [2paymail](https://2paymail.com/)
 
 </details>
 
