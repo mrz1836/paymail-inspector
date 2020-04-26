@@ -13,6 +13,7 @@ import (
 	"github.com/mrz1836/go-validate"
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/mrz1836/paymail-inspector/database"
+	_2paymail "github.com/mrz1836/paymail-inspector/integrations/2paymail"
 	"github.com/mrz1836/paymail-inspector/integrations/bitpic"
 	"github.com/mrz1836/paymail-inspector/integrations/roundesk"
 	"github.com/mrz1836/paymail-inspector/paymail"
@@ -448,6 +449,55 @@ func getRoundeskProfile(alias, domain string, allowCache bool) (profile *roundes
 
 	} else {
 		chalker.Log(chalker.DEFAULT, "Roundesk profile was not found")
+	}
+
+	return
+}
+
+// get2paymail will get a 2paymail account if it exists
+func get2paymail(alias, domain string, allowCache bool) (url string, err error) {
+
+	// Start the request
+	displayHeader(chalker.DEFAULT, fmt.Sprintf("Checking %s for a 2paymail...", chalk.Cyan.Color(alias+"@"+domain)))
+
+	// Cache key
+	keyName := "app-2paymail-" + alias + "@" + domain
+
+	// Do we have caching and db?
+	if !disableCache && databaseEnabled && allowCache {
+		if url, err = database.Get(keyName); err != nil {
+			return
+		}
+		if len(url) > 0 {
+			chalker.Log(chalker.SUCCESS, "2paymail was found for "+alias+"@"+domain+" (from cache)")
+			return
+		}
+	}
+
+	// Does this paymail have a profile?
+	var resp *_2paymail.Response
+	if resp, err = _2paymail.GetAccount(alias, domain, !skipTracing); err != nil {
+		return
+	}
+
+	// Display the tracing results
+	if !skipTracing {
+		displayTracingResults(resp.Tracing, resp.StatusCode)
+	}
+
+	// Checks if the response was good
+	if resp != nil && resp.Found {
+		url = resp.URL
+		chalker.Log(chalker.SUCCESS, "2paymail was found for "+alias+"@"+domain)
+
+		// Store in db?
+		if databaseEnabled {
+			if err = database.Set(keyName, url, 1*time.Hour); err != nil {
+				return
+			}
+		}
+	} else {
+		chalker.Log(chalker.DEFAULT, "2paymail was not found")
 	}
 
 	return

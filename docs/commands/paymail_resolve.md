@@ -40,6 +40,7 @@ paymail resolve mrz@moneybutton.com
       --sender-handle string   Sender's paymail handle. Required by bsvalias spec. Receiver paymail used if not specified.
       --sender-name string     The sender's name
   -s, --signature string       The signature of the entire request
+      --skip-2paymail          Skip trying to get an associated 2paymail
       --skip-bitpic            Skip trying to get an associated Bitpic
       --skip-pki               Skip the pki request
       --skip-public-profile    Skip the public profile request

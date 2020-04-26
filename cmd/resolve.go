@@ -188,6 +188,14 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/04-01-basic-address-resolu
 			}
 		}
 
+		// Attempt to get a 2paymail (if enabled)
+		var paymailUrl string
+		if !skip2paymail {
+			if paymailUrl, err = get2paymail(parts[0], domain, true); err != nil {
+				chalker.Log(chalker.ERROR, fmt.Sprintf("Checking for 2paymail failed: %s", err.Error()))
+			}
+		}
+
 		// Attempt to get a Roundesk profile (if enabled)
 		if !skipRoundesk {
 			var roundesk *roundesk.Response
@@ -234,6 +242,11 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/04-01-basic-address-resolu
 			if len(profile.Avatar) > 0 {
 				chalker.Log(chalker.DEFAULT, fmt.Sprintf("Avatar       : %s", chalk.Cyan.Color(profile.Avatar)))
 			}
+		}
+
+		// Display 2paymail if found
+		if len(paymailUrl) > 0 {
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("2paymail     : %s", chalk.Cyan.Color(paymailUrl)))
 		}
 
 		// Display bitpic if found
@@ -287,6 +300,9 @@ func init() {
 
 	// Skip getting Bitpic avatar
 	resolveCmd.Flags().BoolVar(&skipBitpic, "skip-bitpic", false, "Skip trying to get an associated Bitpic")
+
+	// Skip getting 2paymail account check
+	resolveCmd.Flags().BoolVar(&skip2paymail, "skip-2paymail", false, "Skip trying to get an associated 2paymail")
 
 	// Skip getting Roundesk profile
 	resolveCmd.Flags().BoolVar(&skipRoundesk, "skip-roundesk", false, "Skip trying to get an associated Roundesk profile")

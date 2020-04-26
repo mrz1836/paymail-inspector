@@ -40,6 +40,7 @@ var (
 	satoshis           uint64 // cmd: resolve
 	serviceName        string // cmd: validate
 	signature          string // cmd: resolve
+	skip2paymail       bool   // cmd: resolve
 	skipBitpic         bool   // cmd: resolve
 	skipBrfcValidation bool   // cmd: brfc
 	skipDnsCheck       bool   // cmd: validate
