@@ -9,9 +9,11 @@ import (
 	"github.com/ttacon/chalk"
 )
 
-// Logging types
+// Logging color/style types
 const (
 	DEFAULT = "default"
+	DIM     = "dim"
+	BOLD    = "bold"
 	ERROR   = "error"
 	INFO    = "info"
 	SUCCESS = "success"
@@ -19,6 +21,8 @@ const (
 )
 
 var (
+	bold   = chalk.White.NewStyle().WithTextStyle(chalk.Bold)
+	dim    = chalk.White.NewStyle().WithTextStyle(chalk.Dim)
 	spacer string
 )
 
@@ -27,7 +31,7 @@ func Error(body string) error {
 	return fmt.Errorf("%s %s%s", chalk.Magenta, body, chalk.Reset)
 }
 
-// Log chalks stuff to console, returns nothing
+// Log writes chalks to console
 func Log(level string, body string) {
 	switch level {
 	case INFO:
@@ -38,6 +42,10 @@ func Log(level string, body string) {
 		fmt.Printf("%s%s%s%s\n", chalk.Magenta, spacer, body, chalk.Reset)
 	case SUCCESS:
 		fmt.Printf("%s%s%s%s\n", chalk.Green, spacer, body, chalk.Reset)
+	case DIM:
+		fmt.Printf("%s%s\n", dim.Style(body), chalk.Reset)
+	case BOLD:
+		fmt.Printf("%s%s\n", bold.Style(body), chalk.Reset)
 	case DEFAULT:
 		fallthrough
 	default:
