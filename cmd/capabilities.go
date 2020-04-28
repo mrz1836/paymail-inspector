@@ -16,7 +16,7 @@ import (
 var capabilitiesCmd = &cobra.Command{
 	Use:   "capabilities",
 	Short: "Get the capabilities of the paymail domain",
-	Long: chalk.Green.Color(`
+	Long: chalk.Green.NewStyle().WithTextStyle(chalk.Bold).Style(`
                           ___.   .__.__  .__  __  .__               
   ____ _____  ___________ \_ |__ |__|  | |__|/  |_|__| ____   ______
 _/ ___\\__  \ \____ \__  \ | __ \|  |  | |  \   __\  |/ __ \ /  ___/

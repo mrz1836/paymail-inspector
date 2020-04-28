@@ -14,7 +14,7 @@ import (
 var verifyCmd = &cobra.Command{
 	Use:   "verify",
 	Short: "Verifies if a paymail is associated to a pubkey",
-	Long: chalk.Green.Color(`
+	Long: chalk.Green.NewStyle().WithTextStyle(chalk.Bold).Style(`
                    .__  _____       
 ___  __ ___________|__|/ ____\__.__.
 \  \/ // __ \_  __ \  \   __<   |  |

@@ -27,7 +27,7 @@ var rootCmd = &cobra.Command{
 	Use:               applicationName,
 	Short:             "Inspect, validate domains or resolve paymail addresses",
 	Example:           applicationName + " -h",
-	Long: chalk.Green.Color(`
+	Long: chalk.Green.NewStyle().WithTextStyle(chalk.Bold).Style(`
 __________                             .__.__    .___                                     __                
 \______   \_____  ___.__. _____ _____  |__|  |   |   | ____   ____________   ____   _____/  |_  ___________ 
  |     ___/\__  \<   |  |/     \\__  \ |  |  |   |   |/    \ /  ___/\____ \_/ __ \_/ ___\   __\/  _ \_  __ \
@@ -70,26 +70,9 @@ func Execute() {
 	// Run root command
 	er(rootCmd.Execute())
 
-	// Generate docs from all commands
+	// Generate documentation from all commands
 	if generateDocs {
-
-		// Replace the colorful logs in terminal (displays in Cobra docs) (color numbers generated)
-		replacer := strings.NewReplacer("[32m", "```", "[33m", "```\n", "[39m", "", "[36m", "", "\u001B", "")
-		rootCmd.Long = replacer.Replace(rootCmd.Long)
-
-		// Loop all command, adjust the Long description, re-add command
-		for _, command := range rootCmd.Commands() {
-			rootCmd.RemoveCommand(command)
-			command.Long = replacer.Replace(command.Long)
-			rootCmd.AddCommand(command)
-		}
-
-		// Generate the markdown docs
-		if err := doc.GenMarkdownTree(rootCmd, docsLocation); err != nil {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("Error generating docs: %s", err.Error()))
-			return
-		}
-		chalker.Log(chalker.SUCCESS, fmt.Sprintf("Successfully generated documentation for %d commands", len(rootCmd.Commands())))
+		generateDocumentation()
 	}
 
 	// Flush cache?
@@ -176,4 +159,28 @@ func initConfig() {
 	}
 
 	// chalker.Log(chalker.INFO, fmt.Sprintf("...loaded config file: %s", viper.ConfigFileUsed()))
+}
+
+// generateDocumentation will generate all documentation about each command
+func generateDocumentation() {
+
+	// Replace the colorful logs in terminal (displays in Cobra docs) (color numbers generated)
+	replacer := strings.NewReplacer("[32m", "```", "[33m", "```\n", "[39m", "", "[22m", "", "[36m", "", "[1m", "", "[40m", "", "[49m", "", "\u001B", "")
+	rootCmd.Long = replacer.Replace(rootCmd.Long)
+
+	// Loop all command, adjust the Long description, re-add command
+	for _, command := range rootCmd.Commands() {
+		rootCmd.RemoveCommand(command)
+		command.Long = replacer.Replace(command.Long)
+		rootCmd.AddCommand(command)
+	}
+
+	// Generate the markdown docs
+	if err := doc.GenMarkdownTree(rootCmd, docsLocation); err != nil {
+		chalker.Log(chalker.ERROR, fmt.Sprintf("Error generating docs: %s", err.Error()))
+		return
+	}
+
+	// Success
+	chalker.Log(chalker.SUCCESS, fmt.Sprintf("Successfully generated documentation for %d commands", len(rootCmd.Commands())))
 }

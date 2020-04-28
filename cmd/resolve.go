@@ -15,7 +15,7 @@ import (
 var resolveCmd = &cobra.Command{
 	Use:   "resolve",
 	Short: "Resolves a paymail address",
-	Long: chalk.Green.Color(`
+	Long: chalk.Green.NewStyle().WithTextStyle(chalk.Bold).Style(`
                             .__               
 _______   ____   __________ |  |___  __ ____  
 \_  __ \_/ __ \ /  ___/  _ \|  |\  \/ // __ \ 

@@ -19,7 +19,7 @@ var whoisCmd = &cobra.Command{
 	SuggestFor: []string{"lookup"},
 	Example: applicationName + ` whois mrz
 ` + applicationName + ` w mrz`,
-	Long: chalk.Green.Color(`
+	Long: chalk.Green.NewStyle().WithTextStyle(chalk.Bold).Style(`
         .__           .__        
 __  _  _|  |__   ____ |__| ______
 \ \/ \/ /  |  \ /  _ \|  |/  ___/

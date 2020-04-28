@@ -18,7 +18,7 @@ const (
 var p2pCmd = &cobra.Command{
 	Use:   "p2p",
 	Short: "Starts a new P2P payment request",
-	Long: chalk.Green.Color(`
+	Long: chalk.Green.NewStyle().WithTextStyle(chalk.Bold).Style(`
        ________         
 ______ \_____  \______  
 \____ \ /  ____/\____ \ 

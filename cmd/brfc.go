@@ -20,7 +20,7 @@ var brfcCmd = &cobra.Command{
 	Example: applicationName + ` brfc list
 ` + applicationName + ` brfc search nChain
 ` + applicationName + ` brfc generate --title "BRFC Specifications" --author "andy (nChain)" --version 1`,
-	Long: chalk.Green.Color(`
+	Long: chalk.Green.NewStyle().WithTextStyle(chalk.Bold).Style(`
 ___.           _____       
 \_ |__________/ ____\____  
  | __ \_  __ \   __\/ ___\ 

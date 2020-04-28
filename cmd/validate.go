@@ -16,7 +16,7 @@ import (
 var validateCmd = &cobra.Command{
 	Use:   "validate",
 	Short: "Validate a paymail address or domain",
-	Long: chalk.Green.Color(`
+	Long: chalk.Green.NewStyle().WithTextStyle(chalk.Bold).Style(`
               .__  .__    .___       __          
 ___  _______  |  | |__| __| _/____ _/  |_  ____  
 \  \/ /\__  \ |  | |  |/ __ |\__  \\   __\/ __ \ 

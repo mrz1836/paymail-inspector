@@ -14,7 +14,7 @@ __  _  _|  |__   ____ |__| ______
 ```
 
 
-Search 6public paymail providers for a handle.
+Search 6 public paymail providers for a handle.
 
 ```
 paymail whois [flags]
