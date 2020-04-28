@@ -2,7 +2,7 @@
 Below are some examples using the **paymail** cli app
 
 ### View All Commands (Help)
-```bash
+```shell script
 $ paymail
 ```
 <img src="../.github/IMAGES/help-command.gif?raw=true&v=7" alt="Help Command">
@@ -23,7 +23,7 @@ ___
 
 
 ### List BRFC Specifications
-```bash
+```shell script
 $ paymail brfc list
 ```
 <details>
@@ -41,7 +41,7 @@ Custom flags for the brfc:list command [(command specs)](commands/paymail_brfc.m
 ___
 
 ### Generate new BRFC ID
-```bash
+```shell script
 $ paymail brfc generate --title "BRFC Specifications" --author "andy (nChain)" --version 1
 ```
 <details>
@@ -54,17 +54,17 @@ $ paymail brfc generate --title "BRFC Specifications" --author "andy (nChain)" -
 <summary><strong><code>Test Cases</code></strong></summary>
 
 Expected ID: `57dd1f54fc67`
-```bash
+```shell script
 $ paymail brfc generate --title "BRFC Specifications" --author "andy (nChain)" --version 1
 ```
 
 Expected ID: `74524c4d6274`
-```bash
+```shell script
 $ paymail brfc generate --title "bsvalias Payment Addressing (PayTo Protocol Prefix)" --author "andy (nChain)" --version 1
 ```
 
 Expected ID: `0036f9b8860f`
-```bash
+```shell script
 $ paymail brfc generate --title "bsvalias Integration with Simplified Payment Protocol" --author "andy (nChain)" --version 1
 ```
 
@@ -81,7 +81,7 @@ Custom flags for the brfc:generate command [(command specs)](commands/paymail_br
 ___
 
 ### Search BRFC Specifications
-```bash
+```shell script
 $ paymail brfc search nChain
 ```
 <details>
@@ -100,7 +100,7 @@ Custom flags for the brfc:search command [(command specs)](commands/paymail_brfc
 ___
 
 ### Get Capabilities (by Domain)
-```bash
+```shell script
 $ paymail capabilities moneybutton.com
 ```
 <details>
@@ -117,7 +117,7 @@ Custom flags for the capabilities request [(command specs)](commands/paymail_cap
 ___
 
 ### Start P2P Payment Request (by Paymail)
-```bash
+```shell script
 $ paymail p2p mrz@moneybutton.com
 ```
 <details>
@@ -135,7 +135,7 @@ Custom flags for the p2p command [(command specs)](commands/paymail_p2p.md)
 ___
 
 ### Resolve Paymail Address (by Paymail)
-```bash
+```shell script
 $ paymail resolve mrz@moneybutton.com
 ```
 <details>
@@ -161,7 +161,7 @@ Custom flags for the resolve command [(command specs)](commands/paymail_resolve.
 ___
 
 ### Validate Paymail Setup (by Paymail or Domain)
-```bash
+```shell script
 $ paymail validate moneybutton.com
 ```
 <details>
@@ -187,7 +187,7 @@ Custom flags for the validation command [(command specs)](commands/paymail_valid
 ___
 
 ### Verify Public Key Owner
-```bash
+```shell script
 $ paymail verify mrz@moneybutton.com 02ead23149a1e33df17325ec7a7ba9e0b20c674c57c630f527d69b866aa9b65b10
 ```
 <details>
@@ -204,7 +204,7 @@ Custom flags for the verify command [(command specs)](commands/paymail_verify.md
 ___
 
 ### Whois For Handles
-```bash
+```shell script
 $ paymail whois mrz
 ```
 <details>
