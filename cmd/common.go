@@ -581,10 +581,148 @@ func displayTracingResults(tracing resty.TraceInfo, statusCode int) {
 	}
 
 	// Render the data
-	fmt.Println(columnize.SimpleFormat(output))
+	chalker.Log(chalker.DIM, columnize.SimpleFormat(output))
 }
 
 // displayHeader will display a standard header
 func displayHeader(level, text string) {
 	chalker.Log(level, "\n==========| "+text)
+}
+
+// GetPublicInfo will get all the public info for a given paymail
+func (p *PaymailDetails) GetPublicInfo(capabilities *paymail.CapabilitiesResponse) (err error) {
+
+	// Requirements
+	if len(p.Handle) == 0 {
+		err = fmt.Errorf("missing required field: %s", "Handle")
+		return
+	} else if p.Provider == nil {
+		err = fmt.Errorf("missing required field: %s", "Provider")
+		return
+	}
+
+	// Attempt to get a public profile if the capability is found
+	url := capabilities.GetValueString(paymail.BRFCPublicProfile, "")
+	if len(url) > 0 && !skipPublicProfile && p.PKI != nil && len(p.PKI.Handle) > 0 {
+		if p.PublicProfile, err = getPublicProfile(url, p.Handle, p.Provider.Domain, true); err != nil {
+			err = fmt.Errorf("get public profile failed: %s", err.Error())
+		}
+	}
+
+	// Attempt to get a bitpic (if enabled)
+	if !skipBitpic && p.PKI != nil && len(p.PKI.Handle) > 0 {
+		if p.Bitpic, err = getBitPic(p.Handle, p.Provider.Domain, true); err != nil {
+			err = fmt.Errorf("checking for bitpic failed: %s", err.Error())
+		}
+	}
+
+	// Attempt to get a 2paymail (if enabled)
+	if !skip2paymail && p.PKI != nil && len(p.PKI.Handle) > 0 {
+		if p.TwoPaymail, err = get2paymail(p.Handle, p.Provider.Domain, true); err != nil {
+			err = fmt.Errorf("checking for 2paymail failed: %s", err.Error())
+		}
+	}
+
+	// Attempt to get a Roundesk profile (if enabled)
+	if !skipRoundesk && p.PKI != nil && len(p.PKI.Handle) > 0 {
+		if p.Roundesk, err = getRoundeskProfile(p.Handle, p.Provider.Domain, true); err != nil {
+			err = fmt.Errorf("checking for roundesk profile failed: %s", err.Error())
+		}
+	}
+
+	return
+}
+
+// Paymail returns the paymail address from the details struct
+func (p *PaymailDetails) Paymail() string {
+	if p.PKI != nil && len(p.PKI.Handle) > 0 {
+		return p.PKI.Handle
+	} else if p.Provider != nil && len(p.Handle) > 0 {
+		return p.Handle + "@" + p.Provider.Domain
+	}
+	return ""
+}
+
+// Display all the paymail results for a given paymail search/resolution
+func (p *PaymailDetails) Display() {
+
+	displayPaymail := p.Paymail()
+
+	// Rendering profile information
+	displayHeader(chalker.BOLD, fmt.Sprintf("Results for %s", chalk.Cyan.Color(displayPaymail)))
+
+	// No PKI - then we don't have a paymail
+	if p.PKI == nil || len(p.PKI.PubKey) == 0 {
+		chalker.Log(chalker.SUCCESS, fmt.Sprintf("The handle: %s might be available! Reserve it now: %s", p.Handle, p.Provider.Link))
+		return
+	}
+
+	// Display the public profile if found
+	if p.PublicProfile != nil {
+		if len(p.PublicProfile.Name) > 0 {
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Name         : %s", chalk.Cyan.Color(p.PublicProfile.Name)))
+		}
+		if len(p.PublicProfile.Avatar) > 0 {
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Avatar       : %s", chalk.Cyan.Color(p.PublicProfile.Avatar)))
+		}
+	}
+
+	// Display bitpic if found
+	if len(p.Bitpic) > 0 {
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Bitpic       : %s", chalk.Cyan.Color(p.Bitpic)))
+	}
+
+	// Display 2paymail if found
+	if p.TwoPaymail != nil && len(p.TwoPaymail.URL) > 0 {
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("2paymail     : %s", chalk.Cyan.Color(p.TwoPaymail.URL)))
+		if len(p.TwoPaymail.TX) > 0 {
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("2paymail TX  : %s", chalk.Cyan.Color(p.TwoPaymail.TX)))
+		}
+		if len(p.TwoPaymail.Twitter) > 0 {
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Twitter      : %s", chalk.Cyan.Color(p.TwoPaymail.Twitter)))
+		}
+	}
+
+	// Show pubkey
+	if p.PKI != nil && len(p.PKI.PubKey) > 0 {
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("PubKey       : %s", chalk.Cyan.Color(p.PKI.PubKey)))
+	}
+
+	// Show address resolution details
+	if p.Resolution != nil && len(p.Resolution.Address) > 0 {
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Output Script: %s", chalk.Cyan.Color(p.Resolution.Output)))
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Address      : %s", chalk.Cyan.Color(p.Resolution.Address)))
+
+		// If we have a signature
+		if len(p.Resolution.Signature) > 0 {
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Signature    : %s", chalk.Cyan.Color(p.Resolution.Signature)))
+		}
+	}
+
+	// Display the roundesk profile if found
+	if p.Roundesk != nil && p.Roundesk.Profile != nil {
+
+		// Rendering profile information
+		displayHeader(chalker.DEFAULT, fmt.Sprintf("Roundesk profile for %s", chalk.Cyan.Color(displayPaymail)))
+
+		if len(p.Roundesk.Profile.Name) > 0 {
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Name      : %s", chalk.Cyan.Color(p.Roundesk.Profile.Name)))
+		}
+		if len(p.Roundesk.Profile.Headline) > 0 {
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Headline  : %s", chalk.Cyan.Color(p.Roundesk.Profile.Headline)))
+		}
+		if len(p.Roundesk.Profile.Bio) > 0 {
+			p.Roundesk.Profile.Bio = strings.TrimSuffix(p.Roundesk.Profile.Bio, "\n")
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Bio       : %s", chalk.Cyan.Color(p.Roundesk.Profile.Bio)))
+		}
+		if len(p.Roundesk.Profile.Twetch) > 0 {
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Twetch    : %s", chalk.Cyan.Color("https://twetch.app/u/"+p.Roundesk.Profile.Twetch)))
+		}
+
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("URL       : %s", chalk.Cyan.Color("https://roundesk.co/u/"+displayPaymail)))
+
+		if len(p.Roundesk.Profile.Nonce) > 0 {
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Nonce     : %s", chalk.Cyan.Color(p.Roundesk.Profile.Nonce)))
+		}
+	}
 }

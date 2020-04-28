@@ -111,7 +111,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/05-verify-public-key-owner
 		}
 
 		// Rendering profile information
-		displayHeader(chalker.DEFAULT, fmt.Sprintf("Rendering verify response for %s...", chalk.Cyan.Color(paymailAddress)))
+		displayHeader(chalker.BOLD, fmt.Sprintf("Rendering verify response for %s...", chalk.Cyan.Color(paymailAddress)))
 
 		// Show the results
 		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Paymail: %s", chalk.Cyan.Color(paymailAddress)))

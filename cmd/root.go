@@ -21,54 +21,6 @@ import (
 	"github.com/ttacon/chalk"
 )
 
-// Default flag values for various commands
-var (
-	amount             uint64 // cmd: resolve
-	brfcAuthor         string // cmd: brfc
-	brfcTitle          string // cmd: brfc
-	brfcVersion        string // cmd: brfc
-	configFile         string // cmd: root
-	databaseEnabled    bool   // cmd: root
-	disableCache       bool   // cmd: root
-	flushCache         bool   // cmd: root
-	generateDocs       bool   // cmd: root
-	nameServer         string // cmd: validate
-	port               int    // cmd: validate
-	priority           int    // cmd: validate
-	protocol           string // cmd: validate
-	purpose            string // cmd: resolve
-	satoshis           uint64 // cmd: resolve
-	serviceName        string // cmd: validate
-	signature          string // cmd: resolve
-	skip2paymail       bool   // cmd: resolve
-	skipBitpic         bool   // cmd: resolve
-	skipBrfcValidation bool   // cmd: brfc
-	skipDnsCheck       bool   // cmd: validate
-	skipPki            bool   // cmd: resolve
-	skipPublicProfile  bool   // cmd: resolve
-	skipRoundesk       bool   // cmd: resolve
-	skipSrvCheck       bool   // cmd: validate
-	skipSSLCheck       bool   // cmd: validate
-	skipTracing        bool   // cmd: root
-	weight             int    // cmd: validate
-)
-
-// Defaults for the application
-const (
-	applicationFullName = "paymail-inspector" // Full name of the application (long version)
-	applicationName     = "paymail"           // Application name (binary) (short version
-	configFileDefault   = "config"            // Config file name
-	defaultDomainName   = "moneybutton.com"   // Used in examples
-	defaultNameServer   = "8.8.8.8"           // Default DNS NameServer
-	docsLocation        = "docs/commands"     // Default location for command documentation
-	flagBsvAlias        = "bsvalias"          // Flag for a known, common key
-	flagSenderHandle    = "sender-handle"
-	flagSenderName      = "sender-name"
-)
-
-// Version is set manually (also make:build overwrites this value from Github's latest tag)
-var Version = "v0.1.5"
-
 // rootCmd represents the base command when called without any sub-commands
 var rootCmd = &cobra.Command{
 	DisableAutoGenTag: true,

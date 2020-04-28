@@ -5,8 +5,6 @@ import (
 	"strings"
 
 	"github.com/mrz1836/paymail-inspector/chalker"
-	twopaymail "github.com/mrz1836/paymail-inspector/integrations/2paymail"
-	"github.com/mrz1836/paymail-inspector/integrations/roundesk"
 	"github.com/mrz1836/paymail-inspector/paymail"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -33,8 +31,9 @@ the receiver and request a payment destination from the receiver's paymail servi
 
 Read more at: `+chalk.Cyan.Color("http://bsvalias.org/04-01-basic-address-resolution.html")),
 	Aliases:    []string{"r", "resolution"},
-	SuggestFor: []string{"address", "destination", "payment", "addressing", "whois"},
-	Example:    applicationName + " resolve mrz@" + defaultDomainName,
+	SuggestFor: []string{"address", "destination", "payment", "addressing"},
+	Example: applicationName + " resolve mrz@" + defaultDomainName + `
+` + applicationName + " r mrz@" + defaultDomainName,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return chalker.Error("resolve requires either a paymail address")
@@ -74,6 +73,10 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/04-01-basic-address-resolu
 				return
 			}
 		}
+
+		// Get the alias of the address
+		parts := strings.Split(paymailAddress, "@")
+		handle := parts[0]
 
 		// Get the capabilities
 		capabilities, err := getCapabilities(domain, true)
@@ -144,7 +147,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/04-01-basic-address-resolu
 				// Get the PKI for the given address
 				var senderPki *paymail.PKIResponse
 				if senderPki, err = getPki(senderPkiUrl, parts[0], parts[1], true); err != nil {
-					chalker.Log(chalker.ERROR, fmt.Sprintf("Error: %s", err.Error()))
+					chalker.Log(chalker.ERROR, fmt.Sprintf("Find PKI Failed: %s", err.Error()))
 					return
 				} else if senderPki != nil {
 					chalker.Log(chalker.INFO, fmt.Sprintf("Found --%s %s@%s's pubkey: %s", flagSenderHandle, parts[0], parts[1], chalk.Cyan.Color(senderPki.PubKey)))
@@ -155,127 +158,38 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/04-01-basic-address-resolu
 			chalker.Log(chalker.SUCCESS, `Sender pre-validation: Passed ¯\_(ツ)_/¯`)
 		}
 
-		// Get the alias of the address
-		parts := strings.Split(paymailAddress, "@")
+		// Set the provider (known vs new provider)
+		provider := getProvider(domain)
+		if provider == nil {
+			provider = &Provider{
+				Domain: domain,
+				Link:   "https://" + domain,
+			}
+		}
+
+		// Create result
+		result := &PaymailDetails{
+			Handle:   handle,
+			Provider: provider,
+		}
 
 		// Get the PKI for the given address
-		var pki *paymail.PKIResponse
-		if pki, err = getPki(pkiUrl, parts[0], domain, true); err != nil {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("Error: %s", err.Error()))
-			return
+		if result.PKI, err = getPki(pkiUrl, handle, domain, true); err != nil {
+			chalker.Log(chalker.ERROR, fmt.Sprintf("Find PKI Failed: %s", err.Error()))
 		}
 
 		// Attempt to resolve the address
-		var addressResolution *paymail.AddressResolutionResponse
-		if addressResolution, err = resolveAddress(resolveUrl, parts[0], domain, senderHandle, signature, purpose, amount); err != nil {
+		if result.Resolution, err = resolveAddress(resolveUrl, handle, domain, senderHandle, signature, purpose, amount); err != nil {
 			chalker.Log(chalker.ERROR, fmt.Sprintf("Address resolution failed: %s", err.Error()))
-			return
 		}
 
-		// Attempt to get a public profile if the capability is found
-		url := capabilities.GetValueString(paymail.BRFCPublicProfile, "")
-		var profile *paymail.PublicProfileResponse
-		if len(url) > 0 && !skipPublicProfile {
-			if profile, err = getPublicProfile(url, parts[0], domain, true); err != nil {
-				chalker.Log(chalker.ERROR, fmt.Sprintf("Get public profile failed: %s", err.Error()))
-			}
+		// Get all the public info
+		if err = result.GetPublicInfo(capabilities); err != nil {
+			chalker.Log(chalker.ERROR, fmt.Sprintf("Error: %s", err.Error()))
 		}
 
-		// Attempt to get a bitpic (if enabled)
-		var bitPicURL string
-		if !skipBitpic {
-			if bitPicURL, err = getBitPic(parts[0], domain, true); err != nil {
-				chalker.Log(chalker.ERROR, fmt.Sprintf("Checking for bitpic failed: %s", err.Error()))
-			}
-		}
-
-		// Attempt to get a 2paymail (if enabled)
-		var twoPaymail *twopaymail.Response
-		if !skip2paymail {
-			if twoPaymail, err = get2paymail(parts[0], domain, true); err != nil {
-				chalker.Log(chalker.ERROR, fmt.Sprintf("Checking for 2paymail failed: %s", err.Error()))
-			}
-		}
-
-		// Attempt to get a Roundesk profile (if enabled)
-		if !skipRoundesk {
-			var roundesk *roundesk.Response
-			if roundesk, err = getRoundeskProfile(parts[0], domain, true); err != nil {
-				chalker.Log(chalker.ERROR, fmt.Sprintf("Checking for roundesk profile failed: %s", err.Error()))
-			}
-
-			// Display the roundesk profile if found
-			if roundesk != nil && roundesk.Profile != nil {
-
-				// Rendering profile information
-				displayHeader(chalker.DEFAULT, fmt.Sprintf("Roundesk profile for %s", chalk.Cyan.Color(paymailAddress)))
-
-				if len(roundesk.Profile.Name) > 0 {
-					chalker.Log(chalker.DEFAULT, fmt.Sprintf("Name      : %s", chalk.Cyan.Color(roundesk.Profile.Name)))
-				}
-				if len(roundesk.Profile.Headline) > 0 {
-					chalker.Log(chalker.DEFAULT, fmt.Sprintf("Headline  : %s", chalk.Cyan.Color(roundesk.Profile.Headline)))
-				}
-				if len(roundesk.Profile.Bio) > 0 {
-					roundesk.Profile.Bio = strings.TrimSuffix(roundesk.Profile.Bio, "\n")
-					chalker.Log(chalker.DEFAULT, fmt.Sprintf("Bio       : %s", chalk.Cyan.Color(roundesk.Profile.Bio)))
-				}
-				if len(roundesk.Profile.Twetch) > 0 {
-					chalker.Log(chalker.DEFAULT, fmt.Sprintf("Twetch    : %s", chalk.Cyan.Color("https://twetch.app/u/"+roundesk.Profile.Twetch)))
-				}
-
-				chalker.Log(chalker.DEFAULT, fmt.Sprintf("URL       : %s", chalk.Cyan.Color("https://roundesk.co/u/"+parts[0]+"@"+domain)))
-
-				if len(roundesk.Profile.Nonce) > 0 {
-					chalker.Log(chalker.DEFAULT, fmt.Sprintf("Nonce     : %s", chalk.Cyan.Color(roundesk.Profile.Nonce)))
-				}
-			}
-		}
-
-		// Rendering profile information
-		displayHeader(chalker.DEFAULT, fmt.Sprintf("Public profile for %s", chalk.Cyan.Color(paymailAddress)))
-
-		// Display the public profile if found
-		if profile != nil {
-			if len(profile.Name) > 0 {
-				chalker.Log(chalker.DEFAULT, fmt.Sprintf("Name         : %s", chalk.Cyan.Color(profile.Name)))
-			}
-			if len(profile.Avatar) > 0 {
-				chalker.Log(chalker.DEFAULT, fmt.Sprintf("Avatar       : %s", chalk.Cyan.Color(profile.Avatar)))
-			}
-		}
-
-		// Display bitpic if found
-		if len(bitPicURL) > 0 {
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Bitpic       : %s", chalk.Cyan.Color(bitPicURL)))
-		}
-
-		// Display 2paymail if found
-		if twoPaymail != nil && len(twoPaymail.URL) > 0 {
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("2paymail     : %s", chalk.Cyan.Color(twoPaymail.URL)))
-			if len(twoPaymail.TX) > 0 {
-				chalker.Log(chalker.DEFAULT, fmt.Sprintf("2paymail TX  : %s", chalk.Cyan.Color(twoPaymail.TX)))
-			}
-			if len(twoPaymail.Twitter) > 0 {
-				chalker.Log(chalker.DEFAULT, fmt.Sprintf("Twitter      : %s", chalk.Cyan.Color(twoPaymail.Twitter)))
-			}
-		}
-
-		// Show pubkey
-		if pki != nil && len(pki.PubKey) > 0 {
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("PubKey       : %s", chalk.Cyan.Color(pki.PubKey)))
-		}
-
-		// Show output script
-		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Output Script: %s", chalk.Cyan.Color(addressResolution.Output)))
-
-		// Show the resolved address from the output script
-		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Address      : %s", chalk.Cyan.Color(addressResolution.Address)))
-
-		// If we have a signature
-		if len(addressResolution.Signature) > 0 {
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Signature    : %s", chalk.Cyan.Color(addressResolution.Signature)))
-		}
+		// Show the results
+		result.Display()
 	},
 }
 

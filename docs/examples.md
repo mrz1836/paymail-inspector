@@ -9,10 +9,14 @@ $ paymail
 
 Global flags for the entire application [(view command specs)](commands/paymail.md)
 ```
-  -h, --help              help for paymail inspector
-  -v, --version           version for paymail inspector
-      --bsvalias string   The bsvalias version (default: 1.0)
-      --config string     config file (default is $HOME/.paymail-inspector.yaml)
+      --bsvalias string   The bsvalias version (default "1.0")
+      --config string     Custom config file (default is $HOME/paymail/config.yaml)
+      --docs              Generate docs from all commands (./docs/commands)
+      --flush-cache       Flushes ALL cache, empties local database
+  -h, --help              help for paymail
+      --no-cache          Turn off caching for this specific command
+  -t, --skip-tracing      Turn off request tracing information
+  -v, --version           version for paymail
 ```
 
 ___
@@ -195,4 +199,21 @@ $ paymail verify mrz@moneybutton.com 02ead23149a1e33df17325ec7a7ba9e0b20c674c57c
 Custom flags for the verify command [(view command specs)](commands/paymail_verify.md)
 ```
   -h, --help              help for verify
+```
+
+___
+
+### Whois For Handles
+```bash
+$ paymail whois mrz
+```
+<details>
+<summary><strong><code>Show Example</code></strong></summary>
+
+<img src="../.github/IMAGES/whois-command.gif?raw=true&v=6" alt="Whois Command">
+</details>
+
+Custom flags for the whois command [(view command specs)](commands/paymail_whois.md)
+```
+  -h, --help              help for whois
 ```

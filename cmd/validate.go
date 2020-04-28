@@ -33,8 +33,9 @@ This will also check for required capabilities that all paymail services are req
 All these validations are suggestions/requirements from bsvalias spec.
 
 Read more at: `+chalk.Cyan.Color("http://bsvalias.org/index.html")),
-	Example:    applicationName + " validate " + defaultDomainName,
-	Aliases:    []string{"val", "check"},
+	Example: applicationName + " validate " + defaultDomainName + `
+` + applicationName + " v " + defaultDomainName,
+	Aliases:    []string{"val", "v"},
 	SuggestFor: []string{"valid"},
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
@@ -61,7 +62,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/index.html")),
 			}
 
 		} else {
-			chalker.Log(chalker.INFO, fmt.Sprintf("Domain detected: %s", chalk.Cyan.Color(domain)))
+			chalker.Log(chalker.DIM, fmt.Sprintf("Domain detected: %s", chalk.Cyan.Color(domain)))
 
 			// Check for a real domain (require at least one period)
 			if !strings.Contains(domain, ".") {
@@ -154,12 +155,12 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/index.html")),
 			// Get the PKI for the given address
 			var pki *paymail.PKIResponse
 			if pki, err = getPki(pkiUrl, parts[0], parts[1], false); err != nil {
-				chalker.Log(chalker.ERROR, fmt.Sprintf("error: %s", err.Error()))
+				chalker.Log(chalker.ERROR, fmt.Sprintf("Error: %s", err.Error()))
 				return
 			} else if pki != nil {
 
 				// Rendering profile information
-				displayHeader(chalker.DEFAULT, fmt.Sprintf("Rendering paymail information for %s...", chalk.Cyan.Color(paymailAddress)))
+				displayHeader(chalker.BOLD, fmt.Sprintf("Rendering paymail information for %s...", chalk.Cyan.Color(paymailAddress)))
 
 				chalker.Log(chalker.DEFAULT, fmt.Sprintf("PubKey: %s", chalk.Cyan.Color(pki.PubKey)))
 			}

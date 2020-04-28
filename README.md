@@ -100,7 +100,16 @@ ___
 > Verifies if a paymail is associated to a pubkey ([view example](docs/examples.md#verify-public-key-owner))
 ```bash
 $ paymail verify mrz@moneybutton.com 02ead23149a1e33df17325ec7a7ba9e0b20c674c57c630f527d69b866aa9b65b10
+``` 
+
+___
+
+### `whois`
+> Searches all public paymail providers for a given handle ([view example](docs/examples.md#whois-for-handles))
+```bash
+$ paymail whois mrz
 ```
+
 
 ## Documentation
 Get started with the [examples](docs/examples.md). View the generated golang [godocs](https://pkg.go.dev/github.com/mrz1836/paymail-inspector?tab=subdirectories).
@@ -133,12 +142,22 @@ Additional paymail information can also be found via [MoneyButton's documentatio
 - [ ] MinerID Extension: BlockBind ([b8930c2bbf5d](https://github.com/bitcoin-sv-specs/brfc-minerid/tree/master/extensions/blockbind))
 
 <details>
-<summary><strong><code>Integrated Service Providers</code></strong></summary>
+<summary><strong><code>Public Paymail Providers</code></strong></summary>
+
+- [MoneyButton](https://tncpw.co/4c58a26f)
+- [Handcash](https://tncpw.co/742b1f09)
+- [RelayX](https://tncpw.co/4897634e)
+- [Centbee](https://tncpw.co/4350c72f)
+- [Simply.cash](https://tncpw.co/1ce8f70f)
+- [Bit.sv](https://tncpw.co/bff8984c)
+</details>
+
+<details>
+<summary><strong><code>Integrated Services</code></strong></summary>
 
 - Unwriter's [bitpic](https://bitpic.network/)
 - Deggen's [Roundesk](https://roundesk.co/)
-- Anon's [2paymail](https://2paymail.com/)
-
+- [2paymail](https://2paymail.com/)
 </details>
 
 <details>

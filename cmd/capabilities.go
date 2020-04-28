@@ -33,8 +33,9 @@ Drawing inspiration from RFC 5785 and IANA's Well-Known URIs resource, the Capab
 dictates that a machine-readable document is placed in a predictable location on a web server.
 
 Read more at: `+chalk.Cyan.Color("http://bsvalias.org/02-02-capability-discovery.html")),
-	Aliases: []string{"c", "abilities", "inspect", "lookup"},
-	Example: applicationName + " capabilities " + defaultDomainName,
+	Aliases: []string{"c", "inspect"},
+	Example: applicationName + " capabilities " + defaultDomainName + `
+` + applicationName + " c " + defaultDomainName,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return chalker.Error("capabilities requires either a domain or paymail address")
@@ -69,7 +70,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/02-02-capability-discovery
 		}
 
 		// Rendering profile information
-		displayHeader(chalker.DEFAULT, fmt.Sprintf("Listing %d capabilities...", len(capabilities.Capabilities)))
+		displayHeader(chalker.BOLD, fmt.Sprintf("Listing %d capabilities...", len(capabilities.Capabilities)))
 
 		// Show all the found capabilities
 		// todo: loop known BRFCs and display "more" info in this display for all detected BRFCs

@@ -112,7 +112,7 @@ Read more at: `+chalk.Cyan.Color("https://docs.moneybutton.com/docs/paymail-07-p
 		}
 
 		// Rendering profile information
-		displayHeader(chalker.DEFAULT, fmt.Sprintf("P2P information for %s", chalk.Cyan.Color(paymailAddress)))
+		displayHeader(chalker.BOLD, fmt.Sprintf("P2P information for %s", chalk.Cyan.Color(paymailAddress)))
 
 		// Display the public profile if found
 		if profile != nil {

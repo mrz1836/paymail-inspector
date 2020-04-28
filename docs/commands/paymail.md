@@ -10,7 +10,7 @@ __________                             .__.__    .___                           
  |     ___/\__  \<   |  |/     \\__  \ |  |  |   |   |/    \ /  ___/\____ \_/ __ \_/ ___\   __\/  _ \_  __ \
  |    |     / __ \\___  |  Y Y  \/ __ \|  |  |__ |   |   |  \\___ \ |  |_> >  ___/\  \___|  | (  <_> )  | \/
  |____|    (____  / ____|__|_|  (____  /__|____/ |___|___|  /____  >|   __/ \___  >\___  >__|  \____/|__|   
-                \/\/          \/     \/                   \/     \/ |__|        \/     \/     v0.1.5
+                \/\/          \/     \/                   \/     \/ |__|        \/     \/     v0.1.6
 ```
 Author: MrZ © 2020 github.com/mrz1836/paymail-inspector
 
@@ -46,4 +46,5 @@ paymail -h
 * [paymail resolve](paymail_resolve.md)	 - Resolves a paymail address
 * [paymail validate](paymail_validate.md)	 - Validate a paymail address or domain
 * [paymail verify](paymail_verify.md)	 - Verifies if a paymail is associated to a pubkey
+* [paymail whois](paymail_whois.md)	 - Find a paymail handle across several providers
 

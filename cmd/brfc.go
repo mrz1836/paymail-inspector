@@ -13,8 +13,10 @@ import (
 // brfcCmd represents the brfc command (Bitcoin SV Request-For-Comments)
 // http://bsvalias.org/01-brfc-specifications.html
 var brfcCmd = &cobra.Command{
-	Use:   "brfc",
-	Short: "List all specs, search by keyword, or generate a new BRFC ID",
+	Use:        "brfc",
+	Short:      "List all specs, search by keyword, or generate a new BRFC ID",
+	Aliases:    []string{"spec", "b"},
+	SuggestFor: []string{"specs", "specifications"},
 	Example: applicationName + ` brfc list
 ` + applicationName + ` brfc search nChain
 ` + applicationName + ` brfc generate --title "BRFC Specifications" --author "andy (nChain)" --version 1`,
@@ -112,7 +114,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/01-brfc-specifications.htm
 					continue
 				}
 
-				displayHeader(chalker.DEFAULT, fmt.Sprintf("%s", brfc.Title+" v"+brfc.Version))
+				displayHeader(chalker.BOLD, fmt.Sprintf("%s", brfc.Title+" v"+brfc.Version))
 
 				valid := chalk.Green.Color("(Valid)")
 				// Validate the BRFC ID
@@ -177,7 +179,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/01-brfc-specifications.htm
 				}
 			}
 
-			displayHeader(chalker.DEFAULT, "Generating BRFC ID...")
+			displayHeader(chalker.BOLD, "Generating BRFC ID...")
 
 			// Show the generated ID
 			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Generated ID: %s", chalk.Cyan.Color(brfc.ID)))
@@ -206,7 +208,7 @@ func simpleSearch(s, substr string) bool {
 func showBrfc(brfc *paymail.BRFCSpec) {
 
 	// Header
-	displayHeader(chalker.DEFAULT, fmt.Sprintf("%s", brfc.Title+" v"+brfc.Version))
+	displayHeader(chalker.BOLD, fmt.Sprintf("%s", brfc.Title+" v"+brfc.Version))
 
 	// Validate the BRFC ID
 	valid := chalk.Green.Color("(Valid)")
