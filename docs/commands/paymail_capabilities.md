@@ -31,6 +31,7 @@ paymail capabilities [flags]
 
 ```
 paymail capabilities moneybutton.com
+paymail c moneybutton.com
 ```
 
 ### Options

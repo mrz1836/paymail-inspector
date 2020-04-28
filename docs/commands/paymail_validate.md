@@ -31,6 +31,7 @@ paymail validate [flags]
 
 ```
 paymail validate moneybutton.com
+paymail v moneybutton.com
 ```
 
 ### Options

@@ -29,6 +29,7 @@ paymail resolve [flags]
 
 ```
 paymail resolve mrz@moneybutton.com
+paymail r mrz@moneybutton.com
 ```
 
 ### Options
