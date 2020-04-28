@@ -172,6 +172,22 @@ You can also specify a custom configuration file using `--config "/folder/path/f
 </details>
 
 <details>
+<summary><strong><code>Local Database (Cache)</code></strong></summary>
+
+The database is located in your `$HOME/paymail` folder.
+
+To clear the entire database:
+```bash
+$ paymail --flush-cache
+```
+
+To run commands and ignore loading from cache:
+```bash
+$ paymail whois mrz --no-cache
+```
+</details>
+
+<details>
 <summary><strong><code>Package Dependencies</code></strong></summary>
 
 - bitcoinsv's [bsvd](https://github.com/bitcoinsv/bsvd) and [bsvutil](https://github.com/bitcoinsv/bsvutil) for BSV script functionality
