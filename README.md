@@ -24,65 +24,65 @@
 ## Installation
 
 **Install with [brew](https://github.com/mrz1836/homebrew-paymail-inspector)**
-```bash
-$ brew tap mrz1836/paymail-inspector && brew install paymail-inspector
-$ paymail
+```shell script
+brew tap mrz1836/paymail-inspector && brew install paymail-inspector
+paymail
 ```
 
 **Install using a [compiled binary](https://github.com/mrz1836/paymail-inspector/releases)** on Linux, Mac or Windows _(Mac example)_
-```bash
-$ curl -LkSs https://github.com/mrz1836/paymail-inspector/releases/download/v0.1.6/paymail-inspector_macOS_64-bit.tar.gz -o app.tar.gz
-$ tar -zxf app.tar.gz && cd ./app/
-$ ./paymail
+```shell script
+curl -LkSs https://github.com/mrz1836/paymail-inspector/releases/download/v0.1.6/paymail-inspector_macOS_64-bit.tar.gz -o app.tar.gz
+tar -zxf app.tar.gz && cd ./app/
+./paymail
 ```
 
 **Install with [go](https://formulae.brew.sh/formula/go)**
-```bash
-$ go get github.com/mrz1836/paymail-inspector
-$ cd /$GOPATH/src/github.com/mrz1836/paymail-inspector && make install
-$ paymail
+```shell script
+go get github.com/mrz1836/paymail-inspector
+cd /$GOPATH/src/github.com/mrz1836/paymail-inspector && make install
+paymail
 ```
 
 ## Commands
 
 ### `brfc`
 > List all known brfc specifications ([view example](docs/examples.md#list-brfc-specifications))
-```bash
-$ paymail brfc list
+```shell script
+paymail brfc list
 ```
 
 > Generate a new `BRFC ID` for a new specification ([view example](docs/examples.md#generate-new-brfc-id))
-```bash
-$ paymail brfc generate --title "BRFC Specifications" --author "andy (nChain)" --version 1
+```shell script
+paymail brfc generate --title "BRFC Specifications" --author "andy (nChain)" --version 1
 ```
 
 > Search all brfc specifications (id, title, author) ([view example](docs/examples.md#search-brfc-specifications))
-```bash
-$ paymail brfc search nChain
+```shell script
+paymail brfc search nChain
 ```
 
 ___
 
 ### `capabilities`
 > Lists the available capabilities of the paymail service ([view example](docs/examples.md#get-capabilities-by-domain))
-```bash
-$ paymail capabilities moneybutton.com
+```shell script
+paymail capabilities moneybutton.com
 ```
 
 ___
 
 ### `p2p`
 > Starts a P2P payment request and returns (n) outputs of (`script`,`satoshis`,`address`) ([view example](docs/examples.md#start-p2p-payment-request-by-paymail))
-```bash
-$ paymail p2p mrz@moneybutton.com
+```shell script
+paymail p2p mrz@moneybutton.com
 ```
 
 ___
 
 ### `resolve`
 > Returns the `pubkey`, `output script`, `address` and `profile` for a given paymail address ([view example](docs/examples.md#resolve-paymail-address-by-paymail))
-```bash
-$ paymail resolve mrz@moneybutton.com
+```shell script
+paymail resolve mrz@moneybutton.com
 ```
 
 ___
@@ -90,8 +90,8 @@ ___
 
 ### `validate`
 > Runs several validations on the paymail service for DNSSEC, SSL, SRV and required capabilities ([view example](docs/examples.md#validate-paymail-setup-by-paymail-or-domain))
-```bash
-$ paymail validate moneybutton.com
+```shell script
+paymail validate moneybutton.com
 ```
 
 ___
@@ -99,16 +99,16 @@ ___
 
 ### `verify`
 > Verifies if a paymail is associated to a pubkey ([view example](docs/examples.md#verify-public-key-owner))
-```bash
-$ paymail verify mrz@moneybutton.com 02ead23149a1e33df17325ec7a7ba9e0b20c674c57c630f527d69b866aa9b65b10
+```shell script
+paymail verify mrz@moneybutton.com 02ead23149a1e33df17325ec7a7ba9e0b20c674c57c630f527d69b866aa9b65b10
 ``` 
 
 ___
 
 ### `whois`
 > Searches all public paymail providers for a given handle ([view example](docs/examples.md#whois-for-handles))
-```bash
-$ paymail whois mrz
+```shell script
+paymail whois mrz
 ```
 
 
@@ -177,13 +177,13 @@ You can also specify a custom configuration file using `--config "/folder/path/f
 The database is located in your `$HOME/paymail` folder.
 
 To clear the entire database:
-```bash
-$ paymail --flush-cache
+```shell script
+paymail --flush-cache
 ```
 
 To run commands and ignore loading from cache:
-```bash
-$ paymail whois mrz --no-cache
+```shell script
+paymail whois mrz --no-cache
 ```
 </details>
 
@@ -217,8 +217,8 @@ The release can also be deployed to a `homebrew` repository: [homebrew-paymail-i
 <summary><strong><code>Makefile Commands</code></strong></summary>
 
 View all `makefile` commands
-```bash
-$ make help
+```shell script
+make help
 ```
 
 List of all current commands:
@@ -261,8 +261,8 @@ windows                        Build for Windows (amd64)
 All unit tests and [examples](docs/examples.md) run via [Travis CI](https://travis-ci.com/mrz1836/paymail-inspector) and uses [Go version 1.14.x](https://golang.org/doc/go1.14). View the [deployment configuration file](.travis.yml).
 
 Run all tests (including integration tests)
-```bash
-$ make test
+```shell script
+make test
 ```
 
 ## Code Standards

@@ -3,7 +3,7 @@ Below are some examples using the **paymail** cli app
 
 ### View All Commands (Help)
 ```shell script
-$ paymail
+paymail
 ```
 <img src="../.github/IMAGES/help-command.gif?raw=true&v=7" alt="Help Command">
 
@@ -24,7 +24,7 @@ ___
 
 ### List BRFC Specifications
 ```shell script
-$ paymail brfc list
+paymail brfc list
 ```
 <details>
 <summary><strong><code>Show Example</code></strong></summary>
@@ -42,7 +42,7 @@ ___
 
 ### Generate new BRFC ID
 ```shell script
-$ paymail brfc generate --title "BRFC Specifications" --author "andy (nChain)" --version 1
+paymail brfc generate --title "BRFC Specifications" --author "andy (nChain)" --version 1
 ```
 <details>
 <summary><strong><code>Show Example</code></strong></summary>
@@ -55,17 +55,17 @@ $ paymail brfc generate --title "BRFC Specifications" --author "andy (nChain)" -
 
 Expected ID: `57dd1f54fc67`
 ```shell script
-$ paymail brfc generate --title "BRFC Specifications" --author "andy (nChain)" --version 1
+paymail brfc generate --title "BRFC Specifications" --author "andy (nChain)" --version 1
 ```
 
 Expected ID: `74524c4d6274`
 ```shell script
-$ paymail brfc generate --title "bsvalias Payment Addressing (PayTo Protocol Prefix)" --author "andy (nChain)" --version 1
+paymail brfc generate --title "bsvalias Payment Addressing (PayTo Protocol Prefix)" --author "andy (nChain)" --version 1
 ```
 
 Expected ID: `0036f9b8860f`
 ```shell script
-$ paymail brfc generate --title "bsvalias Integration with Simplified Payment Protocol" --author "andy (nChain)" --version 1
+paymail brfc generate --title "bsvalias Integration with Simplified Payment Protocol" --author "andy (nChain)" --version 1
 ```
 
 </details>
@@ -82,7 +82,7 @@ ___
 
 ### Search BRFC Specifications
 ```shell script
-$ paymail brfc search nChain
+paymail brfc search nChain
 ```
 <details>
 <summary><strong><code>Show Example</code></strong></summary>
@@ -101,7 +101,7 @@ ___
 
 ### Get Capabilities (by Domain)
 ```shell script
-$ paymail capabilities moneybutton.com
+paymail capabilities moneybutton.com
 ```
 <details>
 <summary><strong><code>Show Example</code></strong></summary>
@@ -118,7 +118,7 @@ ___
 
 ### Start P2P Payment Request (by Paymail)
 ```shell script
-$ paymail p2p mrz@moneybutton.com
+paymail p2p mrz@moneybutton.com
 ```
 <details>
 <summary><strong><code>Show Example</code></strong></summary>
@@ -136,7 +136,7 @@ ___
 
 ### Resolve Paymail Address (by Paymail)
 ```shell script
-$ paymail resolve mrz@moneybutton.com
+paymail resolve mrz@moneybutton.com
 ```
 <details>
 <summary><strong><code>Show Example</code></strong></summary>
@@ -162,7 +162,7 @@ ___
 
 ### Validate Paymail Setup (by Paymail or Domain)
 ```shell script
-$ paymail validate moneybutton.com
+paymail validate moneybutton.com
 ```
 <details>
 <summary><strong><code>Show Example</code></strong></summary>
@@ -188,7 +188,7 @@ ___
 
 ### Verify Public Key Owner
 ```shell script
-$ paymail verify mrz@moneybutton.com 02ead23149a1e33df17325ec7a7ba9e0b20c674c57c630f527d69b866aa9b65b10
+paymail verify mrz@moneybutton.com 02ead23149a1e33df17325ec7a7ba9e0b20c674c57c630f527d69b866aa9b65b10
 ```
 <details>
 <summary><strong><code>Show Example</code></strong></summary>
@@ -205,7 +205,7 @@ ___
 
 ### Whois For Handles
 ```shell script
-$ paymail whois mrz
+paymail whois mrz
 ```
 <details>
 <summary><strong><code>Show Example</code></strong></summary>
