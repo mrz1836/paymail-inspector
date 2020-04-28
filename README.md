@@ -12,6 +12,7 @@
 
 ## Table of Contents
 - [Installation](#installation)
+- [Commands](#commands)
 - [Documentation](#documentation)
 - [Examples & Tests](#examples--tests)
 - [Code Standards](#code-standards)
