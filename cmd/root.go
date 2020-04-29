@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/mitchellh/go-homedir"
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/mrz1836/paymail-inspector/database"
 	"github.com/mrz1836/paymail-inspector/integrations/bitpic"
@@ -85,7 +84,11 @@ func Execute() {
 	}
 }
 
+// Core application loader (runs before every cmd)
 func init() {
+
+	// Setup the application resources
+	setupAppResources()
 
 	// Load the configuration
 	cobra.OnInitialize(initConfig)
@@ -123,8 +126,10 @@ func er(err error) {
 	}
 }
 
-// initConfig reads in config file and ENV variables if set.
+// initConfig reads in config file and ENV variables if set
 func initConfig() {
+
+	// Custom configuration file and location
 	if configFile != "" {
 
 		chalker.Log(chalker.INFO, fmt.Sprintf("Loading custom configuration file: %s...", configFile))
@@ -133,21 +138,13 @@ func initConfig() {
 		viper.SetConfigFile(configFile)
 	} else {
 
-		// Find home directory
-		home, err := homedir.Dir()
-		er(err)
-
-		// Set the path
-		path := filepath.Join(home, applicationName)
-
 		// Make a dummy file if it doesn't exist
-		var file *os.File
-		file, err = os.OpenFile(filepath.Join(path, configFileDefault+".yaml"), os.O_RDONLY|os.O_CREATE, 0644)
+		file, err := os.OpenFile(filepath.Join(applicationDirectory, configFileDefault+".yaml"), os.O_RDONLY|os.O_CREATE, 0644)
 		er(err)
 		_ = file.Close() // Error is not needed here, just close and continue
 
 		// Search config in home directory with name "." (without extension)
-		viper.AddConfigPath(path)
+		viper.AddConfigPath(applicationDirectory)
 		viper.SetConfigName(configFileDefault)
 	}
 
