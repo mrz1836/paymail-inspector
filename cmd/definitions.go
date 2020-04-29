@@ -9,7 +9,7 @@ import (
 )
 
 // Version is set manually (also make:build overwrites this value from Github's latest tag)
-var Version = "v0.1.6"
+var Version = "v0.1.7"
 
 // Default flag values for various commands
 var (
@@ -18,7 +18,6 @@ var (
 	brfcTitle          string // cmd: brfc
 	brfcVersion        string // cmd: brfc
 	configFile         string // cmd: root
-	databaseEnabled    bool   // cmd: root
 	disableCache       bool   // cmd: root
 	flushCache         bool   // cmd: root
 	generateDocs       bool   // cmd: root
@@ -41,6 +40,12 @@ var (
 	skipSSLCheck       bool   // cmd: validate
 	skipTracing        bool   // cmd: root
 	weight             int    // cmd: validate
+)
+
+// Application global variables
+var (
+	applicationDirectory string // Folder path for the application resources
+	databaseEnabled      bool   // Flag is set if DB loads successfully
 )
 
 // Defaults for the application
