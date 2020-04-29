@@ -1,18 +1,13 @@
 package cmd
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net"
-	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/go-resty/resty/v2"
-	"github.com/mitchellh/go-homedir"
 	"github.com/mrz1836/go-validate"
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/mrz1836/paymail-inspector/database"
@@ -24,35 +19,6 @@ import (
 	"github.com/spf13/viper"
 	"github.com/ttacon/chalk"
 )
-
-// setupAppResources will setup the local application directories
-func setupAppResources() {
-
-	// Find home directory
-	home, err := homedir.Dir()
-	er(err)
-
-	// Set the path
-	applicationDirectory = filepath.Join(home, applicationName)
-
-	// Detect if we have a program folder (windows)
-	_, err = os.Stat(applicationDirectory)
-	if err != nil {
-		// If it does not exist, make one!
-		if os.IsNotExist(err) {
-			er(os.MkdirAll(applicationDirectory, os.ModePerm))
-		}
-	}
-}
-
-// RandomHex returns a random hex string and error
-func RandomHex(n int) (hexString string, err error) {
-	b := make([]byte, n)
-	if _, err = rand.Read(b); err != nil {
-		return
-	}
-	return hex.EncodeToString(b), nil
-}
 
 // getPki will get a pki response (logging and basic error handling)
 func getPki(url, alias, domain string, allowCache bool) (pki *paymail.PKIResponse, err error) {
