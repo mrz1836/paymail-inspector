@@ -29,7 +29,7 @@ func TestExtractParts(t *testing.T) {
 	if domain != strings.TrimSpace(strings.ToLower(testDomain)) {
 		t.Fatalf("expected domain name: %s but got: %s", strings.TrimSpace(strings.ToLower(testDomain)), domain)
 	}
-	if address != "User@domain.com" {
-		t.Fatalf("expected alias: %s but got: %s", "User@domain.com", address)
+	if address != "user@domain.com" {
+		t.Fatalf("expected alias: %s but got: %s", "user@domain.com", address)
 	}
 }
