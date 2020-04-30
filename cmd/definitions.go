@@ -1,15 +1,14 @@
 package cmd
 
 import (
-	"strings"
-
+	"github.com/mrz1836/go-sanitize"
 	twopaymail "github.com/mrz1836/paymail-inspector/integrations/2paymail"
 	"github.com/mrz1836/paymail-inspector/integrations/roundesk"
 	"github.com/mrz1836/paymail-inspector/paymail"
 )
 
 // Version is set manually (also make:build overwrites this value from Github's latest tag)
-var Version = "v0.1.7"
+var Version = "v0.1.8"
 
 // Default flag values for various commands
 var (
@@ -75,11 +74,13 @@ var providers = []*Provider{
 	{"centbee.com", "https://tncpw.co/4350c72f"},
 	{"simply.cash", "https://tncpw.co/1ce8f70f"},
 	{"bit.sv", "https://tncpw.co/bff8984c"},
+	{"mypaymail.co", "https://tncpw.co/ee243a15"},
+	{"volt.id", "https://tncpw.co/e9ff2b0c"},
 }
 
 // getProvider will return a provider given the domain name
 func getProvider(domain string) *Provider {
-	domain = strings.TrimSpace(strings.ToLower(domain))
+	domain, _ = sanitize.Domain(domain, false, true)
 	for _, provider := range providers {
 		if domain == provider.Domain {
 			return provider

@@ -31,7 +31,7 @@ paymail
 
 **Install using a [compiled binary](https://github.com/mrz1836/paymail-inspector/releases)** on Linux, Mac or Windows _(Mac example)_
 ```shell script
-curl -LkSs https://github.com/mrz1836/paymail-inspector/releases/download/v0.1.7/paymail-inspector_macOS_64-bit.tar.gz -o app.tar.gz
+curl -LkSs https://github.com/mrz1836/paymail-inspector/releases/download/v0.1.8/paymail-inspector_macOS_64-bit.tar.gz -o app.tar.gz
 tar -zxf app.tar.gz && cd ./app/
 ./paymail
 ```
@@ -151,6 +151,8 @@ Additional paymail information can also be found via [MoneyButton's documentatio
 - [Centbee](https://tncpw.co/4350c72f)
 - [Simply.cash](https://tncpw.co/1ce8f70f)
 - [Bit.sv](https://tncpw.co/bff8984c)
+- [myPaymail](https://tncpw.co/ee243a15)
+- [Volt](https://tncpw.co/e9ff2b0c)
 </details>
 
 <details>
@@ -195,6 +197,7 @@ paymail whois mrz --no-cache
 - go-resty's [resty](https://github.com/go-resty/resty) for custom HTTP client support
 - miekg's [dns](https://github.com/miekg/dns) package for advanced DNS functionality
 - mitchellh's [go-homedir](https://github.com/mitchellh/go-homedir) to find the home directory
+- MrZ's [go-sanitize](https://github.com/mrz1836/go-sanitize) for sanitation and data formatting
 - MrZ's [go-validate](https://github.com/mrz1836/go-validate) for domain/email/ip validations
 - ryanuber's [columnize](https://github.com/ryanuber/columnize) for displaying terminal data in columns
 - spf13's [cobra](https://github.com/spf13/cobra) and [viper](https://github.com/spf13/viper) for an easy configuration & CLI application development
