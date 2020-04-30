@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/mrz1836/go-sanitize"
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/mrz1836/paymail-inspector/paymail"
 	"github.com/spf13/cobra"
@@ -77,7 +78,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/01-brfc-specifications.htm
 			}
 
 			// Basic sanitation
-			searchTerm := strings.TrimSpace(args[1])
+			searchTerm := strings.TrimSpace(sanitize.SingleLine(args[1]))
 
 			// Loop the list
 			found := 0

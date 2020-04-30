@@ -16,6 +16,7 @@ require (
 	github.com/miekg/dns v1.1.29
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.3.0 // indirect
+	github.com/mrz1836/go-sanitize v1.0.13
 	github.com/mrz1836/go-validate v0.1.9
 	github.com/pelletier/go-toml v1.7.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
@@ -29,7 +30,7 @@ require (
 	github.com/ttacon/chalk v0.0.0-20160626202418-22c06c80ed31
 	golang.org/x/crypto v0.0.0-20200429183012-4b2356b1ed79 // indirect
 	golang.org/x/net v0.0.0-20200425230154-ff2c4b7c35a0
-	golang.org/x/sys v0.0.0-20200428200454-593003d681fa // indirect
+	golang.org/x/sys v0.0.0-20200430082407-1f5687305801 // indirect
 	golang.org/x/text v0.3.2 // indirect
 	gopkg.in/ini.v1 v1.55.0 // indirect
 )

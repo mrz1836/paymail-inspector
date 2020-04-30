@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/mrz1836/go-sanitize"
 )
 
 // Defaults for paymail functions
@@ -66,21 +67,18 @@ func ExtractParts(paymailInput string) (domain, address string) {
 	// Determine if it's a paymail address vs domain (1 Arg is required)
 	if strings.Contains(paymailInput, "@") {
 
-		// Remove any spaces
-		address = strings.TrimSpace(paymailInput)
+		// Sanitize the paymail address
+		address = sanitize.Email(paymailInput, false)
 
 		// Split the parts
 		parts := strings.Split(address, "@")
 
-		// Force all domain names to lowercase
-		domain = strings.ToLower(parts[1])
-
-		// Combine the address back
-		address = parts[0] + "@" + domain
+		// Sanitize the domain name
+		domain, _ = sanitize.Domain(parts[1], false, true)
 
 	} else {
-		// Force all domain names to lowercase and trim spaces
-		domain = strings.TrimSpace(strings.ToLower(paymailInput))
+		// Sanitize the domain name
+		domain, _ = sanitize.Domain(paymailInput, false, true)
 	}
 	return
 }

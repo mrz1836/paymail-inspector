@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/mrz1836/go-sanitize"
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/mrz1836/paymail-inspector/paymail"
 	"github.com/spf13/cobra"
@@ -49,11 +50,11 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/05-verify-public-key-owner
 
 		// Check for paymail in both args
 		if strings.Contains(args[0], "@") {
-			paymailAddress = args[0]
+			paymailAddress = sanitize.Email(args[0], false)
 			pubKey = args[1]
 		} else if strings.Contains(args[1], "@") {
 			pubKey = args[0]
-			paymailAddress = args[1]
+			paymailAddress = sanitize.Email(args[1], false)
 		}
 
 		// Require a paymail address

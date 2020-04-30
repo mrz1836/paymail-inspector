@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/mrz1836/go-sanitize"
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/mrz1836/paymail-inspector/paymail"
 	"github.com/spf13/cobra"
@@ -44,11 +45,14 @@ Search `+strconv.Itoa(len(providers))+` public paymail providers for a handle.`)
 
 		// Detect if handler or not
 		if strings.Contains(args[0], "@") {
-			parts := strings.Split(strings.TrimSpace(args[0]), "@")
+			parts := strings.Split(args[0], "@")
 			handle = parts[0]
 		} else {
-			handle = strings.TrimSpace(args[0])
+			handle = args[0]
 		}
+
+		// Sanitize
+		handle = sanitize.Custom(handle, `[^a-zA-Z0-9-_.+]`)
 
 		// Invalid handle?
 		if len(handle) == 0 || len(handle) > 255 {
