@@ -183,7 +183,7 @@ To clear the entire database:
 paymail --flush-cache
 ```
 
-To run commands and ignore loading from cache:
+Run commands and ignore loading data from local cache:
 ```shell script
 paymail whois mrz --no-cache
 ```
@@ -192,16 +192,16 @@ paymail whois mrz --no-cache
 <details>
 <summary><strong><code>Package Dependencies</code></strong></summary>
 
-- bitcoinsv's [bsvd](https://github.com/bitcoinsv/bsvd) and [bsvutil](https://github.com/bitcoinsv/bsvutil) for BSV script functionality
-- dgraph's [badger](https://github.com/dgraph-io/badger/v2) for persistent database storage
-- go-resty's [resty](https://github.com/go-resty/resty) for custom HTTP client support
-- miekg's [dns](https://github.com/miekg/dns) package for advanced DNS functionality
-- mitchellh's [go-homedir](https://github.com/mitchellh/go-homedir) to find the home directory
-- MrZ's [go-sanitize](https://github.com/mrz1836/go-sanitize) for sanitation and data formatting
-- MrZ's [go-validate](https://github.com/mrz1836/go-validate) for domain/email/ip validations
-- ryanuber's [columnize](https://github.com/ryanuber/columnize) for displaying terminal data in columns
-- spf13's [cobra](https://github.com/spf13/cobra) and [viper](https://github.com/spf13/viper) for an easy configuration & CLI application development
-- ttacon's [chalk](https://github.com/ttacon/chalk) for colorful logs
+- [badger](https://github.com/dgraph-io/badger/v2) for persistent database storage
+- [bsvd](https://github.com/bitcoinsv/bsvd) and [bsvutil](https://github.com/bitcoinsv/bsvutil) for BSV script functionality
+- [chalk](https://github.com/ttacon/chalk) for colorful logs
+- [cobra](https://github.com/spf13/cobra) and [viper](https://github.com/spf13/viper) for an easy configuration & CLI application development
+- [columnize](https://github.com/ryanuber/columnize) for displaying terminal data in columns
+- [dns](https://github.com/miekg/dns) package for advanced DNS functionality
+- [go-homedir](https://github.com/mitchellh/go-homedir) to find the home directory
+- [go-sanitize](https://github.com/mrz1836/go-sanitize) for sanitation and data formatting
+- [go-validate](https://github.com/mrz1836/go-validate) for domain/email/ip validations
+- [resty](https://github.com/go-resty/resty) for custom HTTP client support
 </details>
 
 <details>
