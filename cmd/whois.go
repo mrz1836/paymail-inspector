@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/mrz1836/go-sanitize"
 	"github.com/mrz1836/paymail-inspector/chalker"
@@ -63,50 +64,15 @@ Search `+strconv.Itoa(len(providers))+` public paymail providers for a handle.`)
 		// List of paymails found
 		var paymails []*PaymailDetails
 
-		// Loop each provider
+		// Loop each provider (break into a Go routine for each provider)
+		var wg sync.WaitGroup
 		for _, provider := range providers {
-
-			// Get the capabilities
-			capabilities, err := getCapabilities(provider.Domain, true)
-			if err != nil {
-				if strings.Contains(err.Error(), "context deadline exceeded") {
-					chalker.Log(chalker.WARN, fmt.Sprintf("No capabilities found for: %s", provider.Domain))
-				} else {
-					chalker.Log(chalker.ERROR, fmt.Sprintf("Error: %s", err.Error()))
-				}
-				continue
-			}
-
-			// Set the URL - Does the paymail provider have the capability?
-			pkiUrl := capabilities.GetValueString(paymail.BRFCPki, paymail.BRFCPkiAlternate)
-			if len(pkiUrl) == 0 {
-				chalker.Log(chalker.ERROR, fmt.Sprintf("The provider %s is missing a required capability: %s", provider.Domain, paymail.BRFCPki))
-				continue
-			}
-
-			// Create result
-			result := &PaymailDetails{
-				Handle:   handle,
-				Provider: provider,
-			}
-
-			// Get the PKI for the given address
-			if result.PKI, err = getPki(pkiUrl, handle, provider.Domain, true); err != nil || result.PKI == nil {
-				if err != nil {
-					chalker.Log(chalker.ERROR, fmt.Sprintf("Search response: %s", err.Error()))
-				}
-				paymails = append(paymails, result)
-				continue
-			}
-
-			// Get all the public info
-			if err = result.GetPublicInfo(capabilities); err != nil {
-				chalker.Log(chalker.ERROR, fmt.Sprintf("Error: %s", err.Error()))
-			}
-
-			// Add to list
-			paymails = append(paymails, result)
+			wg.Add(1)
+			go fetchPaymailInfo(&wg, handle, provider, &paymails)
 		}
+
+		// Waiting for all providers to finish
+		wg.Wait()
 
 		// If we don't have results
 		if len(paymails) == 0 {
@@ -122,6 +88,52 @@ Search `+strconv.Itoa(len(providers))+` public paymail providers for a handle.`)
 			result.Display()
 		}
 	},
+}
+
+// fetchPaymailInfo will get the paymail information from the provider
+func fetchPaymailInfo(wg *sync.WaitGroup, handle string, provider *Provider, results *[]*PaymailDetails) {
+	defer wg.Done()
+
+	// Get the capabilities
+	capabilities, err := getCapabilities(provider.Domain, true)
+	if err != nil {
+		if strings.Contains(err.Error(), "context deadline exceeded") {
+			chalker.Log(chalker.WARN, fmt.Sprintf("No capabilities found for: %s", provider.Domain))
+		} else {
+			chalker.Log(chalker.ERROR, fmt.Sprintf("Error: %s", err.Error()))
+		}
+		return
+	}
+
+	// Set the URL - Does the paymail provider have the capability?
+	pkiUrl := capabilities.GetValueString(paymail.BRFCPki, paymail.BRFCPkiAlternate)
+	if len(pkiUrl) == 0 {
+		chalker.Log(chalker.ERROR, fmt.Sprintf("The provider %s is missing a required capability: %s", provider.Domain, paymail.BRFCPki))
+		return
+	}
+
+	// Create result
+	result := &PaymailDetails{
+		Handle:   handle,
+		Provider: provider,
+	}
+
+	// Get the PKI for the given address
+	if result.PKI, err = getPki(pkiUrl, handle, provider.Domain, true); err != nil || result.PKI == nil {
+		if err != nil {
+			chalker.Log(chalker.ERROR, fmt.Sprintf("Search response: %s", err.Error()))
+		}
+		*results = append(*results, result)
+		return
+	}
+
+	// Get all the public info
+	if err = result.GetPublicInfo(capabilities); err != nil {
+		chalker.Log(chalker.ERROR, fmt.Sprintf("Error: %s", err.Error()))
+	}
+
+	// Add to list
+	*results = append(*results, result)
 }
 
 func init() {
