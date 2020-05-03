@@ -226,7 +226,7 @@ make help
 
 List of all current commands:
 ```text
-all                            Runs test, install, clean, docs
+all                            Runs test, install, and generates docs
 bench                          Run all benchmarks in the Go application
 build-go                       Build the Go application (locally)
 build                          Build all binaries (darwin, linux, windows)
@@ -246,14 +246,15 @@ release                        Full production release (creates release in Githu
 release-test                   Full production test release (everything except deploy)
 release-snap                   Test the full release (build binaries)
 run                            Runs the go application
-tag                            Generate a new tag and push (IE: make tag version=0.0.0)
-tag-remove                     Remove a tag if found (IE: make tag-remove version=0.0.0)
-tag-update                     Update an existing tag to current commit (IE: make tag-update version=0.0.0)
+tag                            Generate a new tag and push (IE: tag version=0.0.0)
+tag-remove                     Remove a tag if found (IE: tag-remove version=0.0.0)
+tag-update                     Update an existing tag to current commit (IE: tag-update version=0.0.0)
 test                           Runs vet, lint and ALL tests
 test-short                     Runs vet, lint and tests (excludes integration tests)
 uninstall                      Uninstall the application (and remove files)
 update                         Update all project dependencies
 update-releaser                Update the goreleaser application
+update-terminalizer            Update the terminalizer application
 vet                            Run the Go vet application
 windows                        Build for Windows (amd64)
 ```
