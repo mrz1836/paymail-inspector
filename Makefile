@@ -19,15 +19,18 @@ endif
 BUILD_DIR=${GOPATH}/src/${GIT_DOMAIN}/${REPO_OWNER}/${REPO_NAME}
 CURRENT_DIR=$(shell pwd)
 BUILD_DIR_LINK=$(shell readlink ${BUILD_DIR})
-DISTRIBUTIONS_DIR=./dist
+
+## Set the distribution folder
+ifndef DISTRIBUTIONS_DIR
+override DISTRIBUTIONS_DIR=./dist
+endif
 
 ## Set the binary release names
 DARWIN=$(CUSTOM_BINARY_NAME)-darwin
 LINUX=$(CUSTOM_BINARY_NAME)-linux
 WINDOWS=$(CUSTOM_BINARY_NAME)-windows.exe
 
-## Set the version(s) (injected into binary)
-VERSION=$(shell git describe --tags --always --long --dirty)
+## Set the version (injected into binary)
 VERSION_SHORT=$(shell git describe --tags --always --abbrev=0)
 
 .PHONY: test install clean release link
@@ -45,7 +48,7 @@ build: darwin linux windows ## Build all binaries (darwin, linux, windows)
 
 clean: ## Remove previous builds and any test cache data
 	@go clean -cache -testcache -i -r
-	if [ -d ${DISTRIBUTIONS_DIR} ]; then @rm -r ${DISTRIBUTIONS_DIR}; fi
+	@if [ -d $(DISTRIBUTIONS_DIR) ]; then rm -r $(DISTRIBUTIONS_DIR); fi
 
 clean-mods: ## Remove all the Go mod cache
 	@go clean -modcache
