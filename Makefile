@@ -54,7 +54,7 @@ clean-mods: ## Remove all the Go mod cache
 	@go clean -modcache
 
 coverage: ## Shows the test coverage
-	@go test -coverprofile=coverage.out ./... && @go tool cover -func=coverage.out
+	@go test -coverprofile=coverage.out ./... && go tool cover -func=coverage.out
 
 darwin: $(DARWIN) ## Build for Darwin (macOS amd64)
 
@@ -89,9 +89,9 @@ link:
 	BUILD_DIR_LINK=${BUILD_DIR_LINK}; \
 	CURRENT_DIR=${CURRENT_DIR}; \
 	if [ "$${BUILD_DIR_LINK}" != "$${CURRENT_DIR}" ]; then \
-	    @echo "Fixing symlinks for build"; \
-	    @rm -f $${BUILD_DIR}; \
-	    @ln -s $${CURRENT_DIR} $${BUILD_DIR}; \
+	    echo "Fixing symlinks for build"; \
+	    rm -f $${BUILD_DIR}; \
+	    ln -s $${CURRENT_DIR} $${BUILD_DIR}; \
 	fi
 
 lint: ## Run the Go lint application
