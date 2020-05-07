@@ -20,12 +20,6 @@ git:
 notifications:
  email: false
 
-# Before we run scripts
-before_script:
- - go get -u golang.org/x/lint/golint
-
-# Run scripts in parallel
+# Run all commands
 script:
- - golint
- - go vet
- - go test -short -v ./...
+ - make test-short

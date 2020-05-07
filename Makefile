@@ -10,6 +10,9 @@ GIT_DOMAIN=github.com
 REPO_NAME=$(shell basename `git rev-parse --show-toplevel`)
 REPO_OWNER=$(shell git config --get remote.origin.url | sed 's/git@$(GIT_DOMAIN)://g' | sed 's/\/$(REPO_NAME).git//g')
 
+## Set the version (injected into binary)
+VERSION_SHORT=$(shell git describe --tags --always --abbrev=0)
+
 ## Default to the repo name if empty
 ifeq ($(CUSTOM_BINARY_NAME),)
 CUSTOM_BINARY_NAME := $(REPO_NAME)
@@ -29,9 +32,6 @@ endif
 DARWIN=$(CUSTOM_BINARY_NAME)-darwin
 LINUX=$(CUSTOM_BINARY_NAME)-linux
 WINDOWS=$(CUSTOM_BINARY_NAME)-windows.exe
-
-## Set the version (injected into binary)
-VERSION_SHORT=$(shell git describe --tags --always --abbrev=0)
 
 .PHONY: test install clean release link
 
@@ -70,7 +70,7 @@ gif-render: ## Render gifs in .github dir (find/replace text etc)
 	@find . -name 'gif.yml' -print0 | xargs -0 sed -i "" "s/logout//g"
 	@terminalizer render gif -o $(name)
 	@cp -f *.gif .github/IMAGES/
-	@rm -rf *.gif && @rm -rf gif.yml
+	@rm -rf *.gif && rm -rf gif.yml
 
 godocs: ## Sync the latest tag with GoDocs
 	@curl https://proxy.golang.org/$(GIT_DOMAIN)/$(REPO_OWNER)/$(REPO_NAME)/@v/$(VERSION_SHORT).info
@@ -95,6 +95,7 @@ link:
 	fi
 
 lint: ## Run the Go lint application
+	@if [ "$(shell command -v golint)" = "" ]; then go get -u golang.org/x/lint/golint; fi
 	@golint
 
 linux: $(LINUX) ## Build for Linux (amd64)
