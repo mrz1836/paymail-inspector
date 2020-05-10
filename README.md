@@ -7,7 +7,6 @@
 [![Build Status](https://travis-ci.com/mrz1836/paymail-inspector.svg?branch=master&v=7)](https://travis-ci.com/mrz1836/paymail-inspector)
 [![Report](https://goreportcard.com/badge/github.com/mrz1836/paymail-inspector?style=flat&v=7)](https://goreportcard.com/report/github.com/mrz1836/paymail-inspector)
 [![Go](https://img.shields.io/github/go-mod/go-version/mrz1836/paymail-inspector?v=7)](https://golang.org/)
-[![GoDoc](https://godoc.org/github.com/mrz1836/paymail-inspector?status.svg&style=flat)](https://pkg.go.dev/github.com/mrz1836/paymail-inspector?tab=subdirectories)
 [![Sponsor](https://img.shields.io/badge/sponsor-MrZ-181717.svg?logo=github&style=flat&v=3)](https://github.com/sponsors/mrz1836)
 [![Donate](https://img.shields.io/badge/donate-bitcoin-ff9900.svg?logo=bitcoin&style=flat)](https://mrz1818.com/?tab=tips&af=paymail-inspector)
 
@@ -72,7 +71,11 @@ paymail brfc generate --title "BRFC Specifications" --author "andy (nChain)" --v
 paymail brfc search nChain
 ```
 
+<br/>
+
 ___
+
+<br/>
 
 ### `capabilities`
 > Lists the available capabilities of the paymail service ([view example](docs/examples.md#get-capabilities-by-domain))
@@ -80,7 +83,11 @@ ___
 paymail capabilities moneybutton.com
 ```
 
+<br/>
+
 ___
+
+<br/>
 
 ### `p2p`
 > Starts a P2P payment request and returns (n) outputs of (`script`,`satoshis`,`address`) ([view example](docs/examples.md#start-p2p-payment-request-by-paymail))
@@ -88,7 +95,11 @@ ___
 paymail p2p mrz@moneybutton.com
 ```
 
+<br/>
+
 ___
+
+<br/>
 
 ### `resolve`
 > Returns the `pubkey`, `output script`, `address` and `profile` for a given paymail address ([view example](docs/examples.md#resolve-paymail-address-by-paymail))
@@ -96,8 +107,11 @@ ___
 paymail resolve mrz@moneybutton.com
 ```
 
+<br/>
+
 ___
 
+<br/>
 
 ### `validate`
 > Runs several validations on the paymail service for DNSSEC, SSL, SRV and required capabilities ([view example](docs/examples.md#validate-paymail-setup-by-paymail-or-domain))
@@ -105,8 +119,11 @@ ___
 paymail validate moneybutton.com
 ```
 
+<br/>
+
 ___
 
+<br/>
 
 ### `verify`
 > Verifies if a paymail is associated to a pubkey ([view example](docs/examples.md#verify-public-key-owner))
@@ -114,7 +131,11 @@ ___
 paymail verify mrz@moneybutton.com 02ead23149a1e33df17325ec7a7ba9e0b20c674c57c630f527d69b866aa9b65b10
 ``` 
 
+<br/>
+
 ___
+
+<br/>
 
 ### `whois`
 > Searches all public paymail providers for a given handle ([view example](docs/examples.md#whois-for-handles))
