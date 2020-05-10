@@ -1,21 +1,38 @@
 ## Define the binary name
 ifndef CUSTOM_BINARY_NAME
-override CUSTOM_BINARY_NAME=paymail
+	override CUSTOM_BINARY_NAME=paymail
 endif
 
-## Default Repo Domain
-GIT_DOMAIN=github.com
+## Default repository domain name
+ifndef GIT_DOMAIN
+	override GIT_DOMAIN=github.com
+endif
 
-## Automatically detect the repo owner and repo name
-REPO_NAME=$(shell basename `git rev-parse --show-toplevel`)
-REPO_OWNER=$(shell git config --get remote.origin.url | sed 's/git@$(GIT_DOMAIN)://g' | sed 's/\/$(REPO_NAME).git//g')
+## Do we have git available?
+HAS_GIT := $(shell command -v git 2> /dev/null)
 
-## Set the version (injected into binary)
-VERSION_SHORT=$(shell git describe --tags --always --abbrev=0)
+ifdef HAS_GIT
+	## Automatically detect the repo owner and repo name (for local use with Git)
+	REPO_NAME=$(shell basename `git rev-parse --show-toplevel`)
+	REPO_OWNER=$(shell git config --get remote.origin.url | sed 's/git@$(GIT_DOMAIN)://g' | sed 's/\/$(REPO_NAME).git//g')
+
+	## Set the version (for go docs)
+	VERSION_SHORT=$(shell git describe --tags --always --abbrev=0)
+endif
 
 ## Default to the repo name if empty
 ifeq ($(CUSTOM_BINARY_NAME),)
-CUSTOM_BINARY_NAME := $(REPO_NAME)
+	CUSTOM_BINARY_NAME := $(REPO_NAME)
+endif
+
+## Not defined? Use default repo name which is the application
+ifeq ($(REPO_NAME),)
+	REPO_NAME="paymail-inspector"
+endif
+
+## Not defined? Use default repo owner
+ifeq ($(REPO_OWNER),)
+	REPO_OWNER="mrz1836"
 endif
 
 ## Symlink into GOPATH
@@ -25,7 +42,7 @@ BUILD_DIR_LINK=$(shell readlink ${BUILD_DIR})
 
 ## Set the distribution folder
 ifndef DISTRIBUTIONS_DIR
-override DISTRIBUTIONS_DIR=./dist
+	override DISTRIBUTIONS_DIR=./dist
 endif
 
 ## Set the binary release names
