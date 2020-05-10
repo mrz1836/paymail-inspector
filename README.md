@@ -1,6 +1,6 @@
 # Paymail Inspector
 
-> **paymail-inspector** is a CLI app for interacting with paymail service providers
+> CLI application for interacting with paymail service providers
 
 [![Release](https://img.shields.io/github/release-pre/mrz1836/paymail-inspector.svg?logo=github&style=flat&v=7)](https://github.com/mrz1836/paymail-inspector/releases)
 [![Downloads](https://img.shields.io/github/downloads/mrz1836/paymail-inspector/total.svg?logo=github&style=flat&v=7)](https://github.com/mrz1836/paymail-inspector/releases)
