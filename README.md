@@ -1,15 +1,21 @@
 # Paymail Inspector
 
-[![Go](https://img.shields.io/github/go-mod/go-version/mrz1836/paymail-inspector?v=7)](https://golang.org/)
-[![Build Status](https://travis-ci.com/mrz1836/paymail-inspector.svg?branch=master&v=7)](https://travis-ci.com/mrz1836/paymail-inspector)
-[![Report](https://goreportcard.com/badge/github.com/mrz1836/paymail-inspector?style=flat&v=7)](https://goreportcard.com/report/github.com/mrz1836/paymail-inspector)
-[![Release](https://img.shields.io/github/release-pre/mrz1836/paymail-inspector.svg?style=flat&v=7)](https://github.com/mrz1836/paymail-inspector/releases)
-[![Downloads](https://img.shields.io/github/downloads/mrz1836/paymail-inspector/total.svg?style=flat&v=7)](https://github.com/mrz1836/paymail-inspector/releases)
-[![GoDoc](https://godoc.org/github.com/mrz1836/paymail-inspector?status.svg&style=flat)](https://pkg.go.dev/github.com/mrz1836/paymail-inspector?tab=subdirectories)
-
 > **paymail-inspector** is a CLI app for interacting with paymail service providers
 
+[![Release](https://img.shields.io/github/release-pre/mrz1836/paymail-inspector.svg?logo=github&style=flat&v=7)](https://github.com/mrz1836/paymail-inspector/releases)
+[![Downloads](https://img.shields.io/github/downloads/mrz1836/paymail-inspector/total.svg?logo=github&style=flat&v=7)](https://github.com/mrz1836/paymail-inspector/releases)
+[![Build Status](https://travis-ci.com/mrz1836/paymail-inspector.svg?branch=master&v=7)](https://travis-ci.com/mrz1836/paymail-inspector)
+[![Report](https://goreportcard.com/badge/github.com/mrz1836/paymail-inspector?style=flat&v=7)](https://goreportcard.com/report/github.com/mrz1836/paymail-inspector)
+[![Go](https://img.shields.io/github/go-mod/go-version/mrz1836/paymail-inspector?v=7)](https://golang.org/)
+[![GoDoc](https://godoc.org/github.com/mrz1836/paymail-inspector?status.svg&style=flat)](https://pkg.go.dev/github.com/mrz1836/paymail-inspector?tab=subdirectories)
+[![Sponsor](https://img.shields.io/badge/sponsor-MrZ-181717.svg?logo=github&style=flat&v=3)](https://github.com/sponsors/mrz1836)
+[![Donate](https://img.shields.io/badge/donate-bitcoin-ff9900.svg?logo=bitcoin&style=flat)](https://mrz1818.com/?tab=tips&af=paymail-inspector)
+
+<br/>
+
 <img src=".github/IMAGES/paymail-inspector.gif?raw=true&v=7" alt="Paymail Commands">
+
+<br/>
 
 ## Table of Contents
 - [Installation](#installation)
@@ -21,6 +27,8 @@
 - [Maintainers](#maintainers)
 - [Contributing](#contributing)
 - [License](#license)
+
+<br/>
 
 ## Installation
 
@@ -43,6 +51,8 @@ go get github.com/mrz1836/paymail-inspector
 cd /$GOPATH/src/github.com/mrz1836/paymail-inspector && make install
 paymail
 ```
+
+<br/>
 
 ## Commands
 
@@ -112,6 +122,7 @@ ___
 paymail whois mrz
 ```
 
+<br/>
 
 ## Documentation
 Get started with the [examples](docs/examples.md). View the generated golang [godocs](https://pkg.go.dev/github.com/mrz1836/paymail-inspector?tab=subdirectories).
@@ -261,6 +272,7 @@ windows                        Build for Windows (amd64)
 ```
 </details>
 
+<br/>
 
 ## Examples & Tests
 All unit tests and [examples](docs/examples.md) run via [Travis CI](https://travis-ci.com/mrz1836/paymail-inspector) and uses [Go version 1.14.x](https://golang.org/doc/go1.14). View the [deployment configuration file](.travis.yml).
@@ -270,13 +282,19 @@ Run all tests (including integration tests)
 make test
 ```
 
+<br/>
+
 ## Code Standards
 Read more about this Go project's [code standards](CODE_STANDARDS.md).
+
+<br/>
 
 ## Usage
 View all the [examples](docs/examples.md) and see the [commands above](#commands)
 
 All the generated command documentation can be found in [docs/commands](docs/commands).
+
+<br/>
 
 ## Maintainers
 
@@ -284,18 +302,23 @@ All the generated command documentation can be found in [docs/commands](docs/com
 |:---:|:---:|
 | [MrZ](https://github.com/mrz1836) | [Satchmo](https://github.com/rohenaz) |
 
+<br/>
 
 ## Contributing
+View the [contributing guidelines](CONTRIBUTING.md) and please follow the [code of conduct](CODE_OF_CONDUCT.md).
 
+### How can I help?
+All kinds of contributions are welcome :raised_hands:! 
+The most basic way to show your support is to star :star2: the project, or to raise issues :speech_balloon:. 
+You can also support this project by [becoming a sponsor on GitHub](https://github.com/sponsors/mrz1836) :clap: 
+or by making a [**bitcoin donation**](https://mrz1818.com/?tab=tips&af=paymail-inspector) to ensure this journey continues indefinitely! :rocket:
+
+### Credits
 Inspiration and code snippets from [dnssec](https://github.com/binaryfigments/dnssec) and [check-ssl](https://github.com/wycore/check-ssl)
 
 Utilized [terminalizer](https://terminalizer.com/) to record example gifs
 
-View the [contributing guidelines](CONTRIBUTING.md) and follow the [code of conduct](CODE_OF_CONDUCT.md).
-
-Support the development of this project 🙏
-
-[![Donate](https://img.shields.io/badge/donate-bitcoin-brightgreen.svg)](https://mrz1818.com/?tab=tips&af=paymail-inspector) [![Twetch](https://img.shields.io/badge/share-twitter-00ACEE.svg)](https://twitter.com/intent/tweet?text=Paymail%20Inspector%20Rocks!%20Check%20it%20out:%20https%3A%2F%2Ftncpw.co%2F2d429aee) [![Twitter](https://img.shields.io/badge/share-twetch-085AF6.svg)](https://twetch.app/compose?description=Paymail%20Inspector%20Rocks!%20Check%20it%20out:%20https%3A%2F%2Ftncpw.co%2F2d429aee)
+<br/>
 
 ## License
 
