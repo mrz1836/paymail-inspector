@@ -4,6 +4,7 @@
 [![Build Status](https://travis-ci.com/mrz1836/paymail-inspector.svg?branch=master&v=7)](https://travis-ci.com/mrz1836/paymail-inspector)
 [![Report](https://goreportcard.com/badge/github.com/mrz1836/paymail-inspector?style=flat&v=7)](https://goreportcard.com/report/github.com/mrz1836/paymail-inspector)
 [![Release](https://img.shields.io/github/release-pre/mrz1836/paymail-inspector.svg?style=flat&v=7)](https://github.com/mrz1836/paymail-inspector/releases)
+[![Downloads](https://img.shields.io/github/downloads/mrz1836/paymail-inspector/total.svg?style=flat&v=7)](https://github.com/mrz1836/paymail-inspector/releases)
 [![GoDoc](https://godoc.org/github.com/mrz1836/paymail-inspector?status.svg&style=flat)](https://pkg.go.dev/github.com/mrz1836/paymail-inspector?tab=subdirectories)
 
 > **paymail-inspector** is a CLI app for interacting with paymail service providers
