@@ -61,10 +61,14 @@ paymail
 paymail brfc list
 ```
 
+<br/>
+
 > Generate a new `BRFC ID` for a new specification ([view example](docs/examples.md#generate-new-brfc-id))
 ```shell script
 paymail brfc generate --title "BRFC Specifications" --author "andy (nChain)" --version 1
 ```
+ 
+<br/>
 
 > Search all brfc specifications (id, title, author) ([view example](docs/examples.md#search-brfc-specifications))
 ```shell script
