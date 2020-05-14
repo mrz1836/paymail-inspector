@@ -1,29 +1,11 @@
-## Define the binary name
-ifndef CUSTOM_BINARY_NAME
-	override CUSTOM_BINARY_NAME=paymail
-endif
+## Custom binary
+CUSTOM_BINARY_NAME := paymail
 
-## Default repository domain name
-ifndef GIT_DOMAIN
-	override GIT_DOMAIN=github.com
-endif
+# Common makefile commands & variables between projects
+include .make/Makefile.common
 
-## Do we have git available?
-HAS_GIT := $(shell command -v git 2> /dev/null)
-
-ifdef HAS_GIT
-	## Automatically detect the repo owner and repo name (for local use with Git)
-	REPO_NAME=$(shell basename `git rev-parse --show-toplevel`)
-	REPO_OWNER=$(shell git config --get remote.origin.url | sed 's/git@$(GIT_DOMAIN)://g' | sed 's/\/$(REPO_NAME).git//g')
-
-	## Set the version (for go docs)
-	VERSION_SHORT=$(shell git describe --tags --always --abbrev=0)
-endif
-
-## Default to the repo name if empty
-ifeq ($(CUSTOM_BINARY_NAME),)
-	CUSTOM_BINARY_NAME := $(REPO_NAME)
-endif
+# Common Golang makefile commands & variables between projects
+include .make/Makefile.go
 
 ## Not defined? Use default repo name which is the application
 ifeq ($(REPO_NAME),)
@@ -35,45 +17,24 @@ ifeq ($(REPO_OWNER),)
 	REPO_OWNER="mrz1836"
 endif
 
-## Symlink into GOPATH
-BUILD_DIR=${GOPATH}/src/${GIT_DOMAIN}/${REPO_OWNER}/${REPO_NAME}
-CURRENT_DIR=$(shell pwd)
-BUILD_DIR_LINK=$(shell readlink ${BUILD_DIR})
+.PHONY: build clean release
 
-## Set the distribution folder
-ifndef DISTRIBUTIONS_DIR
-	override DISTRIBUTIONS_DIR=./dist
-endif
+all: ## Runs multiple commands
+	@$(MAKE) test
+	@$(MAKE) gen-docs
 
-## Set the binary release names
-DARWIN=$(CUSTOM_BINARY_NAME)-darwin
-LINUX=$(CUSTOM_BINARY_NAME)-linux
-WINDOWS=$(CUSTOM_BINARY_NAME)-windows.exe
-
-.PHONY: test install clean release link
-
-all: test gen-docs ## Runs test, install, and generates docs
-
-bench:  ## Run all benchmarks in the Go application
-	@go test -bench ./... -benchmem -v
-
-build-go:  ## Build the Go application (locally)
-	@go build -o bin/$(CUSTOM_BINARY_NAME)
-
-build: darwin linux windows ## Build all binaries (darwin, linux, windows)
+build:  ## Build all binaries (darwin, linux, windows)
+	@$(MAKE) darwin
+	@$(MAKE) linux
+	@$(MAKE) windows
 	@echo version: $(VERSION_SHORT)
 
 clean: ## Remove previous builds and any test cache data
 	@go clean -cache -testcache -i -r
 	@if [ -d $(DISTRIBUTIONS_DIR) ]; then rm -r $(DISTRIBUTIONS_DIR); fi
 
-clean-mods: ## Remove all the Go mod cache
-	@go clean -modcache
-
-coverage: ## Shows the test coverage
-	@go test -coverprofile=coverage.out ./... && go tool cover -func=coverage.out
-
-darwin: $(DARWIN) ## Build for Darwin (macOS amd64)
+darwin: ## Build for Darwin (macOS amd64)
+	@$(MAKE) $(DARWIN)
 
 gen-docs: ## Generate documentation from all available commands (fresh install)
 	@$(MAKE) install
@@ -89,94 +50,17 @@ gif-render: ## Render gifs in .github dir (find/replace text etc)
 	@cp -f *.gif .github/IMAGES/
 	@rm -rf *.gif && rm -rf gif.yml
 
-godocs: ## Sync the latest tag with GoDocs
-	@curl https://proxy.golang.org/$(GIT_DOMAIN)/$(REPO_OWNER)/$(REPO_NAME)/@v/$(VERSION_SHORT).info
+linux: ## Build for Linux (amd64)
+	@$(MAKE) $(LINUX)
 
-help: ## Show all make commands available
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
-
-install: ## Install the application
-	@go build -o $$GOPATH/bin/$(CUSTOM_BINARY_NAME)
-
-install-go: ## Install the application (Using Native Go)
-	@go install $(GIT_DOMAIN)/$(REPO_OWNER)/$(REPO_NAME)
-
-link:
-	BUILD_DIR=${BUILD_DIR}; \
-	BUILD_DIR_LINK=${BUILD_DIR_LINK}; \
-	CURRENT_DIR=${CURRENT_DIR}; \
-	if [ "$${BUILD_DIR_LINK}" != "$${CURRENT_DIR}" ]; then \
-	    echo "Fixing symlinks for build"; \
-	    rm -f $${BUILD_DIR}; \
-	    ln -s $${CURRENT_DIR} $${BUILD_DIR}; \
-	fi
-
-lint: ## Run the Go lint application
-	@if [ "$(shell command -v golint)" = "" ]; then go get -u golang.org/x/lint/golint; fi
-	@golint
-
-linux: $(LINUX) ## Build for Linux (amd64)
-
-release: ## Full production release (creates release in Github)
-	@goreleaser --rm-dist
+release:: ## Runs common.release then runs godocs
 	@$(MAKE) godocs
-
-release-test: ## Full production test release (everything except deploy)
-	@goreleaser --skip-publish --rm-dist
-
-release-snap: ## Test the full release (build binaries)
-	@goreleaser --snapshot --skip-publish --rm-dist
-
-run: ## Runs the go application
-	@go run main.go
-
-tag: ## Generate a new tag and push (IE: tag version=0.0.0)
-	@test $(version)
-	@git tag -a v$(version) -m "Pending full release..."
-	@git push origin v$(version)
-	@git fetch --tags -f
-
-tag-remove: ## Remove a tag if found (IE: tag-remove version=0.0.0)
-	@test $(version)
-	@git tag -d v$(version)
-	@git push --delete origin v$(version)
-	@git fetch --tags
-
-tag-update: ## Update an existing tag to current commit (IE: tag-update version=0.0.0)
-	@test $(version)
-	@git push --force origin HEAD:refs/tags/v$(version)
-	@git fetch --tags -f
-
-test: ## Runs vet, lint and ALL tests
-	@$(MAKE) vet
-	@$(MAKE) lint
-	@go test ./... -v
-
-test-short: ## Runs vet, lint and tests (excludes integration tests)
-	@$(MAKE) vet
-	@$(MAKE) lint
-	@go test ./... -v -test.short
-
-uninstall: ## Uninstall the application (and remove files)
-	@go clean -i $(GIT_DOMAIN)/$(REPO_OWNER)/$(REPO_NAME)
-	@rm -rf $$GOPATH/src/$(GIT_DOMAIN)/$(REPO_OWNER)/$(REPO_NAME)
-	@rm -rf $$GOPATH/bin/$(CUSTOM_BINARY_NAME)
-
-update:  ## Update all project dependencies
-	@go get -u ./...
-	@go mod tidy
-
-update-releaser:  ## Update the goreleaser application
-	@brew update
-	@brew upgrade goreleaser
 
 update-terminalizer:  ## Update the terminalizer application
 	@npm update -g terminalizer
 
-vet: ## Run the Go vet application
-	@go vet -v
-
-windows: $(WINDOWS) ## Build for Windows (amd64)
+windows: ## Build for Windows (amd64)
+	@$(MAKE) $(WINDOWS)
 
 $(WINDOWS):
 	env GOOS=windows GOARCH=amd64 go build -i -v -o ${DISTRIBUTIONS_DIR}/$(WINDOWS) -ldflags="-s -w -X $(GIT_DOMAIN)/$(REPO_OWNER)/$(REPO_NAME)/cmd.Version=$(VERSION_SHORT)"
