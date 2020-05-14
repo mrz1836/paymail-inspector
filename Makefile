@@ -31,6 +31,7 @@ build:  ## Build all binaries (darwin, linux, windows)
 
 clean: ## Remove previous builds and any test cache data
 	@go clean -cache -testcache -i -r
+	@test $(DISTRIBUTIONS_DIR)
 	@if [ -d $(DISTRIBUTIONS_DIR) ]; then rm -r $(DISTRIBUTIONS_DIR); fi
 
 darwin: ## Build for Darwin (macOS amd64)
