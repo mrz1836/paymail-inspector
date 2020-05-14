@@ -12,7 +12,7 @@ require (
 	github.com/dgryski/go-farm v0.0.0-20200201041132-a6ae2369ad13 // indirect
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/go-resty/resty/v2 v2.2.0
-	github.com/golang/protobuf v1.4.1 // indirect
+	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/miekg/dns v1.1.29
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.3.0 // indirect
