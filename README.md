@@ -341,6 +341,8 @@ The most basic way to show your support is to star :star2: the project, or to ra
 You can also support this project by [becoming a sponsor on GitHub](https://github.com/sponsors/mrz1836) :clap: 
 or by making a [**bitcoin donation**](https://mrz1818.com/?tab=tips&af=paymail-inspector) to ensure this journey continues indefinitely! :rocket:
 
+Help by sharing: [![Twetch](https://img.shields.io/badge/share-twitter-00ACEE.svg)](https://twitter.com/intent/tweet?text=Paymail%20Inspector%20Rocks!%20Check%20it%20out:%20https%3A%2F%2Ftncpw.co%2F2d429aee) [![Twitter](https://img.shields.io/badge/share-twetch-085AF6.svg)](https://twetch.app/compose?description=Paymail%20Inspector%20Rocks!%20Check%20it%20out:%20https%3A%2F%2Ftncpw.co%2F2d429aee)
+
 ### Credits
 Inspiration and code snippets from [dnssec](https://github.com/binaryfigments/dnssec) and [check-ssl](https://github.com/wycore/check-ssl)
 
