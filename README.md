@@ -181,6 +181,7 @@ Additional paymail information can also be found via [MoneyButton's documentatio
 
 <details>
 <summary><strong><code>Public Paymail Providers</code></strong></summary>
+<br/>
 
 - [MoneyButton](https://tncpw.co/4c58a26f)
 - [Handcash](https://tncpw.co/742b1f09)
@@ -194,6 +195,7 @@ Additional paymail information can also be found via [MoneyButton's documentatio
 
 <details>
 <summary><strong><code>Integrated Services</code></strong></summary>
+<br/>
 
 - Unwriter's [bitpic](https://bitpic.network/)
 - Deggen's [Roundesk](https://roundesk.co/)
@@ -202,6 +204,7 @@ Additional paymail information can also be found via [MoneyButton's documentatio
 
 <details>
 <summary><strong><code>Custom Configuration</code></strong></summary>
+<br/>
 
 The configuration file should be located in your `$HOME/paymail` folder and named `config.yaml`.
 
@@ -212,6 +215,7 @@ You can also specify a custom configuration file using `--config "/folder/path/f
 
 <details>
 <summary><strong><code>Local Database (Cache)</code></strong></summary>
+<br/>
 
 The database is located in your `$HOME/paymail` folder.
 
@@ -228,6 +232,7 @@ paymail whois mrz --no-cache
 
 <details>
 <summary><strong><code>Package Dependencies</code></strong></summary>
+<br/>
 
 - [badger](https://github.com/dgraph-io/badger/v2) for persistent database storage
 - [bsvd](https://github.com/bitcoinsv/bsvd) and [bsvutil](https://github.com/bitcoinsv/bsvutil) for BSV script functionality
@@ -243,6 +248,7 @@ paymail whois mrz --no-cache
 
 <details>
 <summary><strong><code>Application Deployment</code></strong></summary>
+<br/>
 
 [goreleaser](https://github.com/goreleaser/goreleaser) for easy binary deployment to Github and can be installed via: `brew install goreleaser`.
 
@@ -255,6 +261,7 @@ The release can also be deployed to a `homebrew` repository: [homebrew-paymail-i
 
 <details>
 <summary><strong><code>Makefile Commands</code></strong></summary>
+<br/>
 
 View all `makefile` commands
 ```shell script
@@ -318,7 +325,6 @@ All the generated command documentation can be found in [docs/commands](docs/com
 <br/>
 
 ## Maintainers
-
 | [<img src="https://github.com/mrz1836.png" height="50" alt="MrZ" />](https://github.com/mrz1836) | [<img src="https://github.com/rohenaz.png" height="50" alt="Satchmo" />](https://github.com/rohenaz) |
 |:---:|:---:|
 | [MrZ](https://github.com/mrz1836) | [Satchmo](https://github.com/rohenaz) |
