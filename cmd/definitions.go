@@ -8,7 +8,7 @@ import (
 )
 
 // Version is set manually (also make:build overwrites this value from Github's latest tag)
-var Version = "v0.1.9"
+var Version = "v0.1.10"
 
 // Default flag values for various commands
 var (
@@ -92,6 +92,7 @@ func getProvider(domain string) *Provider {
 // PaymailDetails is all the info about one paymail address
 type PaymailDetails struct {
 	Bitpic        string                             `json:"bitpic"`
+	Dimely        string                             `json:"dimely"`
 	Handle        string                             `json:"handle"`
 	PKI           *paymail.PKIResponse               `json:"pki"`
 	Provider      *Provider                          `json:"provider"`

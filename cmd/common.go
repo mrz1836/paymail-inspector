@@ -619,6 +619,12 @@ func (p *PaymailDetails) GetPublicInfo(capabilities *paymail.CapabilitiesRespons
 		}
 	}
 
+	// Shim for Dime.ly detection (only available to RelayX paymails)
+	if p.Provider.Domain == "relayx.io" {
+		// todo: integration with dime.ly api if it exists or on-chain records?
+		p.Dimely = fmt.Sprintf("https://dimely.io/profile/%s@%s", p.Handle, p.Provider.Domain)
+	}
+
 	return
 }
 
@@ -659,6 +665,11 @@ func (p *PaymailDetails) Display() {
 	// Display bitpic if found
 	if len(p.Bitpic) > 0 {
 		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Bitpic       : %s", chalk.Cyan.Color(p.Bitpic)))
+	}
+
+	// Display dime.ly if found
+	if len(p.Dimely) > 0 {
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Dime.ly      : %s", chalk.Cyan.Color(p.Dimely)))
 	}
 
 	// Display 2paymail if found
