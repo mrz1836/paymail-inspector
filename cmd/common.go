@@ -502,7 +502,7 @@ func get2paymail(alias, domain string, allowCache bool) (profile *twopaymail.Res
 func verifyPubKey(url, alias, domain, pubKey string) (response *paymail.VerifyPubKeyResponse, err error) {
 
 	// Start the request
-	displayHeader(chalker.DEFAULT, fmt.Sprintf("verifing pubkey for %s...", chalk.Cyan.Color(alias+"@"+domain)))
+	displayHeader(chalker.DEFAULT, fmt.Sprintf("Verifing pubkey for %s...", chalk.Cyan.Color(alias+"@"+domain)))
 
 	// Verify the given pubkey
 	if response, err = paymail.VerifyPubKey(url, alias, domain, pubKey, !skipTracing); err != nil {
@@ -703,7 +703,7 @@ func (p *PaymailDetails) Display() {
 	if p.Roundesk != nil && p.Roundesk.Profile != nil {
 
 		// Rendering profile information
-		displayHeader(chalker.DEFAULT, fmt.Sprintf("Roundesk profile for %s", chalk.Cyan.Color(displayPaymail)))
+		displayHeader(chalker.BOLD, fmt.Sprintf("Roundesk profile for %s", chalk.Cyan.Color(displayPaymail)))
 
 		if len(p.Roundesk.Profile.Name) > 0 {
 			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Name      : %s", chalk.Cyan.Color(p.Roundesk.Profile.Name)))
