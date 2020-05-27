@@ -15,10 +15,9 @@ import (
 
 // Defaults for bitpic package
 const (
-	bitPicURL         = "https://bitpic.network"     // Choose the provider
-	bitPicTxtURL      = "https://txt.bitpic.network" // Choose the provider for JSON
-	defaultGetTimeout = 15                           // In seconds
-	defaultUserAgent  = "go:bitpic"                  // Default user agent
+	bitPicURL         = "bitpic.network" // Choose the provider
+	defaultGetTimeout = 15               // In seconds
+	defaultUserAgent  = "go:bitpic"      // Default user agent
 )
 
 // Override the package defaults
@@ -141,7 +140,7 @@ func UrlFromPaymail(paymail string) string {
 func Search(alias, domain string, tracing bool) (response *SearchResponse, err error) {
 
 	// Set the url for the request
-	reqURL := fmt.Sprintf("%s/search/json?text=%s@%s", bitPicTxtURL, alias, domain)
+	reqURL := fmt.Sprintf("https://txt.%s/search/json?text=%s@%s", bitPicURL, alias, domain)
 
 	// Create a Client and start the request
 	client := resty.New().SetTimeout(defaultGetTimeout * time.Second)

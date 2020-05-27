@@ -225,7 +225,7 @@ To clear the entire database:
 paymail --flush-cache
 ```
 
-Run commands and ignore loading data from local cache:
+Run commands _ignoring_ local cache:
 ```shell script
 paymail whois mrz --no-cache
 ```
@@ -271,33 +271,34 @@ make help
 
 List of all current commands:
 ```text
-all                  Runs multiple commands
-clean                Remove previous builds and any test cache data
-clean-mods           Remove all the Go mod cache
-coverage             Shows the test coverage
-darwin               Build for Darwin (macOS amd64)
-gen-docs             Generate documentation from all available commands (fresh install)
-gif-render           Render gifs in .github dir (find/replace text etc)
-godocs               Sync the latest tag with GoDocs
-help                 Show this help message
-install              Install the application
-install-go           Install the application (Using Native Go)
-lint                 Run the Go lint application
-linux                Build for Linux (amd64)
-release              Full production release (creates release in Github)
-release              Runs common.release then runs godocs
-release-snap         Test the full release (build binaries)
-release-test         Full production test release (everything except deploy)
-replace-version      Replaces the version in HTML/JS (pre-deploy)
-tag                  Generate a new tag and push (tag version=0.0.0)
-tag-remove           Remove a tag if found (tag-remove version=0.0.0)
-tag-update           Update an existing tag to current commit (tag-update version=0.0.0)
-test                 Runs vet, lint and ALL tests
-test-short           Runs vet, lint and tests (excludes integration tests)
-test-travis          Runs tests via Travis (also exports coverage)
-uninstall            Uninstall the application (and remove files)
-vet                  Run the Go vet application
-windows              Build for Windows (amd64)
+all                    Runs multiple commands
+clean                  Remove previous builds and any test cache data
+clean-mods             Remove all the Go mod cache
+coverage               Shows the test coverage
+darwin                 Build for Darwin (macOS amd64)
+gen-docs               Generate documentation from all available commands (fresh install)
+gif-render             Render gifs in .github dir (find/replace text etc)
+godocs                 Sync the latest tag with GoDocs
+help                   Show this help message
+install                Install the application
+install-go             Install the application (Using Native Go)
+lint                   Run the Go lint application
+linux                  Build for Linux (amd64)
+release                Full production release (creates release in Github)
+release                Runs common.release then runs godocs
+release-snap           Test the full release (build binaries)
+release-test           Full production test release (everything except deploy)
+replace-version        Replaces the version in HTML/JS (pre-deploy)
+tag                    Generate a new tag and push (tag version=0.0.0)
+tag-remove             Remove a tag if found (tag-remove version=0.0.0)
+tag-update             Update an existing tag to current commit (tag-update version=0.0.0)
+test                   Runs vet, lint and ALL tests
+test-short             Runs vet, lint and tests (excludes integration tests)
+test-travis            Runs all tests via Travis (also exports coverage)
+test-travis-short      Runs unit tests via Travis (also exports coverage)
+uninstall              Uninstall the application (and remove files)
+vet                    Run the Go vet application
+windows                Build for Windows (amd64)
 ```
 </details>
 
