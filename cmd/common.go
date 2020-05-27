@@ -387,6 +387,62 @@ func getBitPic(alias, domain string, allowCache bool) (url string, err error) {
 	return
 }
 
+// getBitPics will search for all bitpics by an alias
+func getBitPics(alias, domain string, allowCache bool) (searchResult *bitpic.SearchResponse, err error) {
+
+	// Start the request
+	displayHeader(chalker.DEFAULT, fmt.Sprintf("Searching Bitpic for %s@%s...", chalk.Cyan.Color(alias), chalk.Cyan.Color(domain)))
+
+	// Cache key
+	keyName := "app-bitpic-search-" + alias + "@" + domain
+
+	// Do we have cache and db?
+	if !disableCache && databaseEnabled && allowCache {
+		var jsonStr string
+		if jsonStr, err = database.Get(keyName); err != nil {
+			return
+		}
+		if len(jsonStr) > 0 {
+			if err = json.Unmarshal([]byte(jsonStr), &searchResult); err != nil {
+				return
+			}
+			chalker.Log(chalker.SUCCESS, fmt.Sprintf("Found %d possible matches (from cache)", len(searchResult.Result.Posts)))
+			return
+		}
+	}
+
+	// Search
+	if searchResult, err = bitpic.Search(alias, domain, true); err != nil {
+		return
+	}
+
+	// Display the tracing results
+	if !skipTracing {
+		displayTracingResults(searchResult.Tracing, searchResult.StatusCode)
+	}
+
+	// Got results
+	if searchResult != nil && searchResult.Result != nil && len(searchResult.Result.Posts) > 0 {
+
+		chalker.Log(chalker.SUCCESS, fmt.Sprintf("Found %d possible matches", len(searchResult.Result.Posts)))
+
+		// Store in db?
+		if databaseEnabled {
+			var jsonStr []byte
+			if jsonStr, err = json.Marshal(searchResult); err != nil {
+				return
+			}
+			if err = database.Set(keyName, string(jsonStr), 1*time.Hour); err != nil {
+				return
+			}
+		}
+	} else {
+		chalker.Log(chalker.DEFAULT, "No bitpics were found")
+	}
+
+	return
+}
+
 // getRoundeskProfile will get a Roundesk profile if it exists
 func getRoundeskProfile(alias, domain string, allowCache bool) (profile *roundesk.Response, err error) {
 
@@ -603,6 +659,9 @@ func (p *PaymailDetails) GetPublicInfo(capabilities *paymail.CapabilitiesRespons
 		if p.Bitpic, err = getBitPic(p.Handle, p.Provider.Domain, true); err != nil {
 			err = fmt.Errorf("checking for bitpic failed: %s", err.Error())
 		}
+		if p.Bitpics, err = getBitPics(p.Handle, p.Provider.Domain, true); err != nil {
+			err = fmt.Errorf("searching for bitpic failed: %s", err.Error())
+		}
 	}
 
 	// Attempt to get a 2paymail (if enabled)
@@ -662,11 +721,6 @@ func (p *PaymailDetails) Display() {
 		}
 	}
 
-	// Display bitpic if found
-	if len(p.Bitpic) > 0 {
-		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Bitpic       : %s", chalk.Cyan.Color(p.Bitpic)))
-	}
-
 	// Display dime.ly if found
 	if len(p.Dimely) > 0 {
 		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Dime.ly      : %s", chalk.Cyan.Color(p.Dimely)))
@@ -681,6 +735,22 @@ func (p *PaymailDetails) Display() {
 		if len(p.TwoPaymail.Twitter) > 0 {
 			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Twitter      : %s", chalk.Cyan.Color(p.TwoPaymail.Twitter)))
 		}
+	}
+
+	// Do we have possible matches?
+	if p.Bitpics != nil && len(p.Bitpics.Result.Posts) > 0 {
+		resultNum := 1
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Bitpic URL   : %s", chalk.Cyan.Color(bitpic.UrlFromPaymail(p.Bitpics.Result.Posts[0].Data.Paymail))))
+		for _, post := range p.Bitpics.Result.Posts {
+			if len(post.Data.Paymail) > 0 {
+				chalker.Log(chalker.DEFAULT, fmt.Sprintf("Bitpic Img #%d: %s", resultNum, chalk.Cyan.Color(post.Data.BitFs)))
+			}
+			resultNum = resultNum + 1
+		}
+	} else if len(p.Bitpic) > 0 { // todo: maybe deprecate if search works indefinitely
+
+		// Display bitpic if found
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Bitpic       : %s", chalk.Cyan.Color(p.Bitpic)))
 	}
 
 	// Show pubkey

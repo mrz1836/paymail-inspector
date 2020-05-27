@@ -3,12 +3,13 @@ package cmd
 import (
 	"github.com/mrz1836/go-sanitize"
 	twopaymail "github.com/mrz1836/paymail-inspector/integrations/2paymail"
+	"github.com/mrz1836/paymail-inspector/integrations/bitpic"
 	"github.com/mrz1836/paymail-inspector/integrations/roundesk"
 	"github.com/mrz1836/paymail-inspector/paymail"
 )
 
 // Version is set manually (also make:build overwrites this value from Github's latest tag)
-var Version = "v0.1.10"
+var Version = "v0.1.11"
 
 // Default flag values for various commands
 var (
@@ -92,6 +93,7 @@ func getProvider(domain string) *Provider {
 // PaymailDetails is all the info about one paymail address
 type PaymailDetails struct {
 	Bitpic        string                             `json:"bitpic"`
+	Bitpics       *bitpic.SearchResponse             `json:"bitpics"`
 	Dimely        string                             `json:"dimely"`
 	Handle        string                             `json:"handle"`
 	PKI           *paymail.PKIResponse               `json:"pki"`
