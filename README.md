@@ -191,6 +191,7 @@ Additional paymail information can also be found via [MoneyButton's documentatio
 - [Bit.sv](https://tncpw.co/bff8984c)
 - [myPaymail](https://tncpw.co/ee243a15)
 - [Volt](https://tncpw.co/e9ff2b0c)
+- [Metanet ID](https://tncpw.co/21ab64da)
 </details>
 
 <details>
