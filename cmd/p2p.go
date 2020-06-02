@@ -141,7 +141,6 @@ Read more at: `+chalk.Cyan.Color("https://docs.moneybutton.com/docs/paymail-07-p
 			displayHeader(chalker.DEFAULT, fmt.Sprintf("Output #%d", index+1))
 			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Script    : %s", chalk.Cyan.Color(output.Script)))
 			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Satoshis  : %s", chalk.Cyan.Color(fmt.Sprintf("%d", output.Satoshis))))
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Address   : %s", chalk.Cyan.Color(output.Address)))
 		}
 	},
 }

@@ -1,16 +1,12 @@
 package paymail
 
 import (
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
-	"github.com/bitcoinsv/bsvd/chaincfg"
-	"github.com/bitcoinsv/bsvd/txscript"
-	"github.com/bitcoinsv/bsvutil"
 	"github.com/go-resty/resty/v2"
 )
 
@@ -35,7 +31,6 @@ type P2PPaymentDestinationResponse struct {
 
 // Output is returned inside the payment destination response
 type Output struct {
-	Address  string `json:"address,omitempty"`  // Hex encoded locking script
 	Satoshis uint64 `json:"satoshis,omitempty"` // Number of satoshis for that output
 	Script   string `json:"script"`             // Hex encoded locking script
 }
@@ -95,45 +90,6 @@ func GetP2PPaymentDestination(p2pUrl, alias, domain string, senderRequest *P2PPa
 	if len(response.Outputs) == 0 {
 		err = fmt.Errorf("missing a returned output")
 		return
-	}
-
-	// Loop all outputs
-	for index, output := range response.Outputs {
-
-		// No script returned
-		if len(output.Script) == 0 {
-			continue
-		}
-
-		// Decode the hex string into bytes
-		var script []byte
-		if script, err = hex.DecodeString(output.Script); err != nil {
-			return
-		}
-
-		// Extract the components from the script
-		var addresses []bsvutil.Address
-		if _, addresses, _, err = txscript.ExtractPkScriptAddrs(script, &chaincfg.MainNetParams); err != nil {
-			return
-		}
-
-		// Missing an address?
-		if len(addresses) == 0 {
-			err = fmt.Errorf("invalid output script, missing an address")
-			return
-		}
-
-		// Extract the address from the pubkey hash
-		var address *bsvutil.LegacyAddressPubKeyHash
-		if address, err = bsvutil.NewLegacyAddressPubKeyHash(addresses[0].ScriptAddress(), &chaincfg.MainNetParams); err != nil {
-			return
-		} else if address == nil {
-			err = fmt.Errorf("failed in NewLegacyAddressPubKeyHash, address was nil")
-			return
-		}
-
-		// Use the encoded version of the address
-		response.Outputs[index].Address = address.EncodeAddress()
 	}
 
 	return
