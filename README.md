@@ -39,7 +39,7 @@ paymail
 
 **Install using a [compiled binary](https://github.com/mrz1836/paymail-inspector/releases)** on Linux, Mac or Windows _(Mac example)_
 ```shell script
-curl -LkSs https://github.com/mrz1836/paymail-inspector/releases/download/v0.1.11/paymail-inspector_macOS_64-bit.tar.gz -o app.tar.gz
+curl -LkSs https://github.com/mrz1836/paymail-inspector/releases/download/v0.1.12/paymail-inspector_macOS_64-bit.tar.gz -o app.tar.gz
 tar -zxf app.tar.gz && cd ./app/
 ./paymail
 ```
@@ -198,10 +198,10 @@ Additional paymail information can also be found via [MoneyButton's documentatio
 <summary><strong><code>Integrated Services</code></strong></summary>
 <br/>
 
-- Unwriter's [bitpic](https://bitpic.network/)
-- Deggen's [Roundesk](https://roundesk.co/)
-- RelayX's [Dime.ly](https://dimely.io)
-- [2paymail](https://2paymail.com/)
+- Unwriter's [bitpic](https://tncpw.co/e4d6ce84)
+- Deggen's [Roundesk](https://tncpw.co/2d8d2e22) & [Baemail](https://tncpw.co/2c90c26b)
+- RelayX's [Dime.ly](https://tncpw.co/46a4d32d)
+- [2paymail](https://tncpw.co/c82bd419)
 </details>
 
 <details>
