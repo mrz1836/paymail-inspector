@@ -227,4 +227,7 @@ func init() {
 
 	// Skip getting Roundesk profile
 	resolveCmd.Flags().BoolVar(&skipRoundesk, "skip-roundesk", false, "Skip trying to get an associated Roundesk profile")
+
+	// Skip getting Baemail account
+	resolveCmd.Flags().BoolVar(&skipRoundesk, "skip-baemail", false, "Skip trying to get an associated Baemail account")
 }

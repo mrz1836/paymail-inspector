@@ -28,9 +28,9 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.7.0
 	github.com/ttacon/chalk v0.0.0-20160626202418-22c06c80ed31
-	golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37 // indirect
-	golang.org/x/net v0.0.0-20200520182314-0ba52f642ac2
-	golang.org/x/sys v0.0.0-20200523222454-059865788121 // indirect
+	golang.org/x/crypto v0.0.0-20200602180216-279210d13fed // indirect
+	golang.org/x/net v0.0.0-20200602114024-627f9648deb9
+	golang.org/x/sys v0.0.0-20200602225109-6fdc65e7d980 // indirect
 	google.golang.org/protobuf v1.24.0 // indirect
-	gopkg.in/ini.v1 v1.56.0 // indirect
+	gopkg.in/ini.v1 v1.57.0 // indirect
 )

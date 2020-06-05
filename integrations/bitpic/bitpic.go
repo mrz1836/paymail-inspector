@@ -80,7 +80,7 @@ type Meta struct {
 func GetPic(alias, domain string, tracing bool) (response *Response, err error) {
 
 	// Set the url for the request
-	reqURL := fmt.Sprintf("%s/exists/%s@%s", Network, alias, domain)
+	reqURL := fmt.Sprintf("https://%s/exists/%s@%s", Network, alias, domain)
 
 	// Create a Client and start the request
 	client := resty.New().SetTimeout(defaultGetTimeout * time.Second)
@@ -121,18 +121,18 @@ func GetPic(alias, domain string, tracing bool) (response *Response, err error) 
 // Specs: https://bitpic.network/about
 func Url(alias, domain string) string {
 	if len(DefaultImage) > 0 {
-		return fmt.Sprintf("%s/u/%s@%s?d=%s", Network, alias, domain, DefaultImage)
+		return fmt.Sprintf("https://%s/u/%s@%s?d=%s", Network, alias, domain, DefaultImage)
 	}
-	return fmt.Sprintf("%s/u/%s@%s", Network, alias, domain)
+	return fmt.Sprintf("https://%s/u/%s@%s", Network, alias, domain)
 }
 
 // UrlFromPaymail will return a url for the bitpic avatar using a paymail
 // Specs: https://bitpic.network/about
 func UrlFromPaymail(paymail string) string {
 	if len(DefaultImage) > 0 {
-		return fmt.Sprintf("%s/u/%s?d=%s", Network, paymail, DefaultImage)
+		return fmt.Sprintf("https://%s/u/%s?d=%s", Network, paymail, DefaultImage)
 	}
-	return fmt.Sprintf("%s/u/%s", Network, paymail)
+	return fmt.Sprintf("https://%s/u/%s", Network, paymail)
 }
 
 // Search will perform a search on the BitPic network

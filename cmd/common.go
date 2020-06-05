@@ -12,6 +12,7 @@ import (
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/mrz1836/paymail-inspector/database"
 	twopaymail "github.com/mrz1836/paymail-inspector/integrations/2paymail"
+	"github.com/mrz1836/paymail-inspector/integrations/baemail"
 	"github.com/mrz1836/paymail-inspector/integrations/bitpic"
 	"github.com/mrz1836/paymail-inspector/integrations/roundesk"
 	"github.com/mrz1836/paymail-inspector/paymail"
@@ -499,6 +500,62 @@ func getRoundeskProfile(alias, domain string, allowCache bool) (profile *roundes
 	return
 }
 
+// getBaemail will check to see if a Baemail account exists for a given paymail
+func getBaemail(alias, domain string, allowCache bool) (response *baemail.Response, err error) {
+
+	// Start the request
+	displayHeader(chalker.DEFAULT, fmt.Sprintf("Checking %s for a Baemail account...", chalk.Cyan.Color(alias+"@"+domain)))
+
+	// Cache key
+	keyName := "app-baemail-" + alias + "@" + domain
+
+	// Do we have caching and db?
+	if !disableCache && databaseEnabled && allowCache {
+		var jsonStr string
+		if jsonStr, err = database.Get(keyName); err != nil {
+			return
+		}
+		if len(jsonStr) > 0 {
+			if err = json.Unmarshal([]byte(jsonStr), &response); err != nil {
+				return
+			}
+			chalker.Log(chalker.SUCCESS, "Baemail account was found (from cache)")
+			return
+		}
+	}
+
+	// Does this paymail have a Baemail account
+	if response, err = baemail.HasProfile(alias, domain, !skipTracing); err != nil {
+		return
+	}
+
+	// Display the tracing results
+	if !skipTracing {
+		displayTracingResults(response.Tracing, response.StatusCode)
+	}
+
+	// Success or failure
+	if response != nil && len(response.ComposeURL) > 0 {
+		chalker.Log(chalker.SUCCESS, "Baemail account was found")
+
+		// Store in db?
+		if databaseEnabled {
+			var jsonStr []byte
+			if jsonStr, err = json.Marshal(response); err != nil {
+				return
+			}
+			if err = database.Set(keyName, string(jsonStr), 1*time.Hour); err != nil {
+				return
+			}
+		}
+
+	} else {
+		chalker.Log(chalker.DEFAULT, "Baemail account was not found")
+	}
+
+	return
+}
+
 // get2paymail will get a 2paymail account if it exists
 func get2paymail(alias, domain string, allowCache bool) (profile *twopaymail.Response, err error) {
 
@@ -656,6 +713,7 @@ func (p *PaymailDetails) GetPublicInfo(capabilities *paymail.CapabilitiesRespons
 
 	// Attempt to get a bitpic (if enabled)
 	if !skipBitpic && p.PKI != nil && len(p.PKI.Handle) > 0 {
+		// todo: make this one request to get all bitpics
 		if p.Bitpic, err = getBitPic(p.Handle, p.Provider.Domain, true); err != nil {
 			err = fmt.Errorf("checking for bitpic failed: %s", err.Error())
 		}
@@ -668,6 +726,13 @@ func (p *PaymailDetails) GetPublicInfo(capabilities *paymail.CapabilitiesRespons
 	if !skip2paymail && p.PKI != nil && len(p.PKI.Handle) > 0 {
 		if p.TwoPaymail, err = get2paymail(p.Handle, p.Provider.Domain, true); err != nil {
 			err = fmt.Errorf("checking for 2paymail failed: %s", err.Error())
+		}
+	}
+
+	// Attempt to check for a Baemail profile (if enabled)
+	if !skipBaemail && p.PKI != nil && len(p.PKI.Handle) > 0 {
+		if p.Baemail, err = getBaemail(p.Handle, p.Provider.Domain, true); err != nil {
+			err = fmt.Errorf("checking for baemail account failed: %s", err.Error())
 		}
 	}
 
@@ -719,6 +784,11 @@ func (p *PaymailDetails) Display() {
 		if len(p.PublicProfile.Avatar) > 0 {
 			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Avatar       : %s", chalk.Cyan.Color(p.PublicProfile.Avatar)))
 		}
+	}
+
+	// Display the baemail compose url if found
+	if p.Baemail != nil && len(p.Baemail.ComposeURL) > 0 {
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Baemail      : %s", chalk.Cyan.Color(p.Baemail.ComposeURL)))
 	}
 
 	// Display dime.ly if found
