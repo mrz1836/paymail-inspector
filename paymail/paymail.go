@@ -61,6 +61,10 @@ type StandardResponse struct {
 	Tracing    resty.TraceInfo `json:"tracing"`     // Trace information if enabled on the request
 }
 
+type JsonError struct {
+	Message string `json:"message"` // Shows the error message returned by the server
+}
+
 // ExtractParts will check if it's a domain or address and extract the parts
 func ExtractParts(paymailInput string) (domain, address string) {
 

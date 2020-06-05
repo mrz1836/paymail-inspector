@@ -59,7 +59,9 @@ func VerifyPubKey(verifyUrl, alias, domain, pubKey string, tracing bool) (respon
 	// Test the status code
 	response.StatusCode = resp.StatusCode()
 	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusNotModified {
-		err = fmt.Errorf("bad response from paymail provider: %d", response.StatusCode)
+		je := &JsonError{}
+		_ = json.Unmarshal(resp.Body(), je)
+		err = fmt.Errorf("bad response from paymail provider: code %d, message: %s", response.StatusCode, je.Message)
 		return
 	}
 	// Decode the body of the response
