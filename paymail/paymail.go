@@ -61,6 +61,7 @@ type StandardResponse struct {
 	Tracing    resty.TraceInfo `json:"tracing"`     // Trace information if enabled on the request
 }
 
+// JsonError is the standard error response from a paymail server
 type JsonError struct {
 	Message string `json:"message"` // Shows the error message returned by the server
 }

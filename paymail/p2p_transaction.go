@@ -18,7 +18,7 @@ Example:
 		"sender": "someone@example.tld",
 		"pubkey": "<somepubkey>",
 		"signature": "signature(txid)",
-		"note": "Human readeble information related to the tx."
+		"note": "Human readable information related to the tx."
 	},
 	"reference": "someRefId"
 }
