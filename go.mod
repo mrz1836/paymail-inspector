@@ -15,7 +15,7 @@ require (
 	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/miekg/dns v1.1.29
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/mitchellh/mapstructure v1.3.1 // indirect
+	github.com/mitchellh/mapstructure v1.3.2 // indirect
 	github.com/mrz1836/go-sanitize v1.0.13
 	github.com/mrz1836/go-validate v0.1.9
 	github.com/pelletier/go-toml v1.8.0 // indirect
