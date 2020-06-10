@@ -33,3 +33,67 @@ func TestExtractParts(t *testing.T) {
 		t.Fatalf("expected alias: %s but got: %s", "user@domain.com", address)
 	}
 }
+
+// TestValidatePaymail will test the ValidatePaymail method
+func TestValidatePaymail(t *testing.T) {
+
+	testPaymail := "User@domain.com"
+
+	err := ValidatePaymail(testPaymail)
+
+	if err != nil {
+		t.Fatalf("expected 'nil' but got: %s", err.Error())
+	}
+}
+
+// TestValidateDomain will test the ValidateDomain method
+func TestValidateDomain(t *testing.T) {
+
+	testDomain := "domain.com"
+
+	err := ValidateDomain(testDomain)
+
+	if err != nil {
+		t.Fatalf("expected 'nil' but got: %s", err.Error())
+	}
+}
+
+// TestValidatePaymailAndDomain will test the ValidatePaymailAndDomain method
+func TestValidatePaymailAndDomain(t *testing.T) {
+
+	testAlias := "user"
+	testDomain := "domain.com"
+	testAddress := testAlias + "@" + testDomain
+
+	err := ValidatePaymailAndDomain(testAddress, testDomain)
+
+	if err != nil {
+		t.Fatalf("expected 'nil' but got: %s", err.Error())
+	}
+}
+
+// TestParseIfHandcashHandle will test the ParseIfHandcashHandle method
+func TestParseIfHandcashHandle(t *testing.T) {
+
+	expected := "user@handcash.io"
+
+	t.Run("handle passed", func(t *testing.T) {
+		testInput := "$user"
+
+		res := ParseIfHandcashHandle(testInput)
+
+		if res != expected {
+			t.Fatalf("expected: %s, got: %s", expected, res)
+		}
+	})
+
+	t.Run("paymail address passed", func(t *testing.T) {
+		testInput := "user@handcash.io"
+
+		res := ParseIfHandcashHandle(testInput)
+
+		if res != expected {
+			t.Fatalf("expected: %s, got: %s", expected, res)
+		}
+	})
+}

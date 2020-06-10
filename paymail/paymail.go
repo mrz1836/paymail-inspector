@@ -5,12 +5,15 @@ package paymail
 
 import (
 	"context"
+	"fmt"
 	"net"
+	"regexp"
 	"strings"
 	"time"
 
 	"github.com/go-resty/resty/v2"
 	"github.com/mrz1836/go-sanitize"
+	"github.com/mrz1836/go-validate"
 )
 
 // Defaults for paymail functions
@@ -98,5 +101,59 @@ func customResolver(nameServer, useNetwork string) net.Resolver {
 			}
 			return d.DialContext(ctx, useNetwork, nameServer+":"+defaultDnsPort)
 		},
+	}
+}
+
+// ValidatePaymail will do a basic validation on the paymail format
+func ValidatePaymail(paymailAddress string) error {
+
+	// Validate the format for the paymail address (paymail addresses follow conventional email requirements)
+	if ok, err := validate.IsValidEmail(paymailAddress, false); err != nil {
+		return fmt.Errorf("paymail address failed format validation: %s", err.Error())
+
+	} else if !ok {
+		return fmt.Errorf("paymail address failed format validation: unknown reason")
+	}
+
+	return nil
+}
+
+// ValidateDomain will do a basic validation on the domain format
+func ValidateDomain(domain string) error {
+
+	// Check for a real domain (require at least one period)
+	if !strings.Contains(domain, ".") {
+		return fmt.Errorf("domain name is invalid: %s", domain)
+
+	} else if !validate.IsValidDNSName(domain) { // Basic DNS check (not a REAL domain name check)
+		return fmt.Errorf("domain name failed DNS check: %s", domain)
+	}
+
+	return nil
+}
+
+// ValidatePaymailAndDomain will do a basic validation on the paymail and domain format
+func ValidatePaymailAndDomain(paymailAddress, domain string) error {
+	if err := ValidatePaymail(paymailAddress); err != nil {
+		return err
+	}
+	if err := ValidateDomain(domain); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// ParseIfHandcashHandle will parse a paymail input to check if
+// it is a HandCash handle (eg. $user). If it is, then it will
+// return the paymail address equivalent (eg. user@handcash.io),
+// else it will just return the input unchanged.
+func ParseIfHandcashHandle(paymailInput string) string {
+	var validID = regexp.MustCompile(`^\$[a-zA-Z0-9\-_.]{4,}$`)
+
+	if validID.MatchString(paymailInput) {
+		return paymailInput[1:] + "@handcash.io"
+	} else {
+		return paymailInput
 	}
 }
