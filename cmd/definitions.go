@@ -79,7 +79,6 @@ var providers = []*Provider{
 	{"bit.sv", "https://tncpw.co/bff8984c"},
 	{"mypaymail.co", "https://tncpw.co/ee243a15"},
 	{"volt.id", "https://tncpw.co/e9ff2b0c"},
-	{"metanet.id", "https://tncpw.co/21ab64da"},
 }
 
 // getProvider will return a provider given the domain name
