@@ -479,7 +479,7 @@ func getRoundeskProfile(alias, domain string, allowCache bool) (profile *roundes
 	}
 
 	// Success or failure
-	if profile != nil && profile.Profile != nil && len(profile.Profile.ID) > 0 {
+	if profile != nil && profile.Profile != nil && len(profile.Profile.Paymail) > 0 {
 		chalker.Log(chalker.SUCCESS, "Roundesk profile was found")
 
 		// Store in db?
@@ -860,9 +860,5 @@ func (p *PaymailDetails) Display() {
 		}
 
 		chalker.Log(chalker.DEFAULT, fmt.Sprintf("URL       : %s", chalk.Cyan.Color("https://roundesk.co/u/"+displayPaymail)))
-
-		if len(p.Roundesk.Profile.Nonce) > 0 {
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Nonce     : %s", chalk.Cyan.Color(p.Roundesk.Profile.Nonce)))
-		}
 	}
 }

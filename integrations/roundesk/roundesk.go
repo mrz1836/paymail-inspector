@@ -17,7 +17,7 @@ import (
 const (
 	defaultGetTimeout = 15                         // In seconds
 	defaultUserAgent  = "go:roundesk"              // Default user agent
-	roundeskURL       = "https://roundesk.co:4443" // Network to use
+	roundeskURL       = "https://roundesk.co/api/" // Network to use
 )
 
 // Override the package defaults
@@ -35,19 +35,16 @@ type Response struct {
 
 // Profile is the roundesk public profile
 type Profile struct {
-	Bio        string  `json:"bio"`
-	Dev        float64 `json:"dev"`
-	Ent        float64 `json:"ent"`
-	Headline   string  `json:"headline"`
-	ID         string  `json:"_id"`
-	Int        float64 `json:"inv"`
-	LastUpdate int64   `json:"lastUpdate"`
-	Mar        float64 `json:"mar"`
-	Name       string  `json:"name"`
-	Nonce      string  `json:"nonce"`
-	Paymail    string  `json:"paymail"`
-	Twetch     string  `json:"twetch"`
-	Uxd        float64 `json:"uxd"`
+	Bio      string  `json:"bio"`
+	Dev      float64 `json:"dev"`
+	Ent      float64 `json:"ent"`
+	Headline string  `json:"headline"`
+	Inv      float64 `json:"inv"`
+	Mar      float64 `json:"mar"`
+	Name     string  `json:"name"`
+	Paymail  string  `json:"paymail"`
+	Twetch   string  `json:"twetch"`
+	Uxd      float64 `json:"uxd"`
 }
 
 // GetProfile will get a roundesk profile if it exists for the given paymail address
@@ -55,7 +52,7 @@ type Profile struct {
 func GetProfile(alias, domain string, tracing bool) (response *Response, err error) {
 
 	// Set the url for the request
-	reqURL := fmt.Sprintf("%s/api/profile/%s@%s", Network, alias, domain)
+	reqURL := fmt.Sprintf("%su/%s@%s", Network, alias, domain)
 
 	// Create a Client and start the request
 	client := resty.New().SetTimeout(defaultGetTimeout * time.Second)
@@ -92,7 +89,12 @@ func GetProfile(alias, domain string, tracing bool) (response *Response, err err
 	}
 
 	// Decode the body of the response
-	err = json.Unmarshal(resp.Body(), &response)
+	err = json.Unmarshal(resp.Body(), &response.Profile)
+
+	// Handle new way of detecting user is not known (Clear out the user data)
+	if response.Profile.Name == "Unknown" {
+		response.Profile.Paymail = ""
+	}
 
 	return
 }
