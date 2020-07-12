@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -103,7 +104,24 @@ func GetCapabilities(target string, port int, tracing bool) (response *Capabilit
 
 	// Decode the body of the response
 	if err = json.Unmarshal(resp.Body(), &response); err != nil {
-		return
+
+		// Invalid character (sometimes quote related: U+0022 vs U+201C)
+		if strings.Contains(err.Error(), "invalid character") {
+
+			// Replace any invalid quotes
+			bodyString := strings.Replace(string(resp.Body()), `“`, `"`, -1)
+			bodyString = strings.Replace(bodyString, `”`, `"`, -1)
+
+			// Parse again
+			if err = json.Unmarshal([]byte(bodyString), &response); err != nil {
+				return
+			}
+		}
+
+		// Still have an error?
+		if err != nil {
+			return
+		}
 	}
 
 	// Invalid version?
