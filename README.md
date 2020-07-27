@@ -198,6 +198,7 @@ Additional paymail information can also be found via [MoneyButton's documentatio
 <br/>
 
 - Unwriter's [bitpic](https://tncpw.co/e4d6ce84)
+- Unwriter's [powping](https://tncpw.co/3517f7fc)
 - Deggen's [Roundesk](https://tncpw.co/2d8d2e22) & [Baemail](https://tncpw.co/2c90c26b)
 - RelayX's [Dime.ly](https://tncpw.co/46a4d32d)
 - [2paymail](https://tncpw.co/c82bd419)

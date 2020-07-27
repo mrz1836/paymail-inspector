@@ -5,6 +5,7 @@ import (
 	twopaymail "github.com/mrz1836/paymail-inspector/integrations/2paymail"
 	"github.com/mrz1836/paymail-inspector/integrations/baemail"
 	"github.com/mrz1836/paymail-inspector/integrations/bitpic"
+	"github.com/mrz1836/paymail-inspector/integrations/powping"
 	"github.com/mrz1836/paymail-inspector/integrations/roundesk"
 	"github.com/mrz1836/paymail-inspector/paymail"
 )
@@ -36,6 +37,7 @@ var (
 	skipBrfcValidation bool   // cmd: brfc
 	skipDnsCheck       bool   // cmd: validate
 	skipPki            bool   // cmd: resolve
+	skipPowPing        bool   // cmd: resolve
 	skipPublicProfile  bool   // cmd: resolve
 	skipRoundesk       bool   // cmd: resolve
 	skipSrvCheck       bool   // cmd: validate
@@ -100,6 +102,7 @@ type PaymailDetails struct {
 	Dimely        string                             `json:"dimely"`
 	Handle        string                             `json:"handle"`
 	PKI           *paymail.PKIResponse               `json:"pki"`
+	PowPing       *powping.Response                  `json:"powping"`
 	Provider      *Provider                          `json:"provider"`
 	PublicProfile *paymail.PublicProfileResponse     `json:"public_profile"`
 	Resolution    *paymail.AddressResolutionResponse `json:"resolution"`

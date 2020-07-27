@@ -14,6 +14,7 @@ import (
 	twopaymail "github.com/mrz1836/paymail-inspector/integrations/2paymail"
 	"github.com/mrz1836/paymail-inspector/integrations/baemail"
 	"github.com/mrz1836/paymail-inspector/integrations/bitpic"
+	"github.com/mrz1836/paymail-inspector/integrations/powping"
 	"github.com/mrz1836/paymail-inspector/integrations/roundesk"
 	"github.com/mrz1836/paymail-inspector/paymail"
 	"github.com/ryanuber/columnize"
@@ -500,6 +501,62 @@ func getRoundeskProfile(alias, domain string, allowCache bool) (profile *roundes
 	return
 }
 
+// getPowPingProfile will get a PowPing profile if it exists
+func getPowPingProfile(alias, domain string, allowCache bool) (profile *powping.Response, err error) {
+
+	// Start the request
+	displayHeader(chalker.DEFAULT, fmt.Sprintf("Checking %s for a PowPing account...", chalk.Cyan.Color(alias+"@"+domain)))
+
+	// Cache key
+	keyName := "app-powping-" + alias + "@" + domain
+
+	// Do we have caching and db?
+	if !disableCache && databaseEnabled && allowCache {
+		var jsonStr string
+		if jsonStr, err = database.Get(keyName); err != nil {
+			return
+		}
+		if len(jsonStr) > 0 {
+			if err = json.Unmarshal([]byte(jsonStr), &profile); err != nil {
+				return
+			}
+			chalker.Log(chalker.SUCCESS, "PowPing account was found (from cache)")
+			return
+		}
+	}
+
+	// Find a powping profile
+	if profile, err = powping.GetProfile(alias, domain, !skipTracing); err != nil {
+		return
+	}
+
+	// Display the tracing results
+	if !skipTracing {
+		displayTracingResults(profile.Tracing, profile.StatusCode)
+	}
+
+	// Success or failure
+	if profile != nil && profile.Profile != nil && len(profile.Profile.Username) > 0 {
+		chalker.Log(chalker.SUCCESS, "PowPing account was found")
+
+		// Store in db?
+		if databaseEnabled {
+			var jsonStr []byte
+			if jsonStr, err = json.Marshal(profile); err != nil {
+				return
+			}
+			if err = database.Set(keyName, string(jsonStr), 1*time.Hour); err != nil {
+				return
+			}
+		}
+
+	} else {
+		chalker.Log(chalker.DEFAULT, "PowPing profile was not found")
+	}
+
+	return
+}
+
 // getBaemail will check to see if a Baemail account exists for a given paymail
 func getBaemail(alias, domain string, allowCache bool) (response *baemail.Response, err error) {
 
@@ -743,6 +800,13 @@ func (p *PaymailDetails) GetPublicInfo(capabilities *paymail.CapabilitiesRespons
 		}
 	}
 
+	// Attempt to get a PowPing profile (if enabled)
+	if !skipPowPing && p.PKI != nil && len(p.PKI.Handle) > 0 {
+		if p.PowPing, err = getPowPingProfile(p.Handle, p.Provider.Domain, true); err != nil {
+			err = fmt.Errorf("checking for powping account failed: %s", err.Error())
+		}
+	}
+
 	// Shim for Dime.ly detection (only available to RelayX paymails)
 	if p.Provider.Domain == "relayx.io" {
 		// todo: integration with dime.ly api if it exists or on-chain records?
@@ -794,6 +858,11 @@ func (p *PaymailDetails) Display() {
 	// Display dime.ly if found
 	if len(p.Dimely) > 0 {
 		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Dime.ly      : %s", chalk.Cyan.Color(p.Dimely)))
+	}
+
+	// Display PowPing if found
+	if p.PowPing != nil && p.PowPing.Profile != nil && len(p.PowPing.Profile.Username) > 0 {
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("PowPing      : %s", chalk.Cyan.Color("https://powping.com/@"+p.PowPing.Profile.Username)))
 	}
 
 	// Display 2paymail if found

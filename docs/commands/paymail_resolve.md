@@ -45,6 +45,7 @@ paymail r mrz@moneybutton.com
       --skip-baemail           Skip trying to get an associated Baemail account
       --skip-bitpic            Skip trying to get an associated Bitpic
       --skip-pki               Skip the pki request
+      --skip-powping           Skip trying to get an associated PowPing account
       --skip-public-profile    Skip the public profile request
       --skip-roundesk          Skip trying to get an associated Roundesk profile
 ```
