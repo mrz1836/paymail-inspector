@@ -39,7 +39,7 @@ paymail
 
 **Install using a [compiled binary](https://github.com/mrz1836/paymail-inspector/releases)** on Linux, Mac or Windows _(Mac example)_
 ```shell script
-curl -LkSs https://github.com/mrz1836/paymail-inspector/releases/download/v0.1.15/paymail-inspector_macOS_64-bit.tar.gz -o app.tar.gz
+curl -LkSs https://github.com/mrz1836/paymail-inspector/releases/download/v0.2.0/paymail-inspector_macOS_64-bit.tar.gz -o app.tar.gz
 tar -zxf app.tar.gz && cd ./app/
 ./paymail
 ```
@@ -306,7 +306,7 @@ windows                Build for Windows (amd64)
 <br/>
 
 ## Examples & Tests
-All unit tests and [examples](docs/examples.md) run via [Travis CI](https://travis-ci.com/mrz1836/paymail-inspector) and uses [Go version 1.14.x](https://golang.org/doc/go1.14). View the [deployment configuration file](.travis.yml).
+All unit tests and [examples](docs/examples.md) run via [Travis CI](https://travis-ci.com/mrz1836/paymail-inspector) and uses [Go version 1.15.x](https://golang.org/doc/go1.15). View the [deployment configuration file](.travis.yml).
 
 Run all tests (including integration tests)
 ```shell script
