@@ -1,6 +1,6 @@
 module github.com/mrz1836/paymail-inspector
 
-go 1.14
+go 1.15
 
 require (
 	github.com/DataDog/zstd v1.4.5 // indirect
@@ -21,7 +21,7 @@ require (
 	github.com/pelletier/go-toml v1.8.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/ryanuber/columnize v2.1.0+incompatible
-	github.com/spf13/afero v1.3.3 // indirect
+	github.com/spf13/afero v1.3.4 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
@@ -29,9 +29,8 @@ require (
 	github.com/spf13/viper v1.7.1
 	github.com/ttacon/chalk v0.0.0-20160626202418-22c06c80ed31
 	golang.org/x/crypto v0.0.0-20200728195943-123391ffb6de // indirect
-	golang.org/x/net v0.0.0-20200707034311-ab3426394381
-	golang.org/x/sys v0.0.0-20200805065543-0cf7623e9dbd // indirect
-	golang.org/x/text v0.3.3 // indirect
+	golang.org/x/net v0.0.0-20200813134508-3edf25e44fcc
+	golang.org/x/sys v0.0.0-20200817085935-3ff754bf58a9 // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
-	gopkg.in/ini.v1 v1.57.0 // indirect
+	gopkg.in/ini.v1 v1.60.0 // indirect
 )
