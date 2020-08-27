@@ -27,7 +27,7 @@ func Connect(folder string) (err error) {
 
 	// Set the database file and connect (disable logging for now)
 	opts := badger.DefaultOptions(filepath.Join(home, folder, "database")).WithLogger(nil)
-	opts.EventLogging = false
+	// opts.EventLogging = false
 	db, err = badger.Open(opts)
 	return
 }
