@@ -7,20 +7,21 @@ require (
 	github.com/bitcoinsv/bsvd v0.0.0-20190609155523-4c29707f7173
 	github.com/bitcoinsv/bsvlog v0.0.0-20181216181007-cb81b076bf2e // indirect
 	github.com/bitcoinsv/bsvutil v0.0.0-20181216182056-1d77cf353ea9
-	github.com/dgraph-io/badger/v2 v2.0.3
+	github.com/dgraph-io/badger/v2 v2.2007.1
 	github.com/dgraph-io/ristretto v0.0.3 // indirect
 	github.com/dgryski/go-farm v0.0.0-20200201041132-a6ae2369ad13 // indirect
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/go-resty/resty/v2 v2.3.0
 	github.com/golang/protobuf v1.4.2 // indirect
+	github.com/magiconair/properties v1.8.2 // indirect
 	github.com/miekg/dns v1.1.31
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.3.3 // indirect
-	github.com/mrz1836/go-sanitize v1.0.14
-	github.com/mrz1836/go-validate v0.1.9
+	github.com/mrz1836/go-sanitize v1.1.0
+	github.com/mrz1836/go-validate v0.2.0
 	github.com/pelletier/go-toml v1.8.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/ryanuber/columnize v2.1.0+incompatible
+	github.com/ryanuber/columnize v2.1.2+incompatible
 	github.com/spf13/afero v1.3.4 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/cobra v1.0.0
@@ -28,9 +29,9 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.7.1
 	github.com/ttacon/chalk v0.0.0-20160626202418-22c06c80ed31
-	golang.org/x/crypto v0.0.0-20200728195943-123391ffb6de // indirect
-	golang.org/x/net v0.0.0-20200813134508-3edf25e44fcc
-	golang.org/x/sys v0.0.0-20200817085935-3ff754bf58a9 // indirect
+	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a // indirect
+	golang.org/x/net v0.0.0-20200822124328-c89045814202
+	golang.org/x/sys v0.0.0-20200826173525-f9321e4c35a6 // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
-	gopkg.in/ini.v1 v1.60.0 // indirect
+	gopkg.in/ini.v1 v1.60.2 // indirect
 )
