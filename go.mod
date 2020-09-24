@@ -13,16 +13,17 @@ require (
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/go-resty/resty/v2 v2.3.0
 	github.com/golang/protobuf v1.4.2 // indirect
-	github.com/magiconair/properties v1.8.2 // indirect
+	github.com/golang/snappy v0.0.2 // indirect
+	github.com/magiconair/properties v1.8.4 // indirect
 	github.com/miekg/dns v1.1.31
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.3.3 // indirect
 	github.com/mrz1836/go-sanitize v1.1.0
 	github.com/mrz1836/go-validate v0.2.0
-	github.com/pelletier/go-toml v1.8.0 // indirect
+	github.com/pelletier/go-toml v1.8.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/ryanuber/columnize v2.1.2+incompatible
-	github.com/spf13/afero v1.3.5 // indirect
+	github.com/spf13/afero v1.4.0 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
@@ -30,8 +31,9 @@ require (
 	github.com/spf13/viper v1.7.1
 	github.com/ttacon/chalk v0.0.0-20160626202418-22c06c80ed31
 	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a // indirect
-	golang.org/x/net v0.0.0-20200904194848-62affa334b73
-	golang.org/x/sys v0.0.0-20200909081042-eff7692f9009 // indirect
+	golang.org/x/net v0.0.0-20200923182212-328152dc79b1
+	golang.org/x/sys v0.0.0-20200923182605-d9f96fdee20d // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
 	gopkg.in/ini.v1 v1.61.0 // indirect
+	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
