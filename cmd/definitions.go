@@ -2,16 +2,15 @@ package cmd
 
 import (
 	"github.com/mrz1836/go-sanitize"
-	twopaymail "github.com/mrz1836/paymail-inspector/integrations/2paymail"
 	"github.com/mrz1836/paymail-inspector/integrations/baemail"
 	"github.com/mrz1836/paymail-inspector/integrations/bitpic"
 	"github.com/mrz1836/paymail-inspector/integrations/powping"
 	"github.com/mrz1836/paymail-inspector/integrations/roundesk"
-	"github.com/mrz1836/paymail-inspector/paymail"
+	"github.com/tonicpow/go-paymail"
 )
 
 // Version is set manually (also make:build overwrites this value from Github's latest tag)
-var Version = "v0.2.2"
+var Version = "v0.3.0"
 
 // Default flag values for various commands
 var (
@@ -24,14 +23,13 @@ var (
 	flushCache         bool   // cmd: root
 	generateDocs       bool   // cmd: root
 	nameServer         string // cmd: validate
-	port               int    // cmd: validate
-	priority           int    // cmd: validate
+	port               uint16 // cmd: validate
+	priority           uint16 // cmd: validate
 	protocol           string // cmd: validate
 	purpose            string // cmd: resolve
 	satoshis           uint64 // cmd: resolve
 	serviceName        string // cmd: validate
 	signature          string // cmd: resolve
-	skip2paymail       bool   // cmd: resolve
 	skipBaemail        bool   // cmd: resolve
 	skipBitpic         bool   // cmd: resolve
 	skipBrfcValidation bool   // cmd: brfc
@@ -43,7 +41,7 @@ var (
 	skipSrvCheck       bool   // cmd: validate
 	skipSSLCheck       bool   // cmd: validate
 	skipTracing        bool   // cmd: root
-	weight             int    // cmd: validate
+	weight             uint16 // cmd: validate
 )
 
 // Application global variables
@@ -67,8 +65,8 @@ const (
 
 // Provider is the paymail provider information
 type Provider struct {
-	Domain string
-	Link   string
+	Domain string `json:"domain"`
+	Link   string `json:"link"`
 }
 
 // providers is a list of providers that user's can obtain a paymail
@@ -78,6 +76,7 @@ var providers = []*Provider{
 	{"relayx.io", "https://tncpw.co/4897634e"},
 	{"centbee.com", "https://tncpw.co/4350c72f"},
 	{"simply.cash", "https://tncpw.co/1ce8f70f"},
+	{"dotwallet.com", "https://tncpw.co/5745c80e"},
 	{"bit.sv", "https://tncpw.co/bff8984c"},
 	{"mypaymail.co", "https://tncpw.co/ee243a15"},
 	{"volt.id", "https://tncpw.co/e9ff2b0c"},
@@ -96,16 +95,15 @@ func getProvider(domain string) *Provider {
 
 // PaymailDetails is all the info about one paymail address
 type PaymailDetails struct {
-	Baemail       *baemail.Response                  `json:"baemail"`
-	Bitpic        string                             `json:"bitpic"`
-	Bitpics       *bitpic.SearchResponse             `json:"bitpics"`
-	Dimely        string                             `json:"dimely"`
-	Handle        string                             `json:"handle"`
-	PKI           *paymail.PKIResponse               `json:"pki"`
-	PowPing       *powping.Response                  `json:"powping"`
-	Provider      *Provider                          `json:"provider"`
-	PublicProfile *paymail.PublicProfileResponse     `json:"public_profile"`
-	Resolution    *paymail.AddressResolutionResponse `json:"resolution"`
-	Roundesk      *roundesk.Response                 `json:"roundesk"`
-	TwoPaymail    *twopaymail.Response               `json:"two_paymail"`
+	Baemail       *baemail.Response      `json:"baemail"`
+	Bitpic        string                 `json:"bitpic"`
+	Bitpics       *bitpic.SearchResponse `json:"bitpics"`
+	Dimely        string                 `json:"dimely"`
+	Handle        string                 `json:"handle"`
+	PKI           *paymail.PKI           `json:"pki"`
+	PowPing       *powping.Response      `json:"powping"`
+	Provider      *Provider              `json:"provider"`
+	PublicProfile *paymail.PublicProfile `json:"public_profile"`
+	Resolution    *paymail.Resolution    `json:"resolution"`
+	Roundesk      *roundesk.Response     `json:"roundesk"`
 }

@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/mrz1836/paymail-inspector/chalker"
-	"github.com/mrz1836/paymail-inspector/paymail"
 	"github.com/spf13/cobra"
+	"github.com/tonicpow/go-paymail"
 	"github.com/ttacon/chalk"
 )
 
@@ -36,7 +36,8 @@ after basic address resolution is deprecated.
 Read more at: `+chalk.Cyan.Color("https://docs.moneybutton.com/docs/paymail-07-p2p-payment-destination.html")),
 	Aliases:    []string{"send"},
 	SuggestFor: []string{"sending"},
-	Example:    applicationName + " p2p mrz@" + defaultDomainName,
+	Example: applicationName + " p2p mrz@" + defaultDomainName + `
+` + applicationName + ` p2p \$mr-z`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return chalker.Error("p2p requires a paymail address")
@@ -48,7 +49,7 @@ Read more at: `+chalk.Cyan.Color("https://docs.moneybutton.com/docs/paymail-07-p
 	Run: func(cmd *cobra.Command, args []string) {
 
 		// Set the domain and paymail
-		domain, paymailAddress := paymail.ExtractParts(args[0])
+		_, domain, paymailAddress := paymail.SanitizePaymail(paymail.ConvertHandle(args[0], false))
 
 		// Did we get a paymail address?
 		if len(paymailAddress) == 0 {
@@ -73,8 +74,8 @@ Read more at: `+chalk.Cyan.Color("https://docs.moneybutton.com/docs/paymail-07-p
 		}
 
 		// Set the URL - Does the paymail provider have the capability?
-		url := capabilities.GetValueString(paymail.BRFCP2PPaymentDestination, "")
-		if len(url) == 0 {
+		destinationURL := capabilities.GetString(paymail.BRFCP2PPaymentDestination, "")
+		if len(destinationURL) == 0 {
 			chalker.Log(chalker.ERROR, fmt.Sprintf("The provider %s is missing a required capability: %s", domain, paymail.BRFCP2PPaymentDestination))
 			return
 		}
@@ -88,17 +89,17 @@ Read more at: `+chalk.Cyan.Color("https://docs.moneybutton.com/docs/paymail-07-p
 		parts := strings.Split(paymailAddress, "@")
 
 		// Fire the P2P request
-		var p2pResponse *paymail.P2PPaymentDestinationResponse
-		if p2pResponse, err = getP2PPaymentDestination(url, parts[0], domain, satoshis); err != nil {
+		var p2pResponse *paymail.PaymentDestination
+		if p2pResponse, err = getP2PPaymentDestination(destinationURL, parts[0], domain, satoshis); err != nil {
 			chalker.Log(chalker.ERROR, fmt.Sprintf("P2P payment destination request failed: %s", err.Error()))
 			return
 		}
 
 		// Attempt to get a public profile if the capability is found
-		url = capabilities.GetValueString(paymail.BRFCPublicProfile, "")
-		var profile *paymail.PublicProfileResponse
-		if len(url) > 0 && !skipPublicProfile {
-			if profile, err = getPublicProfile(url, parts[0], domain, true); err != nil {
+		profileURL := capabilities.GetString(paymail.BRFCPublicProfile, "")
+		var profile *paymail.PublicProfile
+		if len(profileURL) > 0 && !skipPublicProfile {
+			if profile, err = getPublicProfile(profileURL, parts[0], domain, true); err != nil {
 				chalker.Log(chalker.ERROR, fmt.Sprintf("Get public profile failed: %s", err.Error()))
 			}
 		}

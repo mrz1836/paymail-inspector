@@ -5,10 +5,10 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/mrz1836/go-validate"
+	"github.com/mrz1836/go-sanitize"
 	"github.com/mrz1836/paymail-inspector/chalker"
-	"github.com/mrz1836/paymail-inspector/paymail"
 	"github.com/spf13/cobra"
+	"github.com/tonicpow/go-paymail"
 	"github.com/ttacon/chalk"
 )
 
@@ -46,20 +46,19 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/02-02-capability-discovery
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 
-		// Extract the parts given
-		domain, _ := paymail.ExtractParts(args[0])
+		// Sanitize the domain
+		domain, _ := sanitize.Domain(args[0], false, true)
 
-		// Check for a real domain (require at least one period)
-		if !strings.Contains(domain, ".") {
-			chalker.Log(chalker.ERROR, fmt.Sprintf("Domain name is invalid: %s", domain))
-			return
-		} else if !validate.IsValidDNSName(domain) { // Basic DNS check (not a REAL domain name check)
-			chalker.Log(chalker.ERROR, fmt.Sprintf("Domain name failed DNS check: %s", domain))
+		// Validate the domain
+		err := paymail.ValidateDomain(args[0])
+		if err != nil {
+			chalker.Log(chalker.ERROR, fmt.Sprintf("Domain name %s is invalid: %s", domain, err.Error()))
 			return
 		}
 
 		// Get the capabilities
-		capabilities, err := getCapabilities(domain, false)
+		var capabilities *paymail.Capabilities
+		capabilities, err = getCapabilities(domain, false)
 		if err != nil {
 			if strings.Contains(err.Error(), "context deadline exceeded") {
 				chalker.Log(chalker.WARN, fmt.Sprintf("No capabilities found for: %s", domain))

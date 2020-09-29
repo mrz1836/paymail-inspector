@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mrz1836/go-sanitize"
 	"github.com/mrz1836/paymail-inspector/chalker"
-	"github.com/mrz1836/paymail-inspector/paymail"
 	"github.com/spf13/cobra"
+	"github.com/tonicpow/go-paymail"
 	"github.com/ttacon/chalk"
 )
 
@@ -34,7 +33,8 @@ the verifier doesn't know if the public key actually belongs to the right user.
 Read more at: `+chalk.Cyan.Color("http://bsvalias.org/05-verify-public-key-owner.html")),
 	Aliases:    []string{"verification"},
 	SuggestFor: []string{"pubkey"},
-	Example:    applicationName + " verify mrz@" + defaultDomainName + " 02ead23149a1e33df17325ec7a7ba9e0b20c674c57c630f527d69b866aa9b65b10",
+	Example: applicationName + " verify mrz@" + defaultDomainName + " 02ead23149a1e33df17325ec7a7ba9e0b20c674c57c630f527d69b866aa9b65b10" +
+		"\n" + applicationName + " verify 1mrz 0352530c305378fd9dfd99f8c8c44e9092efa7c1674b61d4e9be65f92aa7a77bbe",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 2 {
 			return chalker.Error("verify requires a paymail address AND pubkey")
@@ -45,16 +45,22 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/05-verify-public-key-owner
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 
-		var paymailAddress string
-		var pubKey string
+		var paymailAddress, alias, domain, pubKey string
+
+		// Convert handle if detected
+		if len(args[0]) < 25 {
+			args[0] = paymail.ConvertHandle(args[0], false)
+		} else if len(args[1]) < 25 {
+			args[1] = paymail.ConvertHandle(args[1], false)
+		}
 
 		// Check for paymail in both args
 		if strings.Contains(args[0], "@") {
-			paymailAddress = sanitize.Email(args[0], false)
+			alias, domain, paymailAddress = paymail.SanitizePaymail(args[0])
 			pubKey = args[1]
 		} else if strings.Contains(args[1], "@") {
 			pubKey = args[0]
-			paymailAddress = sanitize.Email(args[1], false)
+			alias, domain, paymailAddress = paymail.SanitizePaymail(args[1])
 		}
 
 		// Require a paymail address
@@ -68,9 +74,6 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/05-verify-public-key-owner
 			chalker.Log(chalker.ERROR, fmt.Sprintf("One argument must be a pubkey [%s] [%s]", args[0], args[1]))
 			return
 		}
-
-		// Extract the parts given
-		domain, _ := paymail.ExtractParts(paymailAddress)
 
 		// Validate the paymail address and domain (error already shown)
 		if ok := validatePaymailAndDomain(paymailAddress, domain); !ok {
@@ -95,18 +98,15 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/05-verify-public-key-owner
 		}
 
 		// Set the URL - Does the paymail provider have the capability?
-		url := capabilities.GetValueString(paymail.BRFCVerifyPublicKeyOwner, "")
-		if len(url) == 0 {
+		verifyURL := capabilities.GetString(paymail.BRFCVerifyPublicKeyOwner, "")
+		if len(verifyURL) == 0 {
 			chalker.Log(chalker.ERROR, fmt.Sprintf("The provider %s is missing a required capability: %s", domain, paymail.BRFCVerifyPublicKeyOwner))
 			return
 		}
 
-		// Get the alias of the address
-		parts := strings.Split(paymailAddress, "@")
-
 		// Fire the verify request
-		var verify *paymail.VerifyPubKeyResponse
-		if verify, err = verifyPubKey(url, parts[0], domain, pubKey); err != nil {
+		var verify *paymail.Verification
+		if verify, err = verifyPubKey(verifyURL, alias, domain, pubKey); err != nil {
 			chalker.Log(chalker.ERROR, fmt.Sprintf("verify pubkey request failed: %s", err.Error()))
 			return
 		}

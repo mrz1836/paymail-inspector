@@ -6,8 +6,8 @@ import (
 
 	"github.com/mrz1836/go-sanitize"
 	"github.com/mrz1836/paymail-inspector/chalker"
-	"github.com/mrz1836/paymail-inspector/paymail"
 	"github.com/spf13/cobra"
+	"github.com/tonicpow/go-paymail"
 	"github.com/ttacon/chalk"
 )
 
@@ -54,19 +54,18 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/01-brfc-specifications.htm
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 
-		// Load the BRFC specifications
-		if len(paymail.BRFCSpecs) == 0 {
-			if err := paymail.LoadSpecifications(); err != nil {
-				chalker.Log(chalker.ERROR, fmt.Sprintf("Error loading BRFC specifications: %s", err.Error()))
-				return
-			}
+		// Load the BRFC specifications via new client
+		client, err := paymail.NewClient(nil, nil)
+		if err != nil {
+			chalker.Log(chalker.ERROR, fmt.Sprintf("Error loading BRFC specifications: %s", err.Error()))
+			return
 		}
 
 		// Search command
 		if args[0] == "search" {
 
 			// Did we find some specifications?
-			if len(paymail.BRFCSpecs) == 0 {
+			if len(client.Options.BRFCSpecs) == 0 {
 				chalker.Log(chalker.ERROR, fmt.Sprintf("No existing brfc specs found in: %s", "BRFCSpecs"))
 				return
 			}
@@ -82,7 +81,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/01-brfc-specifications.htm
 
 			// Loop the list
 			found := 0
-			for _, brfc := range paymail.BRFCSpecs {
+			for _, brfc := range client.Options.BRFCSpecs {
 				if simpleSearch(brfc.ID, searchTerm) || simpleSearch(brfc.Title, searchTerm) || simpleSearch(brfc.Author, searchTerm) {
 					showBrfc(brfc)
 					found = found + 1
@@ -102,13 +101,13 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/01-brfc-specifications.htm
 		if args[0] == "list" {
 
 			// Did we find some specifications?
-			if len(paymail.BRFCSpecs) == 0 {
+			if len(client.Options.BRFCSpecs) == 0 {
 				chalker.Log(chalker.ERROR, fmt.Sprintf("No existing brfc specs found in: %s", "BRFCSpecs"))
 				return
 			}
 
 			// Loop the list
-			for _, brfc := range paymail.BRFCSpecs {
+			for _, brfc := range client.Options.BRFCSpecs {
 
 				// Skip an invalid specs in the JSON (there should NOT be any invalid specs)
 				if len(brfc.Title) == 0 || len(brfc.Version) == 0 || len(brfc.ID) == 0 {
@@ -142,7 +141,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/01-brfc-specifications.htm
 			}
 
 			// Show success message
-			chalker.Log(chalker.SUCCESS, fmt.Sprintf("Total BRFC specifications found: %d", len(paymail.BRFCSpecs)))
+			chalker.Log(chalker.SUCCESS, fmt.Sprintf("Total BRFC specifications found: %d", len(client.Options.BRFCSpecs)))
 
 			return
 		}
@@ -165,18 +164,16 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/01-brfc-specifications.htm
 
 			// Generate the ID
 			var err error
-			if brfc.ID, err = brfc.Generate(); err != nil {
+			if err = brfc.Generate(); err != nil {
 				chalker.Log(chalker.ERROR, fmt.Sprintf("Error generating BRFC ID: %s", err.Error()))
 				return
 			}
 
 			// Check that it doesn't exist
-			if len(paymail.BRFCSpecs) > 0 {
-				for _, existingBrfc := range paymail.BRFCSpecs {
-					if existingBrfc.ID == brfc.ID {
-						chalker.Log(chalker.ERROR, fmt.Sprintf("BRFC already exists: %s", brfc.ID))
-						return
-					}
+			for _, existingBrfc := range client.Options.BRFCSpecs {
+				if existingBrfc.ID == brfc.ID {
+					chalker.Log(chalker.ERROR, fmt.Sprintf("BRFC already exists: %s", brfc.ID))
+					return
 				}
 			}
 

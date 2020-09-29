@@ -39,14 +39,14 @@ paymail v moneybutton.com
 ```
   -h, --help                help for validate
   -n, --nameserver string   DNS name server for resolving records (default "8.8.8.8")
-  -p, --port int            Port that is found in the SRV record (default 443)
-      --priority int        Priority value that is found in the SRV record (default 10)
+  -p, --port uint16         Port that is found in the SRV record (default 443)
+      --priority uint16     Priority value that is found in the SRV record (default 10)
       --protocol string     Protocol in the SRV record (default "tcp")
   -s, --service string      Service name in the SRV record (default "bsvalias")
   -d, --skip-dnssec         Skip checking DNSSEC of the target domain
       --skip-srv            Skip checking SRV record of the main domain
       --skip-ssl            Skip checking SSL of the target domain
-  -w, --weight int          Weight value that is found in the SRV record (default 10)
+  -w, --weight uint16       Weight value that is found in the SRV record (default 10)
 ```
 
 ### Options inherited from parent commands

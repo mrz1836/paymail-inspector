@@ -8,22 +8,31 @@ import (
 	"time"
 
 	"github.com/go-resty/resty/v2"
-	"github.com/mrz1836/go-validate"
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/mrz1836/paymail-inspector/database"
-	twopaymail "github.com/mrz1836/paymail-inspector/integrations/2paymail"
 	"github.com/mrz1836/paymail-inspector/integrations/baemail"
 	"github.com/mrz1836/paymail-inspector/integrations/bitpic"
 	"github.com/mrz1836/paymail-inspector/integrations/powping"
 	"github.com/mrz1836/paymail-inspector/integrations/roundesk"
-	"github.com/mrz1836/paymail-inspector/paymail"
 	"github.com/ryanuber/columnize"
 	"github.com/spf13/viper"
+	"github.com/tonicpow/go-paymail"
 	"github.com/ttacon/chalk"
 )
 
+// Creates a new client for Paymail
+func newPaymailClient() (*paymail.Client, error) {
+	options, err := paymail.DefaultClientOptions()
+	if err != nil {
+		return nil, err
+	}
+	options.UserAgent = applicationFullName + ": v" + Version
+
+	return paymail.NewClient(options, nil)
+}
+
 // getPki will get a pki response (logging and basic error handling)
-func getPki(url, alias, domain string, allowCache bool) (pki *paymail.PKIResponse, err error) {
+func getPki(pkiURL, alias, domain string, allowCache bool) (pki *paymail.PKI, err error) {
 
 	// Start the request
 	displayHeader(chalker.DEFAULT, fmt.Sprintf("Retrieving public key information for %s...", chalk.Cyan.Color(alias+"@"+domain)))
@@ -46,20 +55,19 @@ func getPki(url, alias, domain string, allowCache bool) (pki *paymail.PKIRespons
 		}
 	}
 
+	// New Client
+	var client *paymail.Client
+	client, err = newPaymailClient()
+	if err != nil {
+		return
+	}
+
+	// Set tracing
+	client.Options.RequestTracing = !skipTracing
+
 	// Get the PKI for the given address
-	if pki, err = paymail.GetPKI(url, alias, domain, !skipTracing); err != nil {
+	if pki, err = client.GetPKI(pkiURL, alias, domain); err != nil {
 		return
-	}
-
-	// No pubkey found
-	if len(pki.PubKey) == 0 {
-		err = fmt.Errorf("failed getting pubkey for: %s@%s", alias, domain)
-		return
-	}
-
-	// Possible invalid pubkey
-	if len(pki.PubKey) != paymail.PubKeyLength {
-		chalker.Log(chalker.WARN, fmt.Sprintf("PubKey length is: %d, expected: %d", len(pki.PubKey), paymail.PubKeyLength))
 	}
 
 	// Display the tracing results
@@ -68,18 +76,16 @@ func getPki(url, alias, domain string, allowCache bool) (pki *paymail.PKIRespons
 	}
 
 	// Success
-	if len(pki.PubKey) > 0 {
-		chalker.Log(chalker.SUCCESS, fmt.Sprintf("Found pubkey %s...", pki.PubKey[:10]))
+	chalker.Log(chalker.SUCCESS, fmt.Sprintf("Found pubkey %s...", pki.PubKey[:10]))
 
-		// Store in db?
-		if databaseEnabled {
-			var jsonStr []byte
-			if jsonStr, err = json.Marshal(pki); err != nil {
-				return
-			}
-			if err = database.Set(keyName, string(jsonStr), 1*time.Hour); err != nil {
-				return
-			}
+	// Store in db?
+	if databaseEnabled {
+		var jsonStr []byte
+		if jsonStr, err = json.Marshal(pki); err != nil {
+			return
+		}
+		if err = database.Set(keyName, string(jsonStr), 1*time.Hour); err != nil {
+			return
 		}
 	}
 
@@ -110,8 +116,15 @@ func getSrvRecord(domain string, validate bool, allowCache bool) (srv *net.SRV, 
 		}
 	}
 
+	// New Client
+	var client *paymail.Client
+	client, err = newPaymailClient()
+	if err != nil {
+		return
+	}
+
 	// Get the record
-	if srv, err = paymail.GetSRVRecord(serviceName, protocol, domain, nameServer); err != nil {
+	if srv, err = client.GetSRVRecord(serviceName, protocol, domain); err != nil {
 		return
 	}
 
@@ -123,7 +136,7 @@ func getSrvRecord(domain string, validate bool, allowCache bool) (srv *net.SRV, 
 		}
 
 		// Validate the SRV record for the domain name (using all flags or default values)
-		if err = paymail.ValidateSRVRecord(srv, nameServer, port, priority, weight); err != nil {
+		if err = client.ValidateSRVRecord(srv, port, priority, weight); err != nil {
 			err = fmt.Errorf("validation error: %s", err.Error())
 			return
 		}
@@ -151,7 +164,7 @@ func getSrvRecord(domain string, validate bool, allowCache bool) (srv *net.SRV, 
 }
 
 // getCapabilities will check SRV first, then attempt default domain:port check (logging and basic error handling)
-func getCapabilities(domain string, allowCache bool) (capabilities *paymail.CapabilitiesResponse, err error) {
+func getCapabilities(domain string, allowCache bool) (capabilities *paymail.Capabilities, err error) {
 
 	capabilityDomain := ""
 	capabilityPort := paymail.DefaultPort
@@ -187,8 +200,18 @@ func getCapabilities(domain string, allowCache bool) (capabilities *paymail.Capa
 		}
 	}
 
+	// New Client
+	var client *paymail.Client
+	client, err = newPaymailClient()
+	if err != nil {
+		return
+	}
+
+	// Set tracing
+	client.Options.RequestTracing = !skipTracing
+
 	// Look up the capabilities
-	if capabilities, err = paymail.GetCapabilities(capabilityDomain, capabilityPort, !skipTracing); err != nil {
+	if capabilities, err = client.GetCapabilities(capabilityDomain, capabilityPort); err != nil {
 		return
 	}
 
@@ -221,17 +244,27 @@ func getCapabilities(domain string, allowCache bool) (capabilities *paymail.Capa
 }
 
 // resolveAddress will resolve an address (logging and basic error handling)
-func resolveAddress(url, alias, domain, senderHandle, signature, purpose string, amount uint64) (response *paymail.AddressResolutionResponse, err error) {
+func resolveAddress(resolveURL, alias, domain, senderHandle, signature, purpose string, amount uint64) (response *paymail.Resolution, err error) {
 
 	// Start the request
 	displayHeader(chalker.DEFAULT, fmt.Sprintf("Resolving address for %s...", chalk.Cyan.Color(alias+"@"+domain)))
 
+	// New Client
+	var client *paymail.Client
+	client, err = newPaymailClient()
+	if err != nil {
+		return
+	}
+
+	// Set tracing
+	client.Options.RequestTracing = !skipTracing
+
 	// Create the address resolution request
-	if response, err = paymail.AddressResolution(
-		url,
+	if response, err = client.ResolveAddress(
+		resolveURL,
 		alias,
 		domain,
-		&paymail.AddressResolutionRequest{
+		&paymail.SenderRequest{
 			Amount:       amount,
 			Dt:           time.Now().UTC().Format(time.RFC3339), // UTC is assumed
 			Purpose:      purpose,
@@ -239,7 +272,6 @@ func resolveAddress(url, alias, domain, senderHandle, signature, purpose string,
 			SenderName:   viper.GetString(flagSenderName),
 			Signature:    signature,
 		},
-		!skipTracing,
 	); err != nil {
 		return
 	}
@@ -250,26 +282,33 @@ func resolveAddress(url, alias, domain, senderHandle, signature, purpose string,
 	}
 
 	// Success
-	if len(response.Address) > 0 {
-		chalker.Log(chalker.SUCCESS, fmt.Sprintf("Found address %s...", response.Address[:10]))
-	}
+	chalker.Log(chalker.SUCCESS, fmt.Sprintf("Found address %s...", response.Address[:10]))
 
 	return
 }
 
 // getP2PPaymentDestination will start a new p2p transaction request (logging and basic error handling)
-func getP2PPaymentDestination(url, alias, domain string, satoshis uint64) (response *paymail.P2PPaymentDestinationResponse, err error) {
+func getP2PPaymentDestination(destinationURL, alias, domain string, satoshis uint64) (response *paymail.PaymentDestination, err error) {
 
 	// Start the request
 	displayHeader(chalker.DEFAULT, fmt.Sprintf("Starting new P2P payment request for %s...", chalk.Cyan.Color(alias+"@"+domain)))
 
+	// New Client
+	var client *paymail.Client
+	client, err = newPaymailClient()
+	if err != nil {
+		return
+	}
+
+	// Set tracing
+	client.Options.RequestTracing = !skipTracing
+
 	// Create the address resolution request
-	if response, err = paymail.GetP2PPaymentDestination(
-		url,
+	if response, err = client.GetP2PPaymentDestination(
+		destinationURL,
 		alias,
 		domain,
-		&paymail.P2PPaymentDestinationRequest{Satoshis: satoshis},
-		!skipTracing,
+		&paymail.PaymentRequest{Satoshis: satoshis},
 	); err != nil {
 		return
 	}
@@ -280,15 +319,13 @@ func getP2PPaymentDestination(url, alias, domain string, satoshis uint64) (respo
 	}
 
 	// Success
-	if len(response.Outputs) > 0 {
-		chalker.Log(chalker.SUCCESS, fmt.Sprintf("Found [%d] payment output(s)", len(response.Outputs)))
-	}
+	chalker.Log(chalker.SUCCESS, fmt.Sprintf("Found [%d] payment output(s)", len(response.Outputs)))
 
 	return
 }
 
 // getPublicProfile will get a public profile (logging and basic error handling)
-func getPublicProfile(url, alias, domain string, allowCache bool) (profile *paymail.PublicProfileResponse, err error) {
+func getPublicProfile(profileURL, alias, domain string, allowCache bool) (profile *paymail.PublicProfile, err error) {
 
 	// Start the request
 	displayHeader(chalker.DEFAULT, fmt.Sprintf("Retrieving public profile for %s...", chalk.Cyan.Color(alias+"@"+domain)))
@@ -311,8 +348,18 @@ func getPublicProfile(url, alias, domain string, allowCache bool) (profile *paym
 		}
 	}
 
+	// New Client
+	var client *paymail.Client
+	client, err = newPaymailClient()
+	if err != nil {
+		return
+	}
+
+	// Set tracing
+	client.Options.RequestTracing = !skipTracing
+
 	// Get the profile
-	if profile, err = paymail.GetPublicProfile(url, alias, domain, !skipTracing); err != nil {
+	if profile, err = client.GetPublicProfile(profileURL, alias, domain); err != nil {
 		return
 	}
 
@@ -322,7 +369,7 @@ func getPublicProfile(url, alias, domain string, allowCache bool) (profile *paym
 	}
 
 	// Success
-	if len(profile.Name) > 0 && len(profile.Avatar) > 0 {
+	if len(profile.Name) > 0 {
 		chalker.Log(chalker.SUCCESS, "Valid profile found [name, avatar]")
 
 		// Store in db?
@@ -613,72 +660,24 @@ func getBaemail(alias, domain string, allowCache bool) (response *baemail.Respon
 	return
 }
 
-// get2paymail will get a 2paymail account if it exists
-func get2paymail(alias, domain string, allowCache bool) (profile *twopaymail.Response, err error) {
-
-	// Start the request
-	displayHeader(chalker.DEFAULT, fmt.Sprintf("Checking %s for a 2paymail...", chalk.Cyan.Color(alias+"@"+domain)))
-
-	// Cache key
-	keyName := "app-2paymail-" + alias + "@" + domain
-
-	// Do we have caching and db?
-	if !disableCache && databaseEnabled && allowCache {
-		var jsonStr string
-		if jsonStr, err = database.Get(keyName); err != nil {
-			return
-		}
-		if len(jsonStr) > 0 {
-			if err = json.Unmarshal([]byte(jsonStr), &profile); err != nil {
-				return
-			}
-			chalker.Log(chalker.SUCCESS, "2paymail was found for "+alias+"@"+domain+" (from cache)")
-			return
-		}
-	}
-
-	// Does this paymail have a profile?
-	if profile, err = twopaymail.GetAccount(alias, domain, !skipTracing); err != nil {
-		return
-	}
-
-	// Display the tracing results
-	if !skipTracing {
-		displayTracingResults(profile.Tracing, profile.StatusCode)
-	}
-
-	// Checks if the response was good
-	if profile != nil && profile.Found {
-		chalker.Log(chalker.SUCCESS, "2paymail was found for "+alias+"@"+domain)
-
-		// Store in db?
-		if databaseEnabled {
-			var jsonStr []byte
-			if jsonStr, err = json.Marshal(profile); err != nil {
-				return
-			}
-			if err = database.Set(keyName, string(jsonStr), 1*time.Hour); err != nil {
-				return
-			}
-		}
-	} else {
-		chalker.Log(chalker.DEFAULT, "2paymail was not found")
-	}
-
-	return
-}
-
 // verifyPubKey will verify a given pubkey against a paymail address (logging and basic error handling)
-func verifyPubKey(url, alias, domain, pubKey string) (response *paymail.VerifyPubKeyResponse, err error) {
+func verifyPubKey(verifyURL, alias, domain, pubKey string) (response *paymail.Verification, err error) {
 
 	// Start the request
 	displayHeader(chalker.DEFAULT, fmt.Sprintf("Verifing pubkey for %s...", chalk.Cyan.Color(alias+"@"+domain)))
 
-	// Verify the given pubkey
-	if response, err = paymail.VerifyPubKey(url, alias, domain, pubKey, !skipTracing); err != nil {
+	// New Client
+	var client *paymail.Client
+	client, err = newPaymailClient()
+	if err != nil {
 		return
-	} else if response == nil {
-		err = fmt.Errorf("failed getting verification response")
+	}
+
+	// Set tracing
+	client.Options.RequestTracing = !skipTracing
+
+	// Verify the given pubkey
+	if response, err = client.VerifyPubKey(verifyURL, alias, domain, pubKey); err != nil {
 		return
 	}
 
@@ -694,20 +693,14 @@ func verifyPubKey(url, alias, domain, pubKey string) (response *paymail.VerifyPu
 func validatePaymailAndDomain(paymailAddress, domain string) (valid bool) {
 
 	// Validate the format for the paymail address (paymail addresses follow conventional email requirements)
-	if ok, err := validate.IsValidEmail(paymailAddress, false); err != nil {
+	if err := paymail.ValidatePaymail(paymailAddress); err != nil {
 		chalker.Log(chalker.ERROR, fmt.Sprintf("Paymail address failed format validation: %s", err.Error()))
-		return
-	} else if !ok {
-		chalker.Log(chalker.ERROR, "Paymail address failed format validation: unknown reason")
 		return
 	}
 
 	// Check for a real domain (require at least one period)
-	if !strings.Contains(domain, ".") {
-		chalker.Log(chalker.ERROR, fmt.Sprintf("Domain name is invalid: %s", domain))
-		return
-	} else if !validate.IsValidDNSName(domain) { // Basic DNS check (not a REAL domain name check)
-		chalker.Log(chalker.ERROR, fmt.Sprintf("Domain name failed DNS check: %s", domain))
+	if err := paymail.ValidateDomain(domain); err != nil {
+		chalker.Log(chalker.ERROR, fmt.Sprintf("Domain name %s is invalid: %s", domain, err.Error()))
 		return
 	}
 
@@ -749,7 +742,7 @@ func displayHeader(level, text string) {
 }
 
 // GetPublicInfo will get all the public info for a given paymail
-func (p *PaymailDetails) GetPublicInfo(capabilities *paymail.CapabilitiesResponse) (err error) {
+func (p *PaymailDetails) GetPublicInfo(capabilities *paymail.Capabilities) (err error) {
 
 	// Requirements
 	if len(p.Handle) == 0 {
@@ -761,9 +754,9 @@ func (p *PaymailDetails) GetPublicInfo(capabilities *paymail.CapabilitiesRespons
 	}
 
 	// Attempt to get a public profile if the capability is found
-	url := capabilities.GetValueString(paymail.BRFCPublicProfile, "")
-	if len(url) > 0 && !skipPublicProfile && p.PKI != nil && len(p.PKI.Handle) > 0 {
-		if p.PublicProfile, err = getPublicProfile(url, p.Handle, p.Provider.Domain, true); err != nil {
+	publicURL := capabilities.GetString(paymail.BRFCPublicProfile, "")
+	if len(publicURL) > 0 && !skipPublicProfile && p.PKI != nil && len(p.PKI.Handle) > 0 {
+		if p.PublicProfile, err = getPublicProfile(publicURL, p.Handle, p.Provider.Domain, true); err != nil {
 			err = fmt.Errorf("get public profile failed: %s", err.Error())
 		}
 	}
@@ -776,13 +769,6 @@ func (p *PaymailDetails) GetPublicInfo(capabilities *paymail.CapabilitiesRespons
 		}
 		if p.Bitpics, err = getBitPics(p.Handle, p.Provider.Domain, true); err != nil {
 			err = fmt.Errorf("searching for bitpic failed: %s", err.Error())
-		}
-	}
-
-	// Attempt to get a 2paymail (if enabled)
-	if !skip2paymail && p.PKI != nil && len(p.PKI.Handle) > 0 {
-		if p.TwoPaymail, err = get2paymail(p.Handle, p.Provider.Domain, true); err != nil {
-			err = fmt.Errorf("checking for 2paymail failed: %s", err.Error())
 		}
 	}
 
@@ -863,17 +849,6 @@ func (p *PaymailDetails) Display() {
 	// Display PowPing if found
 	if p.PowPing != nil && p.PowPing.Profile != nil && len(p.PowPing.Profile.Username) > 0 {
 		chalker.Log(chalker.DEFAULT, fmt.Sprintf("PowPing      : %s", chalk.Cyan.Color("https://powping.com/@"+p.PowPing.Profile.Username)))
-	}
-
-	// Display 2paymail if found
-	if p.TwoPaymail != nil && len(p.TwoPaymail.URL) > 0 {
-		chalker.Log(chalker.DEFAULT, fmt.Sprintf("2paymail     : %s", chalk.Cyan.Color(p.TwoPaymail.URL)))
-		if len(p.TwoPaymail.TX) > 0 {
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("2paymail TX  : %s", chalk.Cyan.Color(p.TwoPaymail.TX)))
-		}
-		if len(p.TwoPaymail.Twitter) > 0 {
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Twitter      : %s", chalk.Cyan.Color(p.TwoPaymail.Twitter)))
-		}
 	}
 
 	// Do we have possible matches?

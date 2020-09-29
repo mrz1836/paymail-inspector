@@ -30,6 +30,7 @@ paymail p2p [flags]
 
 ```
 paymail p2p mrz@moneybutton.com
+paymail p2p \$mr-z
 ```
 
 ### Options

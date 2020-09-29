@@ -10,12 +10,14 @@ import (
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/mrz1836/paymail-inspector/chalker"
+	"github.com/mrz1836/paymail-inspector/integrations/baemail"
 	"github.com/mrz1836/paymail-inspector/integrations/bitpic"
+	"github.com/mrz1836/paymail-inspector/integrations/powping"
 	"github.com/mrz1836/paymail-inspector/integrations/roundesk"
-	"github.com/mrz1836/paymail-inspector/paymail"
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
 	"github.com/spf13/viper"
+	"github.com/tonicpow/go-paymail"
 )
 
 // Core application loader (runs before every cmd)
@@ -28,8 +30,9 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	// Set the user agent for the application's external integrations
+	baemail.UserAgent = applicationFullName + ": v" + Version
 	bitpic.UserAgent = applicationFullName + ": v" + Version
-	paymail.UserAgent = applicationFullName + ": v" + Version
+	powping.UserAgent = applicationFullName + ": v" + Version
 	roundesk.UserAgent = applicationFullName + ": v" + Version
 
 	// Add config option

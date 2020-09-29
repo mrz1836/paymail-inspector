@@ -31,6 +31,7 @@ paymail verify [flags]
 
 ```
 paymail verify mrz@moneybutton.com 02ead23149a1e33df17325ec7a7ba9e0b20c674c57c630f527d69b866aa9b65b10
+paymail verify 1mrz 0352530c305378fd9dfd99f8c8c44e9092efa7c1674b61d4e9be65f92aa7a77bbe
 ```
 
 ### Options

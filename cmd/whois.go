@@ -8,8 +8,8 @@ import (
 
 	"github.com/mrz1836/go-sanitize"
 	"github.com/mrz1836/paymail-inspector/chalker"
-	"github.com/mrz1836/paymail-inspector/paymail"
 	"github.com/spf13/cobra"
+	"github.com/tonicpow/go-paymail"
 	"github.com/ttacon/chalk"
 )
 
@@ -20,7 +20,9 @@ var whoisCmd = &cobra.Command{
 	Aliases:    []string{"who", "w"},
 	SuggestFor: []string{"lookup"},
 	Example: applicationName + ` whois mrz
-` + applicationName + ` w mrz`,
+` + applicationName + ` w mrz
+` + applicationName + ` w \$mr-z
+` + applicationName + ` w 1mrz`,
 	Long: chalk.Green.NewStyle().WithTextStyle(chalk.Bold).Style(`
         .__           .__        
 __  _  _|  |__   ____ |__| ______
@@ -42,14 +44,13 @@ Search `+strconv.Itoa(len(providers))+` public paymail providers for a handle.`)
 	Run: func(cmd *cobra.Command, args []string) {
 
 		// Handle to search
-		handle := ""
+		var handle string
 
-		// Detect if handler or not
+		// Are we using a paymail address?
 		if strings.Contains(args[0], "@") {
-			parts := strings.Split(args[0], "@")
-			handle = parts[0]
-		} else {
-			handle = args[0]
+			handle, _, _ = paymail.SanitizePaymail(args[0])
+		} else { // Using a alias or $handle
+			handle, _, _ = paymail.SanitizePaymail(paymail.ConvertHandle(args[0], false))
 		}
 
 		// Sanitize
@@ -106,8 +107,8 @@ func fetchPaymailInfo(wg *sync.WaitGroup, handle string, provider *Provider, res
 	}
 
 	// Set the URL - Does the paymail provider have the capability?
-	pkiUrl := capabilities.GetValueString(paymail.BRFCPki, paymail.BRFCPkiAlternate)
-	if len(pkiUrl) == 0 {
+	pkiURL := capabilities.GetString(paymail.BRFCPki, paymail.BRFCPkiAlternate)
+	if len(pkiURL) == 0 {
 		chalker.Log(chalker.ERROR, fmt.Sprintf("The provider %s is missing a required capability: %s", provider.Domain, paymail.BRFCPki))
 		return
 	}
@@ -119,7 +120,7 @@ func fetchPaymailInfo(wg *sync.WaitGroup, handle string, provider *Provider, res
 	}
 
 	// Get the PKI for the given address
-	if result.PKI, err = getPki(pkiUrl, handle, provider.Domain, true); err != nil || result.PKI == nil {
+	if result.PKI, err = getPki(pkiURL, handle, provider.Domain, true); err != nil || result.PKI == nil {
 		if err != nil {
 			chalker.Log(chalker.ERROR, fmt.Sprintf("Search response: %s", err.Error()))
 		}

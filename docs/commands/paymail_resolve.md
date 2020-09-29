@@ -30,6 +30,7 @@ paymail resolve [flags]
 ```
 paymail resolve mrz@moneybutton.com
 paymail r mrz@moneybutton.com
+paymail r 1mrz
 ```
 
 ### Options
@@ -41,7 +42,6 @@ paymail r mrz@moneybutton.com
       --sender-handle string   Sender's paymail handle. Required by bsvalias spec. Receiver paymail used if not specified.
       --sender-name string     The sender's name
   -s, --signature string       The signature of the entire request
-      --skip-2paymail          Skip trying to get an associated 2paymail
       --skip-baemail           Skip trying to get an associated Baemail account
       --skip-bitpic            Skip trying to get an associated Bitpic
       --skip-pki               Skip the pki request

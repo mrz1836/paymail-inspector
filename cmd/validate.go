@@ -5,10 +5,10 @@ import (
 	"net"
 	"strings"
 
-	"github.com/mrz1836/go-validate"
+	"github.com/mrz1836/go-sanitize"
 	"github.com/mrz1836/paymail-inspector/chalker"
-	"github.com/mrz1836/paymail-inspector/paymail"
 	"github.com/spf13/cobra"
+	"github.com/tonicpow/go-paymail"
 	"github.com/ttacon/chalk"
 )
 
@@ -47,8 +47,15 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/index.html")),
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 
+		var alias, domain, paymailAddress string
+
 		// Extract the parts given
-		domain, paymailAddress := paymail.ExtractParts(args[0])
+		if strings.Contains(args[0], "@") {
+			alias, domain, paymailAddress = paymail.SanitizePaymail(args[0])
+		} else {
+			domain, _ = sanitize.Domain(args[0], false, true)
+		}
+
 		var err error
 
 		// Are we an address?
@@ -64,18 +71,27 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/index.html")),
 		} else {
 			chalker.Log(chalker.DIM, fmt.Sprintf("Domain detected: %s", chalk.Cyan.Color(domain)))
 
-			// Check for a real domain (require at least one period)
-			if !strings.Contains(domain, ".") {
-				chalker.Log(chalker.ERROR, fmt.Sprintf("Domain name is invalid: %s", domain))
-				return
-			} else if !validate.IsValidDNSName(domain) { // Basic DNS check (not a REAL domain name check)
-				chalker.Log(chalker.ERROR, fmt.Sprintf("Domain name failed DNS check: %s", domain))
+			// Validate the domain
+			if err := paymail.ValidateDomain(domain); err != nil {
+				chalker.Log(chalker.ERROR, fmt.Sprintf("Domain name %s is invalid: %s", domain, err.Error()))
 				return
 			}
 		}
 
 		// Used for future checks
 		checkDomain := domain
+
+		// New Client
+		var client *paymail.Client
+		client, err = newPaymailClient()
+		if err != nil {
+			return
+		}
+
+		// Set custom name server
+		if nameServer != client.Options.NameServer {
+			client.Options.NameServer = nameServer
+		}
 
 		// Get the SRV record
 		if !skipSrvCheck {
@@ -97,7 +113,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/index.html")),
 		if !skipDnsCheck {
 
 			// Fire the check request
-			if result := paymail.CheckDNSSEC(checkDomain, nameServer); result.DNSSEC {
+			if result := client.CheckDNSSEC(checkDomain); result.DNSSEC {
 				chalker.Log(chalker.SUCCESS, fmt.Sprintf("DNSSEC found and valid and found %d DS record(s)", result.Answer.DSRecordCount))
 			} else {
 				chalker.Log(chalker.ERROR, fmt.Sprintf("DNSSEC possibly not found or invalid for %s, check manually: dnsviz.net/d/domain.com/dnssec/", result.Domain))
@@ -114,7 +130,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/index.html")),
 		if !skipSSLCheck {
 
 			var valid bool
-			if valid, err = paymail.CheckSSL(checkDomain, nameServer); err != nil {
+			if valid, err = client.CheckSSL(checkDomain); err != nil {
 				chalker.Log(chalker.ERROR, fmt.Sprintf("Error checking SSL: %s", err.Error()))
 			} else if !valid {
 				chalker.Log(chalker.ERROR, "Zero SSL certificates found (or timed out)")
@@ -125,7 +141,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/index.html")),
 		}
 
 		// Get the capabilities
-		var capabilities *paymail.CapabilitiesResponse
+		var capabilities *paymail.Capabilities
 		if capabilities, err = getCapabilities(domain, false); err != nil {
 			if strings.Contains(err.Error(), "context deadline exceeded") {
 				chalker.Log(chalker.WARN, fmt.Sprintf("No capabilities found for: %s", domain))
@@ -136,25 +152,22 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/index.html")),
 		}
 
 		// Missing required capabilities?
-		pkiUrl := capabilities.GetValueString(paymail.BRFCPki, paymail.BRFCPkiAlternate)
-		resolveUrl := capabilities.GetValueString(paymail.BRFCPaymentDestination, paymail.BRFCBasicAddressResolution)
-		if len(pkiUrl) == 0 {
+		pkiURL := capabilities.GetString(paymail.BRFCPki, paymail.BRFCPkiAlternate)
+		resolveURL := capabilities.GetString(paymail.BRFCPaymentDestination, paymail.BRFCBasicAddressResolution)
+		if len(pkiURL) == 0 {
 			chalker.Log(chalker.WARN, fmt.Sprintf("Missing required capability: %s", paymail.BRFCPki))
-		} else if len(resolveUrl) == 0 {
+		} else if len(resolveURL) == 0 {
 			chalker.Log(chalker.WARN, fmt.Sprintf("Missing required capability: %s", paymail.BRFCPaymentDestination))
-		} else if len(pkiUrl) > 0 && len(resolveUrl) > 0 {
+		} else if len(pkiURL) > 0 && len(resolveURL) > 0 {
 			chalker.Log(chalker.SUCCESS, fmt.Sprintf("Found required capabilities: [%s] [%s]", paymail.BRFCPki, paymail.BRFCPaymentDestination))
 		}
 
 		// Only if we have an address (basic validation that the address exists)
-		if len(paymailAddress) > 0 && len(pkiUrl) > 0 {
-
-			// Get the alias of the address
-			parts := strings.Split(paymailAddress, "@")
+		if len(paymailAddress) > 0 && len(pkiURL) > 0 {
 
 			// Get the PKI for the given address
-			var pki *paymail.PKIResponse
-			if pki, err = getPki(pkiUrl, parts[0], parts[1], false); err != nil {
+			var pki *paymail.PKI
+			if pki, err = getPki(pkiURL, alias, domain, false); err != nil {
 				chalker.Log(chalker.ERROR, fmt.Sprintf("Error: %s", err.Error()))
 				return
 			} else if pki != nil {
@@ -181,13 +194,13 @@ func init() {
 	validateCmd.Flags().StringVar(&protocol, "protocol", paymail.DefaultProtocol, "Protocol in the SRV record")
 
 	// Custom port for the SRV record (target address)
-	validateCmd.Flags().IntVarP(&port, "port", "p", paymail.DefaultPort, "Port that is found in the SRV record")
+	validateCmd.Flags().Uint16VarP(&port, "port", "p", paymail.DefaultPort, "Port that is found in the SRV record")
 
 	// Custom priority for the SRV record
-	validateCmd.Flags().IntVar(&priority, "priority", paymail.DefaultPriority, "Priority value that is found in the SRV record")
+	validateCmd.Flags().Uint16Var(&priority, "priority", paymail.DefaultPriority, "Priority value that is found in the SRV record")
 
 	// Custom weight for the SRV record
-	validateCmd.Flags().IntVarP(&weight, "weight", "w", paymail.DefaultWeight, "Weight value that is found in the SRV record")
+	validateCmd.Flags().Uint16VarP(&weight, "weight", "w", paymail.DefaultWeight, "Weight value that is found in the SRV record")
 
 	// Run the SRV check on the domain
 	validateCmd.Flags().BoolVar(&skipSrvCheck, "skip-srv", false, "Skip checking SRV record of the main domain")
