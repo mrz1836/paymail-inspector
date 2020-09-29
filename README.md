@@ -2,17 +2,17 @@
 
 > CLI application for interacting with paymail service providers
 
-[![Release](https://img.shields.io/github/release-pre/mrz1836/paymail-inspector.svg?logo=github&style=flat&v=7)](https://github.com/mrz1836/paymail-inspector/releases)
-[![Downloads](https://img.shields.io/github/downloads/mrz1836/paymail-inspector/total.svg?logo=github&style=flat&v=7)](https://github.com/mrz1836/paymail-inspector/releases)
-[![Build Status](https://travis-ci.com/mrz1836/paymail-inspector.svg?branch=master&v=7)](https://travis-ci.com/mrz1836/paymail-inspector)
-[![Report](https://goreportcard.com/badge/github.com/mrz1836/paymail-inspector?style=flat&v=7)](https://goreportcard.com/report/github.com/mrz1836/paymail-inspector)
-[![Go](https://img.shields.io/github/go-mod/go-version/mrz1836/paymail-inspector?v=7)](https://golang.org/)
-[![Sponsor](https://img.shields.io/badge/sponsor-MrZ-181717.svg?logo=github&style=flat&v=3)](https://github.com/sponsors/mrz1836)
+[![Release](https://img.shields.io/github/release-pre/mrz1836/paymail-inspector.svg?logo=github&style=flat&v=1)](https://github.com/mrz1836/paymail-inspector/releases)
+[![Downloads](https://img.shields.io/github/downloads/mrz1836/paymail-inspector/total.svg?logo=github&style=flat&v=1)](https://github.com/mrz1836/paymail-inspector/releases)
+[![Build Status](https://travis-ci.com/mrz1836/paymail-inspector.svg?branch=master&v=1)](https://travis-ci.com/mrz1836/paymail-inspector)
+[![Report](https://goreportcard.com/badge/github.com/mrz1836/paymail-inspector?style=flat&v=1)](https://goreportcard.com/report/github.com/mrz1836/paymail-inspector)
+[![Go](https://img.shields.io/github/go-mod/go-version/mrz1836/paymail-inspector?v=1)](https://golang.org/)
+[![Sponsor](https://img.shields.io/badge/sponsor-MrZ-181717.svg?logo=github&style=flat&v=1)](https://github.com/sponsors/mrz1836)
 [![Donate](https://img.shields.io/badge/donate-bitcoin-ff9900.svg?logo=bitcoin&style=flat)](https://mrz1818.com/?tab=tips&af=paymail-inspector)
 
 <br/>
 
-<img src=".github/IMAGES/paymail-inspector.gif?raw=true&v=7" alt="Paymail Commands">
+<img src=".github/IMAGES/paymail-inspector.gif?raw=true&v=1" alt="Paymail Commands">
 
 <br/>
 
@@ -39,7 +39,7 @@ paymail
 
 **Install using a [compiled binary](https://github.com/mrz1836/paymail-inspector/releases)** on Linux, Mac or Windows _(Mac example)_
 ```shell script
-curl -LkSs https://github.com/mrz1836/paymail-inspector/releases/download/v0.2.2/paymail-inspector_macOS_64-bit.tar.gz -o app.tar.gz
+curl -LkSs https://github.com/mrz1836/paymail-inspector/releases/download/v0.3.0/paymail-inspector_macOS_64-bit.tar.gz -o app.tar.gz
 tar -zxf app.tar.gz && cd ./app/
 ./paymail
 ```
@@ -188,6 +188,7 @@ Additional paymail information can also be found via [MoneyButton's documentatio
 - [RelayX](https://tncpw.co/4897634e)
 - [Centbee](https://tncpw.co/4350c72f)
 - [Simply.cash](https://tncpw.co/1ce8f70f)
+- [DotWallet](https://tncpw.co/5745c80e)
 - [Bit.sv](https://tncpw.co/bff8984c)
 - [myPaymail](https://tncpw.co/ee243a15)
 - [Volt](https://tncpw.co/e9ff2b0c)
@@ -201,7 +202,14 @@ Additional paymail information can also be found via [MoneyButton's documentatio
 - Unwriter's [powping](https://tncpw.co/3517f7fc)
 - Deggen's [Roundesk](https://tncpw.co/2d8d2e22) & [Baemail](https://tncpw.co/2c90c26b)
 - RelayX's [Dime.ly](https://tncpw.co/46a4d32d)
-- [2paymail](https://tncpw.co/c82bd419)
+</details>
+
+<details>
+<summary><strong><code>Handle Providers</code></strong></summary>
+<br/>
+
+- [HandCash](https://tncpw.co/742b1f09)
+- [RelayX](https://tncpw.co/4897634e)
 </details>
 
 <details>
@@ -243,6 +251,7 @@ paymail whois mrz --no-cache
 - [columnize](https://github.com/ryanuber/columnize) for displaying terminal data in columns
 - [dns](https://github.com/miekg/dns) package for advanced DNS functionality
 - [go-homedir](https://github.com/mitchellh/go-homedir) to find the home directory
+- [go-paymail](https://github.com/tonicpow/go-paymail) for Paymail library support
 - [go-sanitize](https://github.com/mrz1836/go-sanitize) for sanitation and data formatting
 - [go-validate](https://github.com/mrz1836/go-validate) for domain/email/ip validations
 - [resty](https://github.com/go-resty/resty) for custom HTTP client support
