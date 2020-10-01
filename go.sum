@@ -28,8 +28,9 @@ github.com/armon/go-radix v0.0.0-20180808171621-7fddfc383310/go.mod h1:ufUuZ+zHj
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24TaqPxmxbtue+5NUziq4I4S80YR8gNf3Q=
 github.com/beorn7/perks v1.0.0/go.mod h1:KWe93zE9D1o94FZ5RNwFwVgaQK1VOXiVxmqh+CedLV8=
 github.com/bgentry/speakeasy v0.1.0/go.mod h1:+zsyZBPWlz7T6j88CTgSN5bM796AkVf0kBD4zp0CCIs=
-github.com/bitcoinschema/go-bitcoin v0.0.10 h1:Bx4IlBbwduhTbcdmmcdEfG4tnPKfddAt8G+sGpOy07Q=
-github.com/bitcoinschema/go-bitcoin v0.0.10/go.mod h1:LufGwzXzTjm4WdSesoPDotinDh0UWvw1z2paIdOgsUU=
+github.com/bitcoinschema/go-bitcoin v0.0.11/go.mod h1:54r7+8ETFDAwn6xraXtyx2vNKKYEIXaCOEwJHkH2xQE=
+github.com/bitcoinschema/go-bitcoin v0.0.15 h1:yVAaqjcKCfEJ3audJxR1/dA34iNsoo1TQOXFV76GhLA=
+github.com/bitcoinschema/go-bitcoin v0.0.15/go.mod h1:54r7+8ETFDAwn6xraXtyx2vNKKYEIXaCOEwJHkH2xQE=
 github.com/bitcoinsv/bsvd v0.0.0-20190609155523-4c29707f7173 h1:2yTIV9u7H0BhRDGXH5xrAwAz7XibWJtX2dNezMeNsUo=
 github.com/bitcoinsv/bsvd v0.0.0-20190609155523-4c29707f7173/go.mod h1:BZ1UcC9+tmcDEcdVXgpt13hMczwJxWzpAn68wNs7zRA=
 github.com/bitcoinsv/bsvlog v0.0.0-20181216181007-cb81b076bf2e h1:6f+gRvaPE/4h0g39dqTNPr9/P4mikw0aB+dhiExaWN8=
@@ -218,7 +219,6 @@ github.com/pelletier/go-toml v1.2.0 h1:T5zMGML61Wp+FlcbWjRDT7yAxhJNAiPPLOFECq181
 github.com/pelletier/go-toml v1.2.0/go.mod h1:5z9KED0ma1S8pY6P1sdut58dfprrGBbd/94hg7ilaic=
 github.com/pelletier/go-toml v1.8.1 h1:1Nf83orprkJyknT6h7zbuEGUEjcyVlCxSUGTENmNCRM=
 github.com/pelletier/go-toml v1.8.1/go.mod h1:T2/BmBdy8dvIRq1a/8aqjN41wvWlN4lrapLU/GW4pbc=
-github.com/piotrnar/gocoin v0.0.0-20200920172007-af9cf2799157/go.mod h1:sW6i99ojgdRHcz53PCjyEeoTEDFh9dfP5iiEIiNfcaM=
 github.com/piotrnar/gocoin v0.0.0-20201001091124-adad7a225eeb h1:zoASkOZwrUP9K6SeNBG7DSj33tqywMuq3LJgI/eyalU=
 github.com/piotrnar/gocoin v0.0.0-20201001091124-adad7a225eeb/go.mod h1:sW6i99ojgdRHcz53PCjyEeoTEDFh9dfP5iiEIiNfcaM=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
@@ -288,8 +288,8 @@ github.com/stretchr/testify v1.4.0 h1:2E4SXV/wtOkTonXsotYi4li6zVWxYlZuYNCXe9XRJy
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
 github.com/subosito/gotenv v1.2.0/go.mod h1:N0PQaV/YGNqwC0u51sEeR/aUtSLEXKX9iv69rRypqCw=
 github.com/tmc/grpc-websocket-proxy v0.0.0-20190109142713-0ad062ec5ee5/go.mod h1:ncp9v5uamzpCO7NfCPTXjqaC+bZgJeR0sMTm6dMHP7U=
-github.com/tonicpow/go-paymail v0.0.5 h1:NaYVznjAAHJlA3dh6pC1zjbo5tilj8DTH9lOyMcVM+w=
-github.com/tonicpow/go-paymail v0.0.5/go.mod h1:HLV46wxCMkurJTjI41heRwqujvkF1NAnFArIPtEVqJM=
+github.com/tonicpow/go-paymail v0.0.6 h1:CepIn944/VZFa7SQPUA6Xtp/2Y87vXGtGeWC6f62/Mg=
+github.com/tonicpow/go-paymail v0.0.6/go.mod h1:I0YMWuAk6Q+F+myPC6qr4RrY03+M/jUSJBKwbT8NPpM=
 github.com/ttacon/chalk v0.0.0-20160626202418-22c06c80ed31 h1:OXcKh35JaYsGMRzpvFkLv/MEyPuL49CThT1pZ8aSml4=
 github.com/ttacon/chalk v0.0.0-20160626202418-22c06c80ed31/go.mod h1:onvgF043R+lC5RZ8IT9rBXDaEDnpnw/Cl+HFiw+v/7Q=
 github.com/ugorji/go v1.1.4/go.mod h1:uQMGLiO92mf5W77hV/PUCpI3pbzQx3CRekS0kk+RGrc=
@@ -315,6 +315,8 @@ golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550/go.mod h1:yigFU9vqHzYiE8U
 golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
 golang.org/x/crypto v0.0.0-20200930160638-afb6bcd081ae h1:duLSQW+DZ5MsXKX7kc4rXlq6/mmxz4G6ewJuBPlhRe0=
 golang.org/x/crypto v0.0.0-20200930160638-afb6bcd081ae/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
+golang.org/x/crypto v0.0.0-20201001193750-eb9a90e9f9cb h1:+i8XQ/zMhKyWrZ8ZrEx4+Eli5lXoBdSdFzKDjxPAC2I=
+golang.org/x/crypto v0.0.0-20201001193750-eb9a90e9f9cb/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
 golang.org/x/exp v0.0.0-20190121172915-509febef88a4/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
 golang.org/x/exp v0.0.0-20190306152737-a1d7652674e8/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
 golang.org/x/exp v0.0.0-20190510132918-efd6b22b2522/go.mod h1:ZjyILWgesfNpC6sMxTJOJm9Kp84zZh5NQWvqDGG3Qr8=
