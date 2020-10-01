@@ -10,7 +10,7 @@ import (
 )
 
 // Version is set manually (also make:build overwrites this value from Github's latest tag)
-var Version = "v0.3.0"
+var Version = "v0.3.1"
 
 // Default flag values for various commands
 var (
