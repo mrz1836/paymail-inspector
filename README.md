@@ -178,6 +178,7 @@ Additional paymail information can also be found via [MoneyButton's documentatio
 - [ ] MinerID Extension: MinerParams ([1b1d980b5b72](https://github.com/bitcoin-sv-specs/brfc-minerid/tree/master/extensions/minerparams))
 - [ ] MinerID Extension: BlockInfo ([a224052ad433](https://github.com/bitcoin-sv-specs/brfc-minerid/tree/master/extensions/blockinfo))
 - [ ] MinerID Extension: BlockBind ([b8930c2bbf5d](https://github.com/bitcoin-sv-specs/brfc-minerid/tree/master/extensions/blockbind))
+- [ ] SPV Channels API Specification ([d534abdf761f](https://github.com/bitcoin-sv-specs/brfc-spvchannels))
 
 <details>
 <summary><strong><code>Public Paymail Providers</code></strong></summary>
