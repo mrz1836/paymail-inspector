@@ -114,7 +114,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/01-brfc-specifications.htm
 					continue
 				}
 
-				displayHeader(chalker.BOLD, fmt.Sprintf("%s", brfc.Title+" v"+brfc.Version))
+				displayHeader(chalker.BOLD, brfc.Title+" v"+brfc.Version)
 
 				valid := chalk.Green.Color("(Valid)")
 				// Validate the BRFC ID
@@ -206,7 +206,7 @@ func simpleSearch(s, substr string) bool {
 func showBrfc(brfc *paymail.BRFCSpec) {
 
 	// Header
-	displayHeader(chalker.BOLD, fmt.Sprintf("%s", brfc.Title+" v"+brfc.Version))
+	displayHeader(chalker.BOLD, brfc.Title+" v"+brfc.Version)
 
 	// Validate the BRFC ID
 	valid := chalk.Green.Color("(Valid)")

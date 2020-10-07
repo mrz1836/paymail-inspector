@@ -72,7 +72,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/index.html")),
 			chalker.Log(chalker.DIM, fmt.Sprintf("Domain detected: %s", chalk.Cyan.Color(domain)))
 
 			// Validate the domain
-			if err := paymail.ValidateDomain(domain); err != nil {
+			if err = paymail.ValidateDomain(domain); err != nil {
 				chalker.Log(chalker.ERROR, fmt.Sprintf("Domain name %s is invalid: %s", domain, err.Error()))
 				return
 			}
@@ -83,8 +83,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/index.html")),
 
 		// New Client
 		var client *paymail.Client
-		client, err = newPaymailClient()
-		if err != nil {
+		if client, err = newPaymailClient(); err != nil {
 			return
 		}
 
@@ -110,7 +109,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/index.html")),
 
 		// Validate the DNSSEC if the flag is true
 		displayHeader(chalker.DEFAULT, fmt.Sprintf("Checking %s for DNSSEC validation...", chalk.Cyan.Color(checkDomain)))
-		if !skipDnsCheck {
+		if !skipDNSCheck {
 
 			// Fire the check request
 			if result := client.CheckDNSSEC(checkDomain); result.DNSSEC {
@@ -206,7 +205,7 @@ func init() {
 	validateCmd.Flags().BoolVar(&skipSrvCheck, "skip-srv", false, "Skip checking SRV record of the main domain")
 
 	// Run the DNSSEC check on the target domain
-	validateCmd.Flags().BoolVarP(&skipDnsCheck, "skip-dnssec", "d", false, "Skip checking DNSSEC of the target domain")
+	validateCmd.Flags().BoolVarP(&skipDNSCheck, "skip-dnssec", "d", false, "Skip checking DNSSEC of the target domain")
 
 	// Run the SSL check on the target domain
 	validateCmd.Flags().BoolVar(&skipSSLCheck, "skip-ssl", false, "Skip checking SSL of the target domain")

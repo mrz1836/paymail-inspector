@@ -10,7 +10,7 @@ import (
 )
 
 // Version is set manually (also make:build overwrites this value from Github's latest tag)
-var Version = "v0.3.1"
+var Version = "v0.3.2"
 
 // Default flag values for various commands
 var (
@@ -33,7 +33,7 @@ var (
 	skipBaemail        bool   // cmd: resolve
 	skipBitpic         bool   // cmd: resolve
 	skipBrfcValidation bool   // cmd: brfc
-	skipDnsCheck       bool   // cmd: validate
+	skipDNSCheck       bool   // cmd: validate
 	skipPki            bool   // cmd: resolve
 	skipPowPing        bool   // cmd: resolve
 	skipPublicProfile  bool   // cmd: resolve

@@ -76,7 +76,7 @@ func initConfig() {
 	} else {
 
 		// Make a dummy file if it doesn't exist
-		file, err := os.OpenFile(filepath.Join(applicationDirectory, configFileDefault+".yaml"), os.O_RDONLY|os.O_CREATE, 0644)
+		file, err := os.OpenFile(filepath.Join(applicationDirectory, configFileDefault+".yaml"), os.O_RDONLY|os.O_CREATE, 0600)
 		er(err)
 		_ = file.Close() // Error is not needed here, just close and continue
 

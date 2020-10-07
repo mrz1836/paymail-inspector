@@ -111,24 +111,24 @@ func GetPic(alias, domain string, tracing bool) (response *Response, err error) 
 	// Test the response
 	response.Found = string(resp.Body()) == "1"
 	if response.Found {
-		response.URL = Url(alias, domain)
+		response.URL = URL(alias, domain)
 	}
 
 	return
 }
 
-// Url will return a url for the bitpic avatar using alias and domain
+// URL will return a url for the bitpic avatar using alias and domain
 // Specs: https://bitpic.network/about
-func Url(alias, domain string) string {
+func URL(alias, domain string) string {
 	if len(DefaultImage) > 0 {
 		return fmt.Sprintf("https://%s/u/%s@%s?d=%s", Network, alias, domain, DefaultImage)
 	}
 	return fmt.Sprintf("https://%s/u/%s@%s", Network, alias, domain)
 }
 
-// UrlFromPaymail will return a url for the bitpic avatar using a paymail
+// URLFromPaymail will return a url for the bitpic avatar using a paymail
 // Specs: https://bitpic.network/about
-func UrlFromPaymail(paymail string) string {
+func URLFromPaymail(paymail string) string {
 	if len(DefaultImage) > 0 {
 		return fmt.Sprintf("https://%s/u/%s?d=%s", Network, paymail, DefaultImage)
 	}

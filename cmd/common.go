@@ -57,8 +57,7 @@ func getPki(pkiURL, alias, domain string, allowCache bool) (pki *paymail.PKI, er
 
 	// New Client
 	var client *paymail.Client
-	client, err = newPaymailClient()
-	if err != nil {
+	if client, err = newPaymailClient(); err != nil {
 		return
 	}
 
@@ -118,8 +117,7 @@ func getSrvRecord(domain string, validate bool, allowCache bool) (srv *net.SRV, 
 
 	// New Client
 	var client *paymail.Client
-	client, err = newPaymailClient()
-	if err != nil {
+	if client, err = newPaymailClient(); err != nil {
 		return
 	}
 
@@ -202,8 +200,7 @@ func getCapabilities(domain string, allowCache bool) (capabilities *paymail.Capa
 
 	// New Client
 	var client *paymail.Client
-	client, err = newPaymailClient()
-	if err != nil {
+	if client, err = newPaymailClient(); err != nil {
 		return
 	}
 
@@ -251,8 +248,7 @@ func resolveAddress(resolveURL, alias, domain, senderHandle, signature, purpose 
 
 	// New Client
 	var client *paymail.Client
-	client, err = newPaymailClient()
-	if err != nil {
+	if client, err = newPaymailClient(); err != nil {
 		return
 	}
 
@@ -295,8 +291,7 @@ func getP2PPaymentDestination(destinationURL, alias, domain string, satoshis uin
 
 	// New Client
 	var client *paymail.Client
-	client, err = newPaymailClient()
-	if err != nil {
+	if client, err = newPaymailClient(); err != nil {
 		return
 	}
 
@@ -350,8 +345,7 @@ func getPublicProfile(profileURL, alias, domain string, allowCache bool) (profil
 
 	// New Client
 	var client *paymail.Client
-	client, err = newPaymailClient()
-	if err != nil {
+	if client, err = newPaymailClient(); err != nil {
 		return
 	}
 
@@ -668,8 +662,7 @@ func verifyPubKey(verifyURL, alias, domain, pubKey string) (response *paymail.Ve
 
 	// New Client
 	var client *paymail.Client
-	client, err = newPaymailClient()
-	if err != nil {
+	if client, err = newPaymailClient(); err != nil {
 		return
 	}
 
@@ -753,11 +746,14 @@ func (p *PaymailDetails) GetPublicInfo(capabilities *paymail.Capabilities) (err 
 		return
 	}
 
+	// todo: display errors differently
+
 	// Attempt to get a public profile if the capability is found
 	publicURL := capabilities.GetString(paymail.BRFCPublicProfile, "")
 	if len(publicURL) > 0 && !skipPublicProfile && p.PKI != nil && len(p.PKI.Handle) > 0 {
 		if p.PublicProfile, err = getPublicProfile(publicURL, p.Handle, p.Provider.Domain, true); err != nil {
 			err = fmt.Errorf("get public profile failed: %s", err.Error())
+			chalker.Log(chalker.ERROR, fmt.Sprintf("Error: %s", err.Error()))
 		}
 	}
 
@@ -766,9 +762,11 @@ func (p *PaymailDetails) GetPublicInfo(capabilities *paymail.Capabilities) (err 
 		// todo: make this one request to get all bitpics
 		if p.Bitpic, err = getBitPic(p.Handle, p.Provider.Domain, true); err != nil {
 			err = fmt.Errorf("checking for bitpic failed: %s", err.Error())
+			chalker.Log(chalker.ERROR, fmt.Sprintf("Error: %s", err.Error()))
 		}
 		if p.Bitpics, err = getBitPics(p.Handle, p.Provider.Domain, true); err != nil {
 			err = fmt.Errorf("searching for bitpic failed: %s", err.Error())
+			chalker.Log(chalker.ERROR, fmt.Sprintf("Error: %s", err.Error()))
 		}
 	}
 
@@ -776,6 +774,7 @@ func (p *PaymailDetails) GetPublicInfo(capabilities *paymail.Capabilities) (err 
 	if !skipBaemail && p.PKI != nil && len(p.PKI.Handle) > 0 {
 		if p.Baemail, err = getBaemail(p.Handle, p.Provider.Domain, true); err != nil {
 			err = fmt.Errorf("checking for baemail account failed: %s", err.Error())
+			chalker.Log(chalker.ERROR, fmt.Sprintf("Error: %s", err.Error()))
 		}
 	}
 
@@ -783,6 +782,7 @@ func (p *PaymailDetails) GetPublicInfo(capabilities *paymail.Capabilities) (err 
 	if !skipRoundesk && p.PKI != nil && len(p.PKI.Handle) > 0 {
 		if p.Roundesk, err = getRoundeskProfile(p.Handle, p.Provider.Domain, true); err != nil {
 			err = fmt.Errorf("checking for roundesk profile failed: %s", err.Error())
+			chalker.Log(chalker.ERROR, fmt.Sprintf("Error: %s", err.Error()))
 		}
 	}
 
@@ -790,6 +790,7 @@ func (p *PaymailDetails) GetPublicInfo(capabilities *paymail.Capabilities) (err 
 	if !skipPowPing && p.PKI != nil && len(p.PKI.Handle) > 0 {
 		if p.PowPing, err = getPowPingProfile(p.Handle, p.Provider.Domain, true); err != nil {
 			err = fmt.Errorf("checking for powping account failed: %s", err.Error())
+			chalker.Log(chalker.ERROR, fmt.Sprintf("Error: %s", err.Error()))
 		}
 	}
 
@@ -854,7 +855,7 @@ func (p *PaymailDetails) Display() {
 	// Do we have possible matches?
 	if p.Bitpics != nil && len(p.Bitpics.Result.Posts) > 0 {
 		resultNum := 1
-		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Bitpic URL   : %s", chalk.Cyan.Color(bitpic.UrlFromPaymail(p.Bitpics.Result.Posts[0].Data.Paymail))))
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Bitpic URL   : %s", chalk.Cyan.Color(bitpic.URLFromPaymail(p.Bitpics.Result.Posts[0].Data.Paymail))))
 		for _, post := range p.Bitpics.Result.Posts {
 			if len(post.Data.Paymail) > 0 {
 				chalker.Log(chalker.DEFAULT, fmt.Sprintf("Bitpic Img #%d: %s", resultNum, chalk.Cyan.Color(post.Data.BitFs)))
