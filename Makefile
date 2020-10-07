@@ -23,7 +23,7 @@ all: ## Runs multiple commands
 	@$(MAKE) test
 	@$(MAKE) gen-docs
 
-build:  ## Build all binaries (darwin, linux, windows)
+build: ## Build all binaries (darwin, linux, windows)
 	@$(MAKE) darwin
 	@$(MAKE) linux
 	@$(MAKE) windows
@@ -57,7 +57,7 @@ linux: ## Build for Linux (amd64)
 release:: ## Runs common.release then runs godocs
 	@$(MAKE) godocs
 
-update-terminalizer:  ## Update the terminalizer application
+update-terminalizer: ## Update the terminalizer application
 	@npm update -g terminalizer
 
 windows: ## Build for Windows (amd64)
