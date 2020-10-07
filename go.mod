@@ -4,6 +4,7 @@ go 1.15
 
 require (
 	github.com/DataDog/zstd v1.4.5 // indirect
+	github.com/bitcoinschema/go-bitcoin v0.0.22 // indirect
 	github.com/dgraph-io/badger/v2 v2.2007.2
 	github.com/dgraph-io/ristretto v0.0.3 // indirect
 	github.com/dgryski/go-farm v0.0.0-20200201041132-a6ae2369ad13 // indirect
@@ -14,20 +15,20 @@ require (
 	github.com/magiconair/properties v1.8.4 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.3.3 // indirect
-	github.com/mrz1836/go-sanitize v1.1.0
+	github.com/mrz1836/go-sanitize v1.1.1
 	github.com/pelletier/go-toml v1.8.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/ryanuber/columnize v2.1.2+incompatible
-	github.com/spf13/afero v1.4.0 // indirect
+	github.com/spf13/afero v1.4.1 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.7.1
-	github.com/tonicpow/go-paymail v0.0.7
+	github.com/tonicpow/go-paymail v0.0.9
 	github.com/ttacon/chalk v0.0.0-20160626202418-22c06c80ed31
-	golang.org/x/net v0.0.0-20201002202402-0a1ea396d57c // indirect
+	golang.org/x/sys v0.0.0-20201007082116-8445cc04cbdf // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
-	gopkg.in/ini.v1 v1.61.0 // indirect
+	gopkg.in/ini.v1 v1.62.0 // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
