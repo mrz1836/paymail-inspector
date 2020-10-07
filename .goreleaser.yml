@@ -63,7 +63,7 @@ release:
 # ---------------------------
 brews:
   -
-    github:
+    tap:
       owner: mrz1836
       name: homebrew-paymail-inspector
     commit_author:
