@@ -84,7 +84,7 @@ func GetProfile(alias, domain string, tracing bool) (response *Response, err err
 	}
 
 	// No profile result?
-	if string(resp.Body()) == "{}" {
+	if string(resp.Body()) == "{}" || string(resp.Body()) == `{"granted":false}` {
 		return
 	}
 
