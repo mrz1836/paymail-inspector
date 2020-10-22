@@ -20,12 +20,12 @@ require (
 	github.com/ryanuber/columnize v2.1.2+incompatible
 	github.com/spf13/afero v1.4.1 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
-	github.com/spf13/cobra v1.1.0
+	github.com/spf13/cobra v1.1.1
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/viper v1.7.1
-	github.com/tonicpow/go-paymail v0.0.10
+	github.com/tonicpow/go-paymail v0.0.12
 	github.com/ttacon/chalk v0.0.0-20160626202418-22c06c80ed31
-	golang.org/x/sys v0.0.0-20201015000850-e3ed0017c211 // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
 	gopkg.in/ini.v1 v1.62.0 // indirect
+	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
