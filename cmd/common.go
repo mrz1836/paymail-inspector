@@ -135,7 +135,7 @@ func getSrvRecord(domain string, validate bool, allowCache bool) (srv *net.SRV, 
 
 		// Validate the SRV record for the domain name (using all flags or default values)
 		if err = client.ValidateSRVRecord(srv, port, priority, weight); err != nil {
-			err = fmt.Errorf("validation error: %s", err.Error())
+			err = fmt.Errorf("validation error: %w", err)
 			return
 		}
 
@@ -752,7 +752,7 @@ func (p *PaymailDetails) GetPublicInfo(capabilities *paymail.Capabilities) (err 
 	publicURL := capabilities.GetString(paymail.BRFCPublicProfile, "")
 	if len(publicURL) > 0 && !skipPublicProfile && p.PKI != nil && len(p.PKI.Handle) > 0 {
 		if p.PublicProfile, err = getPublicProfile(publicURL, p.Handle, p.Provider.Domain, true); err != nil {
-			err = fmt.Errorf("get public profile failed: %s", err.Error())
+			err = fmt.Errorf("get public profile failed: %w", err)
 			chalker.Log(chalker.ERROR, fmt.Sprintf("Error: %s", err.Error()))
 		}
 	}
@@ -761,11 +761,11 @@ func (p *PaymailDetails) GetPublicInfo(capabilities *paymail.Capabilities) (err 
 	if !skipBitpic && p.PKI != nil && len(p.PKI.Handle) > 0 {
 		// todo: make this one request to get all bitpics
 		if p.Bitpic, err = getBitPic(p.Handle, p.Provider.Domain, true); err != nil {
-			err = fmt.Errorf("checking for bitpic failed: %s", err.Error())
+			err = fmt.Errorf("checking for bitpic failed: %w", err)
 			chalker.Log(chalker.ERROR, fmt.Sprintf("Error: %s", err.Error()))
 		}
 		if p.Bitpics, err = getBitPics(p.Handle, p.Provider.Domain, true); err != nil {
-			err = fmt.Errorf("searching for bitpic failed: %s", err.Error())
+			err = fmt.Errorf("searching for bitpic failed: %w", err)
 			chalker.Log(chalker.ERROR, fmt.Sprintf("Error: %s", err.Error()))
 		}
 	}
@@ -773,7 +773,7 @@ func (p *PaymailDetails) GetPublicInfo(capabilities *paymail.Capabilities) (err 
 	// Attempt to check for a Baemail profile (if enabled)
 	if !skipBaemail && p.PKI != nil && len(p.PKI.Handle) > 0 {
 		if p.Baemail, err = getBaemail(p.Handle, p.Provider.Domain, true); err != nil {
-			err = fmt.Errorf("checking for baemail account failed: %s", err.Error())
+			err = fmt.Errorf("checking for baemail account failed: %w", err)
 			chalker.Log(chalker.ERROR, fmt.Sprintf("Error: %s", err.Error()))
 		}
 	}
@@ -781,7 +781,7 @@ func (p *PaymailDetails) GetPublicInfo(capabilities *paymail.Capabilities) (err 
 	// Attempt to get a Roundesk profile (if enabled)
 	if !skipRoundesk && p.PKI != nil && len(p.PKI.Handle) > 0 {
 		if p.Roundesk, err = getRoundeskProfile(p.Handle, p.Provider.Domain, true); err != nil {
-			err = fmt.Errorf("checking for roundesk profile failed: %s", err.Error())
+			err = fmt.Errorf("checking for roundesk profile failed: %w", err)
 			chalker.Log(chalker.ERROR, fmt.Sprintf("Error: %s", err.Error()))
 		}
 	}
@@ -789,7 +789,7 @@ func (p *PaymailDetails) GetPublicInfo(capabilities *paymail.Capabilities) (err 
 	// Attempt to get a PowPing profile (if enabled)
 	if !skipPowPing && p.PKI != nil && len(p.PKI.Handle) > 0 {
 		if p.PowPing, err = getPowPingProfile(p.Handle, p.Provider.Domain, true); err != nil {
-			err = fmt.Errorf("checking for powping account failed: %s", err.Error())
+			err = fmt.Errorf("checking for powping account failed: %w", err)
 			chalker.Log(chalker.ERROR, fmt.Sprintf("Error: %s", err.Error()))
 		}
 	}

@@ -4,6 +4,7 @@ Package database is for a local storage layer for the application
 package database
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -69,7 +70,7 @@ func Get(key string) (string, error) {
 	})
 
 	// Not found (don't return an error, as we want to use this as cache)
-	if err == badger.ErrKeyNotFound {
+	if errors.Is(err, badger.ErrKeyNotFound) {
 		err = nil
 	}
 
@@ -84,7 +85,7 @@ func Flush() error {
 // GarbageCollection will clean up some garbage in the database (reduces space, etc)
 func GarbageCollection() error {
 	err := db.RunValueLogGC(0.5)
-	if err == badger.ErrNoRewrite {
+	if errors.Is(err, badger.ErrNoRewrite) {
 		return nil
 	}
 	return err
