@@ -4,7 +4,7 @@
 
 [![Release](https://img.shields.io/github/release-pre/mrz1836/paymail-inspector.svg?logo=github&style=flat&v=1)](https://github.com/mrz1836/paymail-inspector/releases)
 [![Downloads](https://img.shields.io/github/downloads/mrz1836/paymail-inspector/total.svg?logo=github&style=flat&v=1)](https://github.com/mrz1836/paymail-inspector/releases)
-[![Build Status](https://travis-ci.com/mrz1836/paymail-inspector.svg?branch=master&v=1)](https://travis-ci.com/mrz1836/paymail-inspector)
+[![Build Status](https://img.shields.io/github/workflow/status/mrz1836/paymail-inspector/run-go-tests?logo=github&v=3)](https://github.com/mrz1836/paymail-inspector/actions)
 [![Report](https://goreportcard.com/badge/github.com/mrz1836/paymail-inspector?style=flat&v=1)](https://goreportcard.com/report/github.com/mrz1836/paymail-inspector)
 [![Go](https://img.shields.io/github/go-mod/go-version/mrz1836/paymail-inspector?v=1)](https://golang.org/)
 [![Sponsor](https://img.shields.io/badge/sponsor-MrZ-181717.svg?logo=github&style=flat&v=1)](https://github.com/sponsors/mrz1836)
@@ -305,9 +305,10 @@ tag                      Generate a new tag and push (tag version=0.0.0)
 tag-remove               Remove a tag if found (tag-remove version=0.0.0)
 tag-update               Update an existing tag to current commit (tag-update version=0.0.0)
 test                     Runs vet, lint and ALL tests
+test-ci                  Runs all tests via CI (exports coverage)
+test-ci-no-race          Runs all tests via CI (no race) (exports coverage)
+test-ci-short            Runs unit tests via CI (exports coverage)
 test-short               Runs vet, lint and tests (excludes integration tests)
-test-travis              Runs all tests via Travis (also exports coverage)
-test-travis-short        Runs unit tests via Travis (also exports coverage)
 uninstall                Uninstall the application (and remove files)
 update-linter            Update the golangci-lint package (macOS only)
 update-terminalizer      Update the terminalizer application
@@ -319,7 +320,8 @@ windows                  Build for Windows (amd64)
 <br/>
 
 ## Examples & Tests
-All unit tests and [examples](docs/examples.md) run via [Travis CI](https://travis-ci.com/mrz1836/paymail-inspector) and uses [Go version 1.15.x](https://golang.org/doc/go1.15). View the [deployment configuration file](.travis.yml).
+All unit tests and [examples](docs/examples.md) run via [Github Actions](https://github.com/mrz1836/paymail-inspector/actions) and
+uses [Go version 1.15.x](https://golang.org/doc/go1.15). View the [configuration file](.github/workflows/run-tests.yml).
 
 Run all tests (including integration tests)
 ```shell script
