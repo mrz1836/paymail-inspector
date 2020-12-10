@@ -55,7 +55,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/01-brfc-specifications.htm
 	Run: func(cmd *cobra.Command, args []string) {
 
 		// Load the BRFC specifications via new client
-		client, err := paymail.NewClient(nil, nil)
+		client, err := paymail.NewClient(nil, nil, nil)
 		if err != nil {
 			chalker.Log(chalker.ERROR, fmt.Sprintf("Error loading BRFC specifications: %s", err.Error()))
 			return

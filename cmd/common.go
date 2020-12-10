@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net"
@@ -28,7 +29,7 @@ func newPaymailClient() (*paymail.Client, error) {
 	}
 	options.UserAgent = applicationFullName + ": v" + Version
 
-	return paymail.NewClient(options, nil)
+	return paymail.NewClient(options, nil, nil)
 }
 
 // getPki will get a pki response (logging and basic error handling)
@@ -134,7 +135,9 @@ func getSrvRecord(domain string, validate bool, allowCache bool) (srv *net.SRV, 
 		}
 
 		// Validate the SRV record for the domain name (using all flags or default values)
-		if err = client.ValidateSRVRecord(srv, port, priority, weight); err != nil {
+		if err = client.ValidateSRVRecord(
+			context.Background(), srv, port, priority, weight,
+		); err != nil {
 			err = fmt.Errorf("validation error: %w", err)
 			return
 		}
