@@ -2,10 +2,10 @@
 CUSTOM_BINARY_NAME := paymail
 
 # Common makefile commands & variables between projects
-include .make/Makefile.common
+include .make/common.mk
 
 # Common Golang makefile commands & variables between projects
-include .make/Makefile.go
+include .make/go.mk
 
 ## Not defined? Use default repo name which is the application
 ifeq ($(REPO_NAME),)
