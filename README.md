@@ -8,7 +8,7 @@
 [![Report](https://goreportcard.com/badge/github.com/mrz1836/paymail-inspector?style=flat&v=1)](https://goreportcard.com/report/github.com/mrz1836/paymail-inspector)
 [![Go](https://img.shields.io/github/go-mod/go-version/mrz1836/paymail-inspector?v=1)](https://golang.org/)
 [![Sponsor](https://img.shields.io/badge/sponsor-MrZ-181717.svg?logo=github&style=flat&v=1)](https://github.com/sponsors/mrz1836)
-[![Donate](https://img.shields.io/badge/donate-bitcoin-ff9900.svg?logo=bitcoin&style=flat)](https://mrz1818.com/?tab=tips&af=paymail-inspector)
+[![Donate](https://img.shields.io/badge/donate-bitcoin-ff9900.svg?logo=bitcoin&style=flat)](https://mrz1818.com/?tab=tips&utm_source=github&utm_medium=sponsor-link&utm_campaign=paymail-inspector&utm_term=paymail-inspector&utm_content=paymail-inspector)
 
 <br/>
 
@@ -356,7 +356,7 @@ View the [contributing guidelines](CONTRIBUTING.md) and please follow the [code 
 All kinds of contributions are welcome :raised_hands:! 
 The most basic way to show your support is to star :star2: the project, or to raise issues :speech_balloon:. 
 You can also support this project by [becoming a sponsor on GitHub](https://github.com/sponsors/mrz1836) :clap: 
-or by making a [**bitcoin donation**](https://mrz1818.com/?tab=tips&af=paymail-inspector) to ensure this journey continues indefinitely! :rocket:
+or by making a [**bitcoin donation**](https://mrz1818.com/?tab=tips&utm_source=github&utm_medium=sponsor-link&utm_campaign=paymail-inspector&utm_term=paymail-inspector&utm_content=paymail-inspector) to ensure this journey continues indefinitely! :rocket:
 
 Help by sharing: [![Twetch](https://img.shields.io/badge/share-twitter-00ACEE.svg)](https://twitter.com/intent/tweet?text=Paymail%20Inspector%20Rocks!%20Check%20it%20out:%20https%3A%2F%2Ftncpw.co%2F2d429aee) [![Twitter](https://img.shields.io/badge/share-twetch-085AF6.svg)](https://twetch.app/compose?description=Paymail%20Inspector%20Rocks!%20Check%20it%20out:%20https%3A%2F%2Ftncpw.co%2F2d429aee)
 
