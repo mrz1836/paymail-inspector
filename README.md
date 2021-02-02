@@ -39,7 +39,7 @@ paymail
 
 **Install using a [compiled binary](https://github.com/mrz1836/paymail-inspector/releases)** on Linux, Mac or Windows _(Mac example)_
 ```shell script
-curl -LkSs https://github.com/mrz1836/paymail-inspector/releases/download/v0.3.6/paymail-inspector_macOS_64-bit.tar.gz -o app.tar.gz
+curl -LkSs https://github.com/mrz1836/paymail-inspector/releases/download/v0.3.7/paymail-inspector_macOS_64-bit.tar.gz -o app.tar.gz
 tar -zxf app.tar.gz && cd ./app/
 ./paymail
 ```
