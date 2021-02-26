@@ -3,14 +3,15 @@ module github.com/mrz1836/paymail-inspector
 go 1.15
 
 require (
-	github.com/DataDog/zstd v1.4.5 // indirect
+	github.com/DataDog/zstd v1.4.8 // indirect
+	github.com/bitcoinschema/go-bitcoin v0.3.14 // indirect
 	github.com/dgraph-io/badger/v2 v2.2007.2
 	github.com/dgraph-io/ristretto v0.0.3 // indirect
 	github.com/dgryski/go-farm v0.0.0-20200201041132-a6ae2369ad13 // indirect
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/go-resty/resty/v2 v2.5.0
 	github.com/golang/protobuf v1.4.3 // indirect
-	github.com/golang/snappy v0.0.2 // indirect
+	github.com/golang/snappy v0.0.3 // indirect
 	github.com/magiconair/properties v1.8.4 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.4.1 // indirect
@@ -26,6 +27,7 @@ require (
 	github.com/spf13/viper v1.7.1
 	github.com/tonicpow/go-paymail v0.1.4
 	github.com/ttacon/chalk v0.0.0-20160626202418-22c06c80ed31
+	golang.org/x/net v0.0.0-20210226101413-39120d07d75e // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
 	gopkg.in/ini.v1 v1.62.0 // indirect
 )
