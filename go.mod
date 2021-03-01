@@ -4,7 +4,6 @@ go 1.15
 
 require (
 	github.com/DataDog/zstd v1.4.8 // indirect
-	github.com/bitcoinschema/go-bitcoin v0.3.14 // indirect
 	github.com/dgraph-io/badger/v2 v2.2007.2
 	github.com/dgraph-io/ristretto v0.0.3 // indirect
 	github.com/dgryski/go-farm v0.0.0-20200201041132-a6ae2369ad13 // indirect
@@ -25,9 +24,8 @@ require (
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/viper v1.7.1
-	github.com/tonicpow/go-paymail v0.1.4
+	github.com/tonicpow/go-paymail v0.1.5
 	github.com/ttacon/chalk v0.0.0-20160626202418-22c06c80ed31
-	golang.org/x/net v0.0.0-20210226101413-39120d07d75e // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
 	gopkg.in/ini.v1 v1.62.0 // indirect
 )
