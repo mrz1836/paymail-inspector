@@ -22,14 +22,17 @@ import (
 )
 
 // Creates a new client for Paymail
-func newPaymailClient() (*paymail.Client, error) {
-	options, err := paymail.DefaultClientOptions()
-	if err != nil {
-		return nil, err
-	}
-	options.UserAgent = applicationFullName + ": v" + Version
+func newPaymailClient(tracing bool, nameServer string) (*paymail.Client, error) {
+	opts := []paymail.ClientOps{paymail.WithUserAgent(applicationFullName + ": v" + Version)}
 
-	return paymail.NewClient(options, nil, nil)
+	if tracing {
+		opts = append(opts, paymail.WithRequestTracing())
+	}
+	if len(nameServer) > 0 {
+		opts = append(opts, paymail.WithNameServer(nameServer))
+	}
+
+	return paymail.NewClient(opts...)
 }
 
 // getPki will get a pki response (logging and basic error handling)
@@ -58,12 +61,9 @@ func getPki(pkiURL, alias, domain string, allowCache bool) (pki *paymail.PKI, er
 
 	// New Client
 	var client *paymail.Client
-	if client, err = newPaymailClient(); err != nil {
+	if client, err = newPaymailClient(!skipTracing, nameServer); err != nil {
 		return
 	}
-
-	// Set tracing
-	client.Options.RequestTracing = !skipTracing
 
 	// Get the PKI for the given address
 	if pki, err = client.GetPKI(pkiURL, alias, domain); err != nil {
@@ -118,7 +118,7 @@ func getSrvRecord(domain string, validate bool, allowCache bool) (srv *net.SRV, 
 
 	// New Client
 	var client *paymail.Client
-	if client, err = newPaymailClient(); err != nil {
+	if client, err = newPaymailClient(false, nameServer); err != nil {
 		return
 	}
 
@@ -203,12 +203,9 @@ func getCapabilities(domain string, allowCache bool) (capabilities *paymail.Capa
 
 	// New Client
 	var client *paymail.Client
-	if client, err = newPaymailClient(); err != nil {
+	if client, err = newPaymailClient(!skipTracing, nameServer); err != nil {
 		return
 	}
-
-	// Set tracing
-	client.Options.RequestTracing = !skipTracing
 
 	// Look up the capabilities
 	if capabilities, err = client.GetCapabilities(capabilityDomain, capabilityPort); err != nil {
@@ -251,12 +248,9 @@ func resolveAddress(resolveURL, alias, domain, senderHandle, signature, purpose 
 
 	// New Client
 	var client *paymail.Client
-	if client, err = newPaymailClient(); err != nil {
+	if client, err = newPaymailClient(!skipTracing, nameServer); err != nil {
 		return
 	}
-
-	// Set tracing
-	client.Options.RequestTracing = !skipTracing
 
 	// Create the address resolution request
 	if response, err = client.ResolveAddress(
@@ -294,12 +288,9 @@ func getP2PPaymentDestination(destinationURL, alias, domain string, satoshis uin
 
 	// New Client
 	var client *paymail.Client
-	if client, err = newPaymailClient(); err != nil {
+	if client, err = newPaymailClient(!skipTracing, nameServer); err != nil {
 		return
 	}
-
-	// Set tracing
-	client.Options.RequestTracing = !skipTracing
 
 	// Create the address resolution request
 	if response, err = client.GetP2PPaymentDestination(
@@ -348,12 +339,9 @@ func getPublicProfile(profileURL, alias, domain string, allowCache bool) (profil
 
 	// New Client
 	var client *paymail.Client
-	if client, err = newPaymailClient(); err != nil {
+	if client, err = newPaymailClient(!skipTracing, nameServer); err != nil {
 		return
 	}
-
-	// Set tracing
-	client.Options.RequestTracing = !skipTracing
 
 	// Get the profile
 	if profile, err = client.GetPublicProfile(profileURL, alias, domain); err != nil {
@@ -665,12 +653,9 @@ func verifyPubKey(verifyURL, alias, domain, pubKey string) (response *paymail.Ve
 
 	// New Client
 	var client *paymail.Client
-	if client, err = newPaymailClient(); err != nil {
+	if client, err = newPaymailClient(!skipTracing, nameServer); err != nil {
 		return
 	}
-
-	// Set tracing
-	client.Options.RequestTracing = !skipTracing
 
 	// Verify the given pubkey
 	if response, err = client.VerifyPubKey(verifyURL, alias, domain, pubKey); err != nil {

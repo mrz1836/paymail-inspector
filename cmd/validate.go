@@ -83,13 +83,8 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/index.html")),
 
 		// New Client
 		var client *paymail.Client
-		if client, err = newPaymailClient(); err != nil {
+		if client, err = newPaymailClient(true, nameServer); err != nil {
 			return
-		}
-
-		// Set custom name server
-		if nameServer != client.Options.NameServer {
-			client.Options.NameServer = nameServer
 		}
 
 		// Get the SRV record
