@@ -30,7 +30,7 @@ type Response struct {
 	ComposeURL string          `json:"compose_url"` // Compose email url
 	Found      bool            `json:"found"`       // Flag if the profile was found
 	StatusCode int             `json:"status_code"` // Status code returned on the request
-	Tracing    resty.TraceInfo `json:"tracing"`     // Trace information if enabled on the request
+	Tracing    resty.TraceInfo `json:"-"`           // Trace information if enabled on the request
 }
 
 // HasProfile will check if a profile exists for the given paymail address

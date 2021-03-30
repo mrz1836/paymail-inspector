@@ -39,7 +39,7 @@ type Response struct {
 type SearchResponse struct {
 	Result     *SearchResult   `json:"result"`      // Result from BitPics
 	StatusCode int             `json:"status_code"` // Status code returned on the request
-	Tracing    resty.TraceInfo `json:"tracing"`     // Trace information if enabled on the request
+	Tracing    resty.TraceInfo `json:"-"`           // Trace information if enabled on the request
 }
 
 // SearchResult is the child of the response

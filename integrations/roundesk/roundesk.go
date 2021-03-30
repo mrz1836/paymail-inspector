@@ -30,7 +30,7 @@ var (
 type Response struct {
 	Profile    *Profile        `json:"profile"`     // The roundesk profile data
 	StatusCode int             `json:"status_code"` // Status code returned on the request
-	Tracing    resty.TraceInfo `json:"tracing"`     // Trace information if enabled on the request
+	Tracing    resty.TraceInfo `json:"-"`           // Trace information if enabled on the request
 }
 
 // Profile is the roundesk public profile
