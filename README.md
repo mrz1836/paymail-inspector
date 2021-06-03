@@ -39,7 +39,7 @@ paymail
 
 **Install using a [compiled binary](https://github.com/mrz1836/paymail-inspector/releases)** on Linux, Mac or Windows _(Mac example)_
 ```shell script
-curl -LkSs https://github.com/mrz1836/paymail-inspector/releases/download/v0.3.9/paymail-inspector_macOS_64-bit.tar.gz -o app.tar.gz
+curl -LkSs https://github.com/mrz1836/paymail-inspector/releases/download/v0.3.10/paymail-inspector_macOS_64-bit.tar.gz -o app.tar.gz
 tar -zxf app.tar.gz && cd ./app/
 ./paymail
 ```
@@ -170,6 +170,10 @@ Additional paymail information can also be found via [MoneyButton's documentatio
 - [x] Sender Validation ([6745385c3fc0](http://bsvalias.org/04-02-sender-validation.html))
 - [ ] P2P Transactions ([5f1323cddf31](https://docs.moneybutton.com/docs/paymail-06-p2p-transactions.html))
 - [ ] Receiver Approvals ([3d7c2ca83a46](http://bsvalias.org/04-03-receiver-approvals.html))
+- [ ] Asset Information ([1300361cb2d4](https://docs.moneybutton.com/docs/paymail/paymail-08-asset-information.html))
+- [ ] SFP Paymail Extension Build Action ([189e32d93d28](https://docs.moneybutton.com/docs/sfp/paymail-09-sfp-build.html))
+- [ ] SFP Paymail Extension Authorise Action ([95dddb461bff](https://docs.moneybutton.com/docs/sfp/paymail-10-sfp-authorise.html))
+- [ ] P2P Payment Destination with Tokens Support ([f792b6eff07a](https://docs.moneybutton.com/docs/paymail/paymail-11-p2p-payment-destination-tokens.html))
 - [ ] Merchant API ([ce852c4c2cd1](https://github.com/bitcoin-sv-specs/brfc-merchantapi))
 - [ ] JSON Envelope Specification ([298e080a4598](https://github.com/bitcoin-sv-specs/brfc-misc/tree/master/jsonenvelope))
 - [ ] Fee Specification ([fb567267440a](https://github.com/bitcoin-sv-specs/brfc-misc/tree/master/feespec))
@@ -190,7 +194,6 @@ Additional paymail information can also be found via [MoneyButton's documentatio
 - [Centbee](https://tncpw.co/4350c72f)
 - [Simply.cash](https://tncpw.co/1ce8f70f)
 - [DotWallet](https://tncpw.co/5745c80e)
-- [Bit.sv](https://tncpw.co/bff8984c)
 - [myPaymail](https://tncpw.co/ee243a15)
 - [Volt](https://tncpw.co/e9ff2b0c)
 </details>
