@@ -10,7 +10,7 @@ import (
 )
 
 // Version is set manually (also make:build overwrites this value from Github's latest tag)
-var Version = "v0.3.9"
+var Version = "v0.3.10"
 
 // Default flag values for various commands
 var (
@@ -77,7 +77,6 @@ var providers = []*Provider{
 	{"centbee.com", "https://tncpw.co/4350c72f"},
 	{"simply.cash", "https://tncpw.co/1ce8f70f"},
 	{"dotwallet.com", "https://tncpw.co/5745c80e"},
-	{"bit.sv", "https://tncpw.co/bff8984c"},
 	{"mypaymail.co", "https://tncpw.co/ee243a15"},
 	{"volt.id", "https://tncpw.co/e9ff2b0c"},
 }
