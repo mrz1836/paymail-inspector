@@ -23,7 +23,7 @@ import (
 // Core application loader (runs before every cmd)
 func init() {
 
-	// Setup the application resources
+	// Set up the application resources
 	setupAppResources()
 
 	// Load the configuration
@@ -109,7 +109,7 @@ func generateDocumentation() {
 		rootCmd.AddCommand(command)
 	}
 
-	// Generate the markdown docs
+	// Generate the Markdown docs
 	if err := doc.GenMarkdownTree(rootCmd, docsLocation); err != nil {
 		chalker.Log(chalker.ERROR, fmt.Sprintf("Error generating docs: %s", err.Error()))
 		return
@@ -119,7 +119,7 @@ func generateDocumentation() {
 	chalker.Log(chalker.SUCCESS, fmt.Sprintf("Successfully generated documentation for %d commands", len(rootCmd.Commands())))
 }
 
-// setupAppResources will setup the local application directories
+// setupAppResources will set up the local application directories
 func setupAppResources() {
 
 	// Find home directory

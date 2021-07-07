@@ -75,7 +75,7 @@ func HasProfile(alias, domain string, tracing bool) (response *Response, err err
 	return
 }
 
-// Compose will return a url for composing a baemail
+// Compose will return an url for composing a baemail
 // Specs: https://baemail.me/compose?to=user%40domain
 func Compose(alias, domain string) (url string) {
 	return fmt.Sprintf("%s/compose?to=%s@%s", Network, alias, domain)

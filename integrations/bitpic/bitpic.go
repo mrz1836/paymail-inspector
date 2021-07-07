@@ -1,5 +1,5 @@
 /*
-Package bitpic interfaces with unwriter's bitpic.network
+Package bitpic interfaces with unwriter's "bitpic.network"
 Read more at: https://bitpic.network/about
 */
 package bitpic
@@ -117,7 +117,7 @@ func GetPic(alias, domain string, tracing bool) (response *Response, err error) 
 	return
 }
 
-// URL will return a url for the bitpic avatar using alias and domain
+// URL will return an HTTP url for the bitpic avatar using alias and domain
 // Specs: https://bitpic.network/about
 func URL(alias, domain string) string {
 	if len(DefaultImage) > 0 {
@@ -126,7 +126,7 @@ func URL(alias, domain string) string {
 	return fmt.Sprintf("https://%s/u/%s@%s", Network, alias, domain)
 }
 
-// URLFromPaymail will return a url for the bitpic avatar using a paymail
+// URLFromPaymail will return an HTTP url for the bitpic avatar using a paymail
 // Specs: https://bitpic.network/about
 func URLFromPaymail(paymail string) string {
 	if len(DefaultImage) > 0 {

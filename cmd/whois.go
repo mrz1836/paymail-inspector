@@ -49,7 +49,7 @@ Search `+strconv.Itoa(len(providers))+` public paymail providers for a handle.`)
 		// Are we using a paymail address?
 		if strings.Contains(args[0], "@") {
 			handle, _, _ = paymail.SanitizePaymail(args[0])
-		} else { // Using a alias or $handle
+		} else { // Using an alias or $handle
 			handle, _, _ = paymail.SanitizePaymail(paymail.ConvertHandle(args[0], false))
 		}
 

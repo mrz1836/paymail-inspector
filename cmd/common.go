@@ -92,7 +92,7 @@ func getPki(pkiURL, alias, domain string, allowCache bool) (pki *paymail.PKI, er
 	return
 }
 
-// getSrvRecord will return an srv record, and optional validation
+// getSrvRecord will return a srv record, and optional validation
 func getSrvRecord(domain string, validate bool, allowCache bool) (srv *net.SRV, err error) {
 
 	// Start the request
