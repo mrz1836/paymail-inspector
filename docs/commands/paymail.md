@@ -10,7 +10,7 @@ __________                             .__.__    .___                           
  |     ___/\__  \<   |  |/     \\__  \ |  |  |   |   |/    \ /  ___/\____ \_/ __ \_/ ___\   __\/  _ \_  __ \
  |    |     / __ \\___  |  Y Y  \/ __ \|  |  |__ |   |   |  \\___ \ |  |_> >  ___/\  \___|  | (  <_> )  | \/
  |____|    (____  / ____|__|_|  (____  /__|____/ |___|___|  /____  >|   __/ \___  >\___  >__|  \____/|__|   
-                \/\/          \/     \/                   \/     \/ |__|        \/     \/     v0.3.10
+                \/\/          \/     \/                   \/     \/ |__|        \/     \/     v0.3.11
 ```
 Author: MrZ © 2020 github.com/mrz1836/paymail-inspector
 
@@ -42,6 +42,7 @@ paymail -h
 
 * [paymail brfc](paymail_brfc.md)	 - List all specs, search by keyword, or generate a new BRFC ID
 * [paymail capabilities](paymail_capabilities.md)	 - Get the capabilities of the paymail domain
+* [paymail completion](paymail_completion.md)	 - generate the autocompletion script for the specified shell
 * [paymail p2p](paymail_p2p.md)	 - Starts a new P2P payment request
 * [paymail resolve](paymail_resolve.md)	 - Resolves a paymail address
 * [paymail validate](paymail_validate.md)	 - Validate a paymail address or domain
