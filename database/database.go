@@ -82,7 +82,7 @@ func Flush() error {
 	return db.DropAll()
 }
 
-// GarbageCollection will clean up some garbage in the database (reduces space, etc)
+// GarbageCollection will clean up some garbage in the database (reduces space, etc.)
 func GarbageCollection() error {
 	err := db.RunValueLogGC(0.5)
 	if errors.Is(err, badger.ErrNoRewrite) {
