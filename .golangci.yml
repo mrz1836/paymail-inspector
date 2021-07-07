@@ -338,7 +338,7 @@ linters:
     - govet
     - gosec
     - bodyclose
-    - golint
+    - revive
     - unconvert
     - misspell
     - dogsled
@@ -397,7 +397,6 @@ issues:
         - errcheck
         - dupl
         - gosec
-        - scopelint
 
     # Exclude known linters from partially hard-vendored code,
     # which is impossible to exclude via "nolint" comments.
