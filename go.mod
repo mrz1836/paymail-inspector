@@ -11,7 +11,7 @@ require (
 	github.com/golang/glog v0.0.0-20210429001901-424d2337a529 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/mrz1836/go-sanitize v1.1.3
+	github.com/mrz1836/go-sanitize v1.1.4
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/ryanuber/columnize v2.1.2+incompatible
 	github.com/spf13/cobra v1.2.1
