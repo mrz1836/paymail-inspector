@@ -16,7 +16,6 @@ require (
 	github.com/ryanuber/columnize v2.1.2+incompatible
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/viper v1.8.1
-	github.com/tonicpow/go-paymail v0.2.8
+	github.com/tonicpow/go-paymail v0.2.9
 	github.com/ttacon/chalk v0.0.0-20160626202418-22c06c80ed31
-	google.golang.org/protobuf v1.27.1 // indirect
 )
