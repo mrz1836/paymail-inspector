@@ -841,7 +841,7 @@ func (p *PaymailDetails) Display() {
 	}
 
 	// Do we have possible matches?
-	if p.Bitpics != nil && len(p.Bitpics.Result.Posts) > 0 {
+	if p.Bitpics != nil && p.Bitpics.Result != nil && len(p.Bitpics.Result.Posts) > 0 {
 		resultNum := 1
 		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Bitpic URL   : %s", chalk.Cyan.Color(bitpic.URLFromPaymail(p.Bitpics.Result.Posts[0].Data.Paymail))))
 		for _, post := range p.Bitpics.Result.Posts {
