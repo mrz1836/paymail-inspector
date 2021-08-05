@@ -140,7 +140,11 @@ pull_request_rules:
 
   - name: Welcome New Contributors
     conditions:
-      - author!=@regularcontributors
+      - and:
+        - author!=dependabot
+        - author!=mrz1836
+        - author!=rohenaz
+        - author!=jadwahab
     actions:
       comment:
         message: |
