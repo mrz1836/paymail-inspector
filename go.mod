@@ -17,6 +17,6 @@ require (
 	github.com/spf13/cast v1.4.0 // indirect
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/viper v1.8.1
-	github.com/tonicpow/go-paymail v0.2.9
+	github.com/tonicpow/go-paymail v0.2.10
 	github.com/ttacon/chalk v0.0.0-20160626202418-22c06c80ed31
 )
