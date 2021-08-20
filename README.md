@@ -365,6 +365,8 @@ or by making a [**bitcoin donation**](https://mrz1818.com/?tab=tips&utm_source=g
 
 Help by sharing: [![Twetch](https://img.shields.io/badge/share-twitter-00ACEE.svg)](https://twitter.com/intent/tweet?text=Paymail%20Inspector%20Rocks!%20Check%20it%20out:%20https%3A%2F%2Ftncpw.co%2F2d429aee) [![Twitter](https://img.shields.io/badge/share-twetch-085AF6.svg)](https://twetch.app/compose?description=Paymail%20Inspector%20Rocks!%20Check%20it%20out:%20https%3A%2F%2Ftncpw.co%2F2d429aee)
 
+[![Stars](https://img.shields.io/github/stars/mrz1836/paymail-inspector?label=Please%20like%20us&style=social)](https://github.com/mrz1836/paymail-inspector/stargazers)
+
 ### Credits
 Inspiration and code snippets from [dnssec](https://github.com/binaryfigments/dnssec) and [check-ssl](https://github.com/wycore/check-ssl)
 
