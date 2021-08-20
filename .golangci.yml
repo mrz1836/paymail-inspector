@@ -192,7 +192,7 @@ linters-settings:
     #    See the License for the specific language governing permissions and
     #    limitations under the License.
     template-path:
-    # also as alternative of directive 'template' you may put the path to file with the template source
+    # also, as alternative of directive 'template' you may put the path to file with the template source
   goimports:
     # put imports beginning with prefix after 3rd-party packages;
     # it's a comma-separated list of prefixes
