@@ -7,8 +7,10 @@
 [![Build Status](https://img.shields.io/github/workflow/status/mrz1836/paymail-inspector/run-go-tests?logo=github&v=3)](https://github.com/mrz1836/paymail-inspector/actions)
 [![Report](https://goreportcard.com/badge/github.com/mrz1836/paymail-inspector?style=flat&v=1)](https://goreportcard.com/report/github.com/mrz1836/paymail-inspector)
 [![Go](https://img.shields.io/github/go-mod/go-version/mrz1836/paymail-inspector?v=1)](https://golang.org/)
+<br>
+[![Mergify Status](https://img.shields.io/endpoint.svg?url=https://gh.mergify.io/badges/mrz1836/paymail-inspector&style=flat&v=1)](https://mergify.io)
 [![Sponsor](https://img.shields.io/badge/sponsor-MrZ-181717.svg?logo=github&style=flat&v=1)](https://github.com/sponsors/mrz1836)
-[![Donate](https://img.shields.io/badge/donate-bitcoin-ff9900.svg?logo=bitcoin&style=flat)](https://mrz1818.com/?tab=tips&utm_source=github&utm_medium=sponsor-link&utm_campaign=paymail-inspector&utm_term=paymail-inspector&utm_content=paymail-inspector)
+[![Donate](https://img.shields.io/badge/donate-bitcoin-ff9900.svg?logo=bitcoin&style=flat&v=1)](https://mrz1818.com/?tab=tips&utm_source=github&utm_medium=sponsor-link&utm_campaign=paymail-inspector&utm_term=paymail-inspector&utm_content=paymail-inspector)
 
 <br/>
 
@@ -39,7 +41,7 @@ paymail
 
 **Install using a [compiled binary](https://github.com/mrz1836/paymail-inspector/releases)** on Linux, Mac or Windows _(Mac example)_
 ```shell script
-curl -LkSs https://github.com/mrz1836/paymail-inspector/releases/download/v0.3.11/paymail-inspector_macOS_64-bit.tar.gz -o app.tar.gz
+curl -LkSs https://github.com/mrz1836/paymail-inspector/releases/download/v0.3.12/paymail-inspector_macOS_64-bit.tar.gz -o app.tar.gz
 tar -zxf app.tar.gz && cd ./app/
 ./paymail
 ```
