@@ -376,4 +376,4 @@ Utilized [terminalizer](https://terminalizer.com/) to record example gifs
 
 ## License
 
-![License](https://img.shields.io/github/license/mrz1836/paymail-inspector.svg?style=flat)
+[![License](https://img.shields.io/github/license/mrz1836/paymail-inspector.svg?style=flat)](LICENSE)
