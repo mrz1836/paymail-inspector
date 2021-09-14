@@ -55,7 +55,7 @@ lint: ## Run the golangci-lint application (install if not found)
 	@echo "running golangci-lint..."
 	@golangci-lint run --verbose
 
-test: ## Runs vet, lint and ALL tests
+test: ## Runs lint and ALL tests
 	@$(MAKE) lint
 	@echo "running tests..."
 	@go test ./... -v
@@ -82,6 +82,10 @@ test-ci-short: ## Runs unit tests via CI (exports coverage)
 	@$(MAKE) lint
 	@echo "running tests (CI - unit tests only)..."
 	@go test ./... -test.short -race -coverprofile=coverage.txt -covermode=atomic
+
+test-no-lint: ## Runs just tests
+	@echo "running tests..."
+	@go test ./... -v
 
 uninstall: ## Uninstall the application (and remove files)
 	@test $(BINARY_NAME)

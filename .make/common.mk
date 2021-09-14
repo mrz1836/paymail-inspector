@@ -31,6 +31,13 @@ ifndef DISTRIBUTIONS_DIR
 endif
 export DISTRIBUTIONS_DIR
 
+.PHONY: diff
+
+diff: ## Show the git diff
+	$(call print-target)
+	git diff --exit-code
+	RES=$$(git status --porcelain) ; if [ -n "$$RES" ]; then echo $$RES && exit 1 ; fi
+
 help: ## Show this help message
 	@egrep -h '^(.+)\:\ ##\ (.+)' ${MAKEFILE_LIST} | column -t -c 2 -s ':#'
 
