@@ -25,7 +25,7 @@ __________                             .__.__    .___                           
  |    |     / __ \\___  |  Y Y  \/ __ \|  |  |__ |   |   |  \\___ \ |  |_> >  ___/\  \___|  | (  <_> )  | \/
  |____|    (____  / ____|__|_|  (____  /__|____/ |___|___|  /____  >|   __/ \___  >\___  >__|  \____/|__|   
                 \/\/          \/     \/                   \/     \/ |__|        \/     \/     `+Version) + `
-` + chalk.Yellow.Color("Author: MrZ © 2020 github.com/mrz1836/"+applicationFullName) + `
+` + chalk.Yellow.Color("Author: MrZ © 2021 github.com/mrz1836/"+applicationFullName) + `
 
 This CLI app is used for interacting with paymail service providers.
 
