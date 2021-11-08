@@ -1,6 +1,6 @@
 module github.com/mrz1836/paymail-inspector
 
-go 1.15
+go 1.16
 
 require (
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
@@ -17,7 +17,6 @@ require (
 	github.com/ryanuber/columnize v2.1.2+incompatible
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/viper v1.9.0
-	github.com/tonicpow/go-paymail v0.2.13
+	github.com/tonicpow/go-paymail v0.3.0
 	github.com/ttacon/chalk v0.0.0-20160626202418-22c06c80ed31
-	golang.org/x/sys v0.0.0-20211029165221-6e7872819dc8 // indirect
 )

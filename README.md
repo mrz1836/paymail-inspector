@@ -326,7 +326,7 @@ windows                  Build for Windows (amd64)
 
 ## Examples & Tests
 All unit tests and [examples](docs/examples.md) run via [Github Actions](https://github.com/mrz1836/paymail-inspector/actions) and
-uses [Go version 1.15.x](https://golang.org/doc/go1.15). View the [configuration file](.github/workflows/run-tests.yml).
+uses [Go version 1.16.x](https://golang.org/doc/go1.16). View the [configuration file](.github/workflows/run-tests.yml).
 
 Run all tests (including integration tests)
 ```shell script
@@ -349,8 +349,8 @@ All the generated command documentation can be found in [docs/commands](docs/com
 
 ## Maintainers
 | [<img src="https://github.com/mrz1836.png" height="50" alt="MrZ" />](https://github.com/mrz1836) | [<img src="https://github.com/rohenaz.png" height="50" alt="Satchmo" />](https://github.com/rohenaz) |
-|:---:|:---:|
-| [MrZ](https://github.com/mrz1836) | [Satchmo](https://github.com/rohenaz) |
+|:------------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------------------:|
+|                                [MrZ](https://github.com/mrz1836)                                 |                                [Satchmo](https://github.com/rohenaz)                                 |
 
 <br/>
 
