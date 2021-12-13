@@ -3,7 +3,6 @@ module github.com/mrz1836/paymail-inspector
 go 1.16
 
 require (
-	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
 	github.com/dgraph-io/badger/v2 v2.2007.4
 	github.com/dgraph-io/ristretto v0.1.0 // indirect
@@ -16,7 +15,7 @@ require (
 	github.com/mrz1836/go-sanitize v1.1.5
 	github.com/ryanuber/columnize v2.1.2+incompatible
 	github.com/spf13/cobra v1.2.1
-	github.com/spf13/viper v1.9.0
+	github.com/spf13/viper v1.10.0
 	github.com/tonicpow/go-paymail v0.3.0
 	github.com/ttacon/chalk v0.0.0-20160626202418-22c06c80ed31
 )
