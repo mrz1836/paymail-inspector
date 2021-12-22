@@ -1,9 +1,8 @@
 ## paymail completion bash
 
-generate the autocompletion script for bash
+Generate the autocompletion script for bash
 
 ### Synopsis
-
 
 Generate the autocompletion script for the bash shell.
 
@@ -11,16 +10,21 @@ This script depends on the 'bash-completion' package.
 If it is not installed already, you can install it via your OS's package manager.
 
 To load completions in your current shell session:
-$ source <(paymail completion bash)
+
+	source <(paymail completion bash)
 
 To load completions for every new session, execute once:
-Linux:
-  $ paymail completion bash > /etc/bash_completion.d/paymail
-MacOS:
-  $ paymail completion bash > /usr/local/etc/bash_completion.d/paymail
+
+#### Linux:
+
+	paymail completion bash > /etc/bash_completion.d/paymail
+
+#### macOS:
+
+	paymail completion bash > /usr/local/etc/bash_completion.d/paymail
 
 You will need to start a new shell for this setup to take effect.
-  
+
 
 ```
 paymail completion bash
@@ -46,5 +50,5 @@ paymail completion bash
 
 ### SEE ALSO
 
-* [paymail completion](paymail_completion.md)	 - generate the autocompletion script for the specified shell
+* [paymail completion](paymail_completion.md)	 - Generate the autocompletion script for the specified shell
 

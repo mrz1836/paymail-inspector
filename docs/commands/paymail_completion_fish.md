@@ -1,17 +1,18 @@
 ## paymail completion fish
 
-generate the autocompletion script for fish
+Generate the autocompletion script for fish
 
 ### Synopsis
-
 
 Generate the autocompletion script for the fish shell.
 
 To load completions in your current shell session:
-$ paymail completion fish | source
+
+	paymail completion fish | source
 
 To load completions for every new session, execute once:
-$ paymail completion fish > ~/.config/fish/completions/paymail.fish
+
+	paymail completion fish > ~/.config/fish/completions/paymail.fish
 
 You will need to start a new shell for this setup to take effect.
 
@@ -40,5 +41,5 @@ paymail completion fish [flags]
 
 ### SEE ALSO
 
-* [paymail completion](paymail_completion.md)	 - generate the autocompletion script for the specified shell
+* [paymail completion](paymail_completion.md)	 - Generate the autocompletion script for the specified shell
 
