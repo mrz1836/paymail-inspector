@@ -16,6 +16,6 @@ require (
 	github.com/spf13/afero v1.7.1 // indirect
 	github.com/spf13/cobra v1.3.0
 	github.com/spf13/viper v1.10.1
-	github.com/tonicpow/go-paymail v0.4.3
+	github.com/tonicpow/go-paymail v0.5.0
 	github.com/ttacon/chalk v0.0.0-20160626202418-22c06c80ed31
 )
