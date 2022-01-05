@@ -10,7 +10,7 @@ import (
 )
 
 // Version is set manually (also make:build overwrites this value from Github's latest tag)
-var Version = "v0.3.17"
+var Version = "v0.3.18"
 
 // Default flag values for various commands
 var (
@@ -94,15 +94,15 @@ func getProvider(domain string) *Provider {
 
 // PaymailDetails is all the info about one paymail address
 type PaymailDetails struct {
-	Baemail       *baemail.Response      `json:"baemail"`
-	Bitpic        string                 `json:"bitpic"`
-	Bitpics       *bitpic.SearchResponse `json:"bitpics"`
-	Dimely        string                 `json:"dimely"`
-	Handle        string                 `json:"handle"`
-	PKI           *paymail.PKI           `json:"pki"`
-	PowPing       *powping.Response      `json:"powping"`
-	Provider      *Provider              `json:"provider"`
-	PublicProfile *paymail.PublicProfile `json:"public_profile"`
-	Resolution    *paymail.Resolution    `json:"resolution"`
-	Roundesk      *roundesk.Response     `json:"roundesk"`
+	Baemail       *baemail.Response              `json:"baemail"`
+	Bitpic        string                         `json:"bitpic"`
+	Bitpics       *bitpic.SearchResponse         `json:"bitpics"`
+	Dimely        string                         `json:"dimely"`
+	Handle        string                         `json:"handle"`
+	PKI           *paymail.PKIResponse           `json:"pki"`
+	PowPing       *powping.Response              `json:"powping"`
+	Provider      *Provider                      `json:"provider"`
+	PublicProfile *paymail.PublicProfileResponse `json:"public_profile"`
+	Resolution    *paymail.ResolutionResponse    `json:"resolution"`
+	Roundesk      *roundesk.Response             `json:"roundesk"`
 }
