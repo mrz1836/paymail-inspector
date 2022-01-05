@@ -57,7 +57,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/02-02-capability-discovery
 		}
 
 		// Get the capabilities
-		var capabilities *paymail.Capabilities
+		var capabilities *paymail.CapabilitiesResponse
 		capabilities, err = getCapabilities(domain, false)
 		if err != nil {
 			if strings.Contains(err.Error(), "context deadline exceeded") {

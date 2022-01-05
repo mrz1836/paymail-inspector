@@ -89,7 +89,7 @@ Read more at: `+chalk.Cyan.Color("https://docs.moneybutton.com/docs/paymail-07-p
 		parts := strings.Split(paymailAddress, "@")
 
 		// Fire the P2P request
-		var p2pResponse *paymail.PaymentDestination
+		var p2pResponse *paymail.PaymentDestinationResponse
 		if p2pResponse, err = getP2PPaymentDestination(destinationURL, parts[0], domain, satoshis); err != nil {
 			chalker.Log(chalker.ERROR, fmt.Sprintf("P2P payment destination request failed: %s", err.Error()))
 			return
@@ -97,7 +97,7 @@ Read more at: `+chalk.Cyan.Color("https://docs.moneybutton.com/docs/paymail-07-p
 
 		// Attempt to get a public profile if the capability is found
 		profileURL := capabilities.GetString(paymail.BRFCPublicProfile, "")
-		var profile *paymail.PublicProfile
+		var profile *paymail.PublicProfileResponse
 		if len(profileURL) > 0 && !skipPublicProfile {
 			if profile, err = getPublicProfile(profileURL, parts[0], domain, true); err != nil {
 				chalker.Log(chalker.ERROR, fmt.Sprintf("Get public profile failed: %s", err.Error()))

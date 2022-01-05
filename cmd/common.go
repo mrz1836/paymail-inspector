@@ -36,7 +36,7 @@ func newPaymailClient(tracing bool, nameServer string) (*paymail.Client, error) 
 }
 
 // getPki will get a pki response (logging and basic error handling)
-func getPki(pkiURL, alias, domain string, allowCache bool) (pki *paymail.PKI, err error) {
+func getPki(pkiURL, alias, domain string, allowCache bool) (pki *paymail.PKIResponse, err error) {
 
 	// Start the request
 	displayHeader(chalker.DEFAULT, fmt.Sprintf("Retrieving public key information for %s...", chalk.Cyan.Color(alias+"@"+domain)))
@@ -165,7 +165,7 @@ func getSrvRecord(domain string, validate bool, allowCache bool) (srv *net.SRV, 
 }
 
 // getCapabilities will check SRV first, then attempt default domain:port check (logging and basic error handling)
-func getCapabilities(domain string, allowCache bool) (capabilities *paymail.Capabilities, err error) {
+func getCapabilities(domain string, allowCache bool) (capabilities *paymail.CapabilitiesResponse, err error) {
 
 	capabilityDomain := ""
 	capabilityPort := paymail.DefaultPort
@@ -241,7 +241,8 @@ func getCapabilities(domain string, allowCache bool) (capabilities *paymail.Capa
 }
 
 // resolveAddress will resolve an address (logging and basic error handling)
-func resolveAddress(resolveURL, alias, domain, senderHandle, signature, purpose string, amount uint64) (response *paymail.Resolution, err error) {
+func resolveAddress(resolveURL, alias, domain, senderHandle,
+	signature, purpose string, amount uint64) (response *paymail.ResolutionResponse, err error) {
 
 	// Start the request
 	displayHeader(chalker.DEFAULT, fmt.Sprintf("Resolving address for %s...", chalk.Cyan.Color(alias+"@"+domain)))
@@ -281,7 +282,8 @@ func resolveAddress(resolveURL, alias, domain, senderHandle, signature, purpose 
 }
 
 // getP2PPaymentDestination will start a new p2p transaction request (logging and basic error handling)
-func getP2PPaymentDestination(destinationURL, alias, domain string, satoshis uint64) (response *paymail.PaymentDestination, err error) {
+func getP2PPaymentDestination(destinationURL, alias,
+	domain string, satoshis uint64) (response *paymail.PaymentDestinationResponse, err error) {
 
 	// Start the request
 	displayHeader(chalker.DEFAULT, fmt.Sprintf("Starting new P2P payment request for %s...", chalk.Cyan.Color(alias+"@"+domain)))
@@ -314,7 +316,8 @@ func getP2PPaymentDestination(destinationURL, alias, domain string, satoshis uin
 }
 
 // getPublicProfile will get a public profile (logging and basic error handling)
-func getPublicProfile(profileURL, alias, domain string, allowCache bool) (profile *paymail.PublicProfile, err error) {
+func getPublicProfile(profileURL, alias,
+	domain string, allowCache bool) (profile *paymail.PublicProfileResponse, err error) {
 
 	// Start the request
 	displayHeader(chalker.DEFAULT, fmt.Sprintf("Retrieving public profile for %s...", chalk.Cyan.Color(alias+"@"+domain)))
@@ -646,7 +649,7 @@ func getBaemail(alias, domain string, allowCache bool) (response *baemail.Respon
 }
 
 // verifyPubKey will verify a given pubkey against a paymail address (logging and basic error handling)
-func verifyPubKey(verifyURL, alias, domain, pubKey string) (response *paymail.Verification, err error) {
+func verifyPubKey(verifyURL, alias, domain, pubKey string) (response *paymail.VerificationResponse, err error) {
 
 	// Start the request
 	displayHeader(chalker.DEFAULT, fmt.Sprintf("Verifing pubkey for %s...", chalk.Cyan.Color(alias+"@"+domain)))
@@ -723,7 +726,7 @@ func displayHeader(level, text string) {
 }
 
 // GetPublicInfo will get all the public info for a given paymail
-func (p *PaymailDetails) GetPublicInfo(capabilities *paymail.Capabilities) (err error) {
+func (p *PaymailDetails) GetPublicInfo(capabilities *paymail.CapabilitiesResponse) (err error) {
 
 	// Requirements
 	if len(p.Handle) == 0 {

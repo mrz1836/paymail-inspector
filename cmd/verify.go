@@ -105,7 +105,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/05-verify-public-key-owner
 		}
 
 		// Fire the verify request
-		var verify *paymail.Verification
+		var verify *paymail.VerificationResponse
 		if verify, err = verifyPubKey(verifyURL, alias, domain, pubKey); err != nil {
 			chalker.Log(chalker.ERROR, fmt.Sprintf("verify pubkey request failed: %s", err.Error()))
 			return

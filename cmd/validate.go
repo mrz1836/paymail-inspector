@@ -135,7 +135,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/index.html")),
 		}
 
 		// Get the capabilities
-		var capabilities *paymail.Capabilities
+		var capabilities *paymail.CapabilitiesResponse
 		if capabilities, err = getCapabilities(domain, false); err != nil {
 			if strings.Contains(err.Error(), "context deadline exceeded") {
 				chalker.Log(chalker.WARN, fmt.Sprintf("No capabilities found for: %s", domain))
@@ -160,7 +160,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/index.html")),
 		if len(paymailAddress) > 0 && len(pkiURL) > 0 {
 
 			// Get the PKI for the given address
-			var pki *paymail.PKI
+			var pki *paymail.PKIResponse
 			if pki, err = getPki(pkiURL, alias, domain, false); err != nil {
 				chalker.Log(chalker.ERROR, fmt.Sprintf("Error: %s", err.Error()))
 				return

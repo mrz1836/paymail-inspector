@@ -139,7 +139,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/04-01-basic-address-resolu
 				}
 
 				// Get the PKI for the given address
-				var senderPki *paymail.PKI
+				var senderPki *paymail.PKIResponse
 				if senderPki, err = getPki(senderPkiURL, senderAlias, senderDomain, true); err != nil {
 					chalker.Log(chalker.ERROR, fmt.Sprintf("Find PKI Failed: %s", err.Error()))
 					return
