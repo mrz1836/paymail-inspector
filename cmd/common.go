@@ -22,7 +22,7 @@ import (
 )
 
 // Creates a new client for Paymail
-func newPaymailClient(tracing bool, nameServer string) (*paymail.Client, error) {
+func newPaymailClient(tracing bool, nameServer string) (paymail.ClientInterface, error) {
 	opts := []paymail.ClientOps{paymail.WithUserAgent(applicationFullName + ": v" + Version)}
 
 	if tracing {
@@ -60,7 +60,7 @@ func getPki(pkiURL, alias, domain string, allowCache bool) (pki *paymail.PKIResp
 	}
 
 	// New Client
-	var client *paymail.Client
+	var client paymail.ClientInterface
 	if client, err = newPaymailClient(!skipTracing, nameServer); err != nil {
 		return
 	}
@@ -117,7 +117,7 @@ func getSrvRecord(domain string, validate bool, allowCache bool) (srv *net.SRV, 
 	}
 
 	// New Client
-	var client *paymail.Client
+	var client paymail.ClientInterface
 	if client, err = newPaymailClient(false, nameServer); err != nil {
 		return
 	}
@@ -202,7 +202,7 @@ func getCapabilities(domain string, allowCache bool) (capabilities *paymail.Capa
 	}
 
 	// New Client
-	var client *paymail.Client
+	var client paymail.ClientInterface
 	if client, err = newPaymailClient(!skipTracing, nameServer); err != nil {
 		return
 	}
@@ -248,7 +248,7 @@ func resolveAddress(resolveURL, alias, domain, senderHandle,
 	displayHeader(chalker.DEFAULT, fmt.Sprintf("Resolving address for %s...", chalk.Cyan.Color(alias+"@"+domain)))
 
 	// New Client
-	var client *paymail.Client
+	var client paymail.ClientInterface
 	if client, err = newPaymailClient(!skipTracing, nameServer); err != nil {
 		return
 	}
@@ -289,7 +289,7 @@ func getP2PPaymentDestination(destinationURL, alias,
 	displayHeader(chalker.DEFAULT, fmt.Sprintf("Starting new P2P payment request for %s...", chalk.Cyan.Color(alias+"@"+domain)))
 
 	// New Client
-	var client *paymail.Client
+	var client paymail.ClientInterface
 	if client, err = newPaymailClient(!skipTracing, nameServer); err != nil {
 		return
 	}
@@ -341,7 +341,7 @@ func getPublicProfile(profileURL, alias,
 	}
 
 	// New Client
-	var client *paymail.Client
+	var client paymail.ClientInterface
 	if client, err = newPaymailClient(!skipTracing, nameServer); err != nil {
 		return
 	}
@@ -655,7 +655,7 @@ func verifyPubKey(verifyURL, alias, domain, pubKey string) (response *paymail.Ve
 	displayHeader(chalker.DEFAULT, fmt.Sprintf("Verifing pubkey for %s...", chalk.Cyan.Color(alias+"@"+domain)))
 
 	// New Client
-	var client *paymail.Client
+	var client paymail.ClientInterface
 	if client, err = newPaymailClient(!skipTracing, nameServer); err != nil {
 		return
 	}

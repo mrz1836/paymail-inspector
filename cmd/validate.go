@@ -82,7 +82,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/index.html")),
 		checkDomain := domain
 
 		// New Client
-		var client *paymail.Client
+		var client paymail.ClientInterface
 		if client, err = newPaymailClient(true, nameServer); err != nil {
 			return
 		}
