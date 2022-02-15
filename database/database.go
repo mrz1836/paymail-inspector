@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/dgraph-io/badger/v2"
+	"github.com/dgraph-io/badger/v3"
 )
 
 var (
@@ -18,7 +18,7 @@ var (
 )
 
 // Connect will make a new database connection and new folder/file(s) if needed
-func Connect(folder string) (err error) {
+func Connect(folder, database string) (err error) {
 
 	// Get the home dir
 	var home string
@@ -27,7 +27,7 @@ func Connect(folder string) (err error) {
 	}
 
 	// Set the database file and connect (disable logging for now)
-	opts := badger.DefaultOptions(filepath.Join(home, folder, "database")).WithLogger(nil)
+	opts := badger.DefaultOptions(filepath.Join(home, folder, database)).WithLogger(nil)
 	// opts.EventLogging = false
 	db, err = badger.Open(opts)
 	return
