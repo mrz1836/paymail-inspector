@@ -41,7 +41,7 @@ paymail
 
 **Install using a [compiled binary](https://github.com/mrz1836/paymail-inspector/releases)** on Linux, Mac or Windows _(Mac example)_
 ```shell script
-curl -LkSs https://github.com/mrz1836/paymail-inspector/releases/download/v0.3.20/paymail-inspector_macOS_64-bit.tar.gz -o app.tar.gz
+curl -LkSs https://github.com/mrz1836/paymail-inspector/releases/download/v0.3.21/paymail-inspector_macOS_64-bit.tar.gz -o app.tar.gz
 tar -zxf app.tar.gz && cd ./app/
 ./paymail
 ```
@@ -250,10 +250,9 @@ paymail whois mrz --no-cache
 <summary><strong><code>Package Dependencies</code></strong></summary>
 <br/>
 
-- [badger](https://github.com/dgraph-io/badger/v2) for persistent database storage
-- [bsvd](https://github.com/bitcoinsv/bsvd) and [bsvutil](https://github.com/bitcoinsv/bsvutil) for BSV script functionality
-- [chalk](https://github.com/ttacon/chalk) for colorful logs
+- [badger](https://github.com/dgraph-io/badger) for persistent database storage
 - [cobra](https://github.com/spf13/cobra) and [viper](https://github.com/spf13/viper) for an easy configuration & CLI application development
+- [color](https://github.com/fatih/color) for colorful logs
 - [columnize](https://github.com/ryanuber/columnize) for displaying terminal data in columns
 - [dns](https://github.com/miekg/dns) package for advanced DNS functionality
 - [go-homedir](https://github.com/mitchellh/go-homedir) to find the home directory
