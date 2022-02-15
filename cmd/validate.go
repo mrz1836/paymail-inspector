@@ -5,25 +5,25 @@ import (
 	"net"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/mrz1836/go-sanitize"
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/spf13/cobra"
 	"github.com/tonicpow/go-paymail"
-	"github.com/ttacon/chalk"
 )
 
 // validateCmd represents the validate command
 var validateCmd = &cobra.Command{
 	Use:   "validate",
 	Short: "Validate a paymail address or domain",
-	Long: chalk.Green.NewStyle().WithTextStyle(chalk.Bold).Style(`
+	Long: color.GreenString(`
               .__  .__    .___       __          
 ___  _______  |  | |__| __| _/____ _/  |_  ____  
 \  \/ /\__  \ |  | |  |/ __ |\__  \\   __\/ __ \ 
  \   /  / __ \|  |_|  / /_/ | / __ \|  | \  ___/ 
   \_/  (____  /____/__\____ |(____  /__|  \___  >
             \/             \/     \/          \/`) + `
-` + chalk.Yellow.Color(`
+` + color.YellowString(`
 Validate a specific paymail address (user@domain.tld) or validate a domain for required paymail capabilities. 
 
 By default, this will check for a SRV record, DNSSEC and SSL for the domain. 
@@ -32,7 +32,7 @@ This will also check for required capabilities that all paymail services are req
 
 All these validations are suggestions/requirements from bsvalias spec.
 
-Read more at: `+chalk.Cyan.Color("http://bsvalias.org/index.html")),
+Read more at: `+color.CyanString("http://bsvalias.org/index.html")),
 	Example: applicationName + " validate " + defaultDomainName + `
 ` + applicationName + " v " + defaultDomainName,
 	Aliases:    []string{"val", "v"},
@@ -61,7 +61,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/index.html")),
 		// Are we an address?
 		displayHeader(chalker.DEFAULT, "Detecting validation type...")
 		if len(paymailAddress) > 0 {
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Paymail detected: %s", chalk.Cyan.Color(paymailAddress)))
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Paymail detected: %s", color.CyanString(paymailAddress)))
 
 			// Validate the paymail address and domain (error already shown)
 			if ok := validatePaymailAndDomain(paymailAddress, domain); !ok {
@@ -69,7 +69,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/index.html")),
 			}
 
 		} else {
-			chalker.Log(chalker.DIM, fmt.Sprintf("Domain detected: %s", chalk.Cyan.Color(domain)))
+			chalker.Log(chalker.DIM, fmt.Sprintf("Domain detected: %s", color.CyanString(domain)))
 
 			// Validate the domain
 			if err = paymail.ValidateDomain(domain); err != nil {
@@ -99,11 +99,11 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/index.html")),
 				checkDomain = srv.Target
 			}
 		} else {
-			chalker.Log(chalker.WARN, fmt.Sprintf("Skipping SRV record check for: %s", chalk.Cyan.Color(checkDomain)))
+			chalker.Log(chalker.WARN, fmt.Sprintf("Skipping SRV record check for: %s", color.CyanString(checkDomain)))
 		}
 
 		// Validate the DNSSEC if the flag is true
-		displayHeader(chalker.DEFAULT, fmt.Sprintf("Checking %s for DNSSEC validation...", chalk.Cyan.Color(checkDomain)))
+		displayHeader(chalker.DEFAULT, fmt.Sprintf("Checking %s for DNSSEC validation...", color.CyanString(checkDomain)))
 		if !skipDNSCheck {
 
 			// Fire the check request
@@ -116,11 +116,11 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/index.html")),
 				}
 			}
 		} else {
-			chalker.Log(chalker.WARN, fmt.Sprintf("Skipping DNSSEC check for: %s", chalk.Cyan.Color(checkDomain)))
+			chalker.Log(chalker.WARN, fmt.Sprintf("Skipping DNSSEC check for: %s", color.CyanString(checkDomain)))
 		}
 
 		// Validate that there is SSL on the target
-		displayHeader(chalker.DEFAULT, fmt.Sprintf("Checking %s for SSL validation...", chalk.Cyan.Color(checkDomain)))
+		displayHeader(chalker.DEFAULT, fmt.Sprintf("Checking %s for SSL validation...", color.CyanString(checkDomain)))
 		if !skipSSLCheck {
 
 			var valid bool
@@ -131,7 +131,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/index.html")),
 			}
 			chalker.Log(chalker.SUCCESS, fmt.Sprintf("SSL found and valid for: %s", checkDomain))
 		} else {
-			chalker.Log(chalker.WARN, fmt.Sprintf("Skipping SSL check for: %s", chalk.Cyan.Color(checkDomain)))
+			chalker.Log(chalker.WARN, fmt.Sprintf("Skipping SSL check for: %s", color.CyanString(checkDomain)))
 		}
 
 		// Get the capabilities
@@ -167,9 +167,9 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/index.html")),
 			} else if pki != nil {
 
 				// Rendering profile information
-				displayHeader(chalker.BOLD, fmt.Sprintf("Rendering paymail information for %s...", chalk.Cyan.Color(paymailAddress)))
+				displayHeader(chalker.BOLD, fmt.Sprintf("Rendering paymail information for %s...", color.CyanString(paymailAddress)))
 
-				chalker.Log(chalker.DEFAULT, fmt.Sprintf("PubKey: %s", chalk.Cyan.Color(pki.PubKey)))
+				chalker.Log(chalker.DEFAULT, fmt.Sprintf("PubKey: %s", color.CyanString(pki.PubKey)))
 			}
 		}
 	},

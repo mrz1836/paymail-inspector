@@ -6,11 +6,11 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/fatih/color"
 	"github.com/mrz1836/go-sanitize"
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/spf13/cobra"
 	"github.com/tonicpow/go-paymail"
-	"github.com/ttacon/chalk"
 )
 
 // whoisCmd represents the whois command
@@ -23,14 +23,14 @@ var whoisCmd = &cobra.Command{
 ` + applicationName + ` w mrz
 ` + applicationName + ` w \$mr-z
 ` + applicationName + ` w 1mrz`,
-	Long: chalk.Green.NewStyle().WithTextStyle(chalk.Bold).Style(`
+	Long: color.GreenString(`
         .__           .__        
 __  _  _|  |__   ____ |__| ______
 \ \/ \/ /  |  \ /  _ \|  |/  ___/
  \     /|   Y  (  <_> )  |\___ \ 
   \/\_/ |___|  /\____/|__/____  >
              \/               \/`) + `
-` + chalk.Yellow.Color(`
+` + color.YellowString(`
 
 Search `+strconv.Itoa(len(providers))+` public paymail providers for a handle.`),
 	Args: func(cmd *cobra.Command, args []string) error {

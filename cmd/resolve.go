@@ -4,32 +4,32 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/tonicpow/go-paymail"
-	"github.com/ttacon/chalk"
 )
 
 // resolveCmd represents the resolve command
 var resolveCmd = &cobra.Command{
 	Use:   "resolve",
 	Short: "Resolves a paymail address",
-	Long: chalk.Green.NewStyle().WithTextStyle(chalk.Bold).Style(`
+	Long: color.GreenString(`
                             .__               
 _______   ____   __________ |  |___  __ ____  
 \_  __ \_/ __ \ /  ___/  _ \|  |\  \/ // __ \ 
  |  | \/\  ___/ \___ (  <_> )  |_\   /\  ___/ 
  |__|    \___  >____  >____/|____/\_/  \___  >
              \/     \/                     \/`) + `
-` + chalk.Yellow.Color(`
+` + color.YellowString(`
 Resolves a paymail address into a hex-encoded Bitcoin script, address and public profile (if found).
 
 Given a sender and a receiver, where the sender knows the receiver's 
 paymail handle <alias>@<domain>.<tld>, the sender can perform Service Discovery against 
 the receiver and request a payment destination from the receiver's paymail service.
 
-Read more at: `+chalk.Cyan.Color("http://bsvalias.org/04-01-basic-address-resolution.html")),
+Read more at: `+color.CyanString("http://bsvalias.org/04-01-basic-address-resolution.html")),
 	Aliases:    []string{"r", "resolution"},
 	SuggestFor: []string{"address", "destination", "payment", "addressing"},
 	Example: applicationName + " resolve mrz@" + defaultDomainName + `
@@ -106,7 +106,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/04-01-basic-address-resolu
 			chalker.Log(chalker.WARN, "Sender validation is ENFORCED")
 
 			// Start the request
-			displayHeader(chalker.DEFAULT, fmt.Sprintf("Running sender validations for %s...", chalk.Cyan.Color(senderAddress)))
+			displayHeader(chalker.DEFAULT, fmt.Sprintf("Running sender validations for %s...", color.CyanString(senderAddress)))
 
 			// Required if flag is enforced
 			if len(signature) == 0 {
@@ -144,7 +144,7 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/04-01-basic-address-resolu
 					chalker.Log(chalker.ERROR, fmt.Sprintf("Find PKI Failed: %s", err.Error()))
 					return
 				} else if senderPki != nil {
-					chalker.Log(chalker.INFO, fmt.Sprintf("Found --%s %s@%s's pubkey: %s", flagSenderHandle, senderAlias, senderDomain, chalk.Cyan.Color(senderPki.PubKey)))
+					chalker.Log(chalker.INFO, fmt.Sprintf("Found --%s %s@%s's pubkey: %s", flagSenderHandle, senderAlias, senderDomain, color.CyanString(senderPki.PubKey)))
 				}
 			}
 

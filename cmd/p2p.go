@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/spf13/cobra"
 	"github.com/tonicpow/go-paymail"
-	"github.com/ttacon/chalk"
 )
 
 const (
@@ -18,14 +18,14 @@ const (
 var p2pCmd = &cobra.Command{
 	Use:   "p2p",
 	Short: "Starts a new P2P payment request",
-	Long: chalk.Green.NewStyle().WithTextStyle(chalk.Bold).Style(`
+	Long: color.GreenString(`
        ________         
 ______ \_____  \______  
 \____ \ /  ____/\____ \ 
 |  |_> >       \|  |_> >
 |   __/\_______ \   __/ 
 |__|           \/__|`) + `
-` + chalk.Yellow.Color(`
+` + color.YellowString(`
 This command will start a new P2P request with the receiver and optional amount expected (in Satoshis).
 
 This protocol is an alternative protocol to basic address resolution. 
@@ -33,7 +33,7 @@ Instead of returning one address, it returns a list of outputs with a reference 
 It is only intended to be used with P2P Transactions and will continue to function even 
 after basic address resolution is deprecated.
 
-Read more at: `+chalk.Cyan.Color("https://docs.moneybutton.com/docs/paymail-07-p2p-payment-destination.html")),
+Read more at: `+color.CyanString("https://docs.moneybutton.com/docs/paymail-07-p2p-payment-destination.html")),
 	Aliases:    []string{"send"},
 	SuggestFor: []string{"sending"},
 	Example: applicationName + " p2p mrz@" + defaultDomainName + `
@@ -113,26 +113,26 @@ Read more at: `+chalk.Cyan.Color("https://docs.moneybutton.com/docs/paymail-07-p
 		}
 
 		// Rendering profile information
-		displayHeader(chalker.BOLD, fmt.Sprintf("P2P information for %s", chalk.Cyan.Color(paymailAddress)))
+		displayHeader(chalker.BOLD, fmt.Sprintf("P2P information for %s", color.CyanString(paymailAddress)))
 
 		// Display the public profile if found
 		if profile != nil {
 			if len(profile.Name) > 0 {
-				chalker.Log(chalker.DEFAULT, fmt.Sprintf("Name      : %s", chalk.Cyan.Color(profile.Name)))
+				chalker.Log(chalker.DEFAULT, fmt.Sprintf("Name      : %s", color.CyanString(profile.Name)))
 			}
 			if len(profile.Avatar) > 0 {
-				chalker.Log(chalker.DEFAULT, fmt.Sprintf("Avatar    : %s", chalk.Cyan.Color(profile.Avatar)))
+				chalker.Log(chalker.DEFAULT, fmt.Sprintf("Avatar    : %s", color.CyanString(profile.Avatar)))
 			}
 		}
 
 		// Display bitpic if found
 		if len(bitPicURL) > 0 {
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Bitpic    : %s", chalk.Cyan.Color(bitPicURL)))
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Bitpic    : %s", color.CyanString(bitPicURL)))
 		}
 
 		// If there is a reference
 		if len(p2pResponse.Reference) > 0 {
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Reference : %s", chalk.Cyan.Color(p2pResponse.Reference)))
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Reference : %s", color.CyanString(p2pResponse.Reference)))
 		}
 
 		// Output the results
@@ -140,9 +140,9 @@ Read more at: `+chalk.Cyan.Color("https://docs.moneybutton.com/docs/paymail-07-p
 
 			// Show output script & amount
 			displayHeader(chalker.DEFAULT, fmt.Sprintf("Output #%d", index+1))
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Script    : %s", chalk.Cyan.Color(output.Script)))
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Satoshis  : %s", chalk.Cyan.Color(fmt.Sprintf("%d", output.Satoshis))))
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Address   : %s", chalk.Cyan.Color(output.Address)))
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Script    : %s", color.CyanString(output.Script)))
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Satoshis  : %s", color.CyanString(fmt.Sprintf("%d", output.Satoshis))))
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Address   : %s", color.CyanString(output.Address)))
 		}
 	},
 }

@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/go-resty/resty/v2"
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/mrz1836/paymail-inspector/database"
@@ -18,7 +19,6 @@ import (
 	"github.com/ryanuber/columnize"
 	"github.com/spf13/viper"
 	"github.com/tonicpow/go-paymail"
-	"github.com/ttacon/chalk"
 )
 
 // Creates a new client for Paymail
@@ -39,7 +39,7 @@ func newPaymailClient(tracing bool, nameServer string) (paymail.ClientInterface,
 func getPki(pkiURL, alias, domain string, allowCache bool) (pki *paymail.PKIResponse, err error) {
 
 	// Start the request
-	displayHeader(chalker.DEFAULT, fmt.Sprintf("Retrieving public key information for %s...", chalk.Cyan.Color(alias+"@"+domain)))
+	displayHeader(chalker.DEFAULT, fmt.Sprintf("Retrieving public key information for %s...", color.CyanString(alias+"@"+domain)))
 
 	// Cache key
 	keyName := "model-pki-" + alias + "@" + domain
@@ -96,7 +96,7 @@ func getPki(pkiURL, alias, domain string, allowCache bool) (pki *paymail.PKIResp
 func getSrvRecord(domain string, validate bool, allowCache bool) (srv *net.SRV, err error) {
 
 	// Start the request
-	displayHeader(chalker.DEFAULT, fmt.Sprintf("Retrieving SRV record for %s...", chalk.Cyan.Color(domain)))
+	displayHeader(chalker.DEFAULT, fmt.Sprintf("Retrieving SRV record for %s...", color.CyanString(domain)))
 
 	// Cache key
 	keyName := "model-srv-" + domain
@@ -181,7 +181,7 @@ func getCapabilities(domain string, allowCache bool) (capabilities *paymail.Capa
 	}
 
 	// Get the capabilities for the given target domain
-	displayHeader(chalker.DEFAULT, fmt.Sprintf("Retrieving available capabilities for %s...", chalk.Cyan.Color(fmt.Sprintf("%s:%d", capabilityDomain, capabilityPort))))
+	displayHeader(chalker.DEFAULT, fmt.Sprintf("Retrieving available capabilities for %s...", color.CyanString(fmt.Sprintf("%s:%d", capabilityDomain, capabilityPort))))
 
 	// Cache key
 	keyName := "model-capabilities-" + domain
@@ -214,7 +214,7 @@ func getCapabilities(domain string, allowCache bool) (capabilities *paymail.Capa
 
 	// Check the version
 	if capabilities.BsvAlias != viper.GetString(flagBsvAlias) {
-		err = fmt.Errorf("capabilities %s version mismatch, expected: %s but got: %s", flagBsvAlias, chalk.Cyan.Color(viper.GetString(flagBsvAlias)), chalk.Magenta.Color(capabilities.BsvAlias))
+		err = fmt.Errorf("capabilities %s version mismatch, expected: %s but got: %s", flagBsvAlias, color.CyanString(viper.GetString(flagBsvAlias)), color.MagentaString(capabilities.BsvAlias))
 		return
 	}
 
@@ -245,7 +245,7 @@ func resolveAddress(resolveURL, alias, domain, senderHandle,
 	signature, purpose string, amount uint64) (response *paymail.ResolutionResponse, err error) {
 
 	// Start the request
-	displayHeader(chalker.DEFAULT, fmt.Sprintf("Resolving address for %s...", chalk.Cyan.Color(alias+"@"+domain)))
+	displayHeader(chalker.DEFAULT, fmt.Sprintf("Resolving address for %s...", color.CyanString(alias+"@"+domain)))
 
 	// New Client
 	var client paymail.ClientInterface
@@ -286,7 +286,7 @@ func getP2PPaymentDestination(destinationURL, alias,
 	domain string, satoshis uint64) (response *paymail.PaymentDestinationResponse, err error) {
 
 	// Start the request
-	displayHeader(chalker.DEFAULT, fmt.Sprintf("Starting new P2P payment request for %s...", chalk.Cyan.Color(alias+"@"+domain)))
+	displayHeader(chalker.DEFAULT, fmt.Sprintf("Starting new P2P payment request for %s...", color.CyanString(alias+"@"+domain)))
 
 	// New Client
 	var client paymail.ClientInterface
@@ -320,7 +320,7 @@ func getPublicProfile(profileURL, alias,
 	domain string, allowCache bool) (profile *paymail.PublicProfileResponse, err error) {
 
 	// Start the request
-	displayHeader(chalker.DEFAULT, fmt.Sprintf("Retrieving public profile for %s...", chalk.Cyan.Color(alias+"@"+domain)))
+	displayHeader(chalker.DEFAULT, fmt.Sprintf("Retrieving public profile for %s...", color.CyanString(alias+"@"+domain)))
 
 	// Cache key
 	keyName := "model-public-profile-" + alias + "@" + domain
@@ -379,7 +379,7 @@ func getPublicProfile(profileURL, alias,
 func getBitPic(alias, domain string, allowCache bool) (url string, err error) {
 
 	// Start the request
-	displayHeader(chalker.DEFAULT, fmt.Sprintf("Checking %s for a Bitpic...", chalk.Cyan.Color(alias+"@"+domain)))
+	displayHeader(chalker.DEFAULT, fmt.Sprintf("Checking %s for a Bitpic...", color.CyanString(alias+"@"+domain)))
 
 	// Cache key
 	keyName := "app-bitpic-" + alias + "@" + domain
@@ -428,7 +428,7 @@ func getBitPic(alias, domain string, allowCache bool) (url string, err error) {
 func getBitPics(alias, domain string, allowCache bool) (searchResult *bitpic.SearchResponse, err error) {
 
 	// Start the request
-	displayHeader(chalker.DEFAULT, fmt.Sprintf("Searching Bitpic for %s@%s...", chalk.Cyan.Color(alias), chalk.Cyan.Color(domain)))
+	displayHeader(chalker.DEFAULT, fmt.Sprintf("Searching Bitpic for %s@%s...", color.CyanString(alias), color.CyanString(domain)))
 
 	// Cache key
 	keyName := "app-bitpic-search-" + alias + "@" + domain
@@ -484,7 +484,7 @@ func getBitPics(alias, domain string, allowCache bool) (searchResult *bitpic.Sea
 func getRoundeskProfile(alias, domain string, allowCache bool) (profile *roundesk.Response, err error) {
 
 	// Start the request
-	displayHeader(chalker.DEFAULT, fmt.Sprintf("Checking %s for a Roundesk profile...", chalk.Cyan.Color(alias+"@"+domain)))
+	displayHeader(chalker.DEFAULT, fmt.Sprintf("Checking %s for a Roundesk profile...", color.CyanString(alias+"@"+domain)))
 
 	// Cache key
 	keyName := "app-roundesk-" + alias + "@" + domain
@@ -540,7 +540,7 @@ func getRoundeskProfile(alias, domain string, allowCache bool) (profile *roundes
 func getPowPingProfile(alias, domain string, allowCache bool) (profile *powping.Response, err error) {
 
 	// Start the request
-	displayHeader(chalker.DEFAULT, fmt.Sprintf("Checking %s for a PowPing account...", chalk.Cyan.Color(alias+"@"+domain)))
+	displayHeader(chalker.DEFAULT, fmt.Sprintf("Checking %s for a PowPing account...", color.CyanString(alias+"@"+domain)))
 
 	// Cache key
 	keyName := "app-powping-" + alias + "@" + domain
@@ -596,7 +596,7 @@ func getPowPingProfile(alias, domain string, allowCache bool) (profile *powping.
 func getBaemail(alias, domain string, allowCache bool) (response *baemail.Response, err error) {
 
 	// Start the request
-	displayHeader(chalker.DEFAULT, fmt.Sprintf("Checking %s for a Baemail account...", chalk.Cyan.Color(alias+"@"+domain)))
+	displayHeader(chalker.DEFAULT, fmt.Sprintf("Checking %s for a Baemail account...", color.CyanString(alias+"@"+domain)))
 
 	// Cache key
 	keyName := "app-baemail-" + alias + "@" + domain
@@ -652,7 +652,7 @@ func getBaemail(alias, domain string, allowCache bool) (response *baemail.Respon
 func verifyPubKey(verifyURL, alias, domain, pubKey string) (response *paymail.VerificationResponse, err error) {
 
 	// Start the request
-	displayHeader(chalker.DEFAULT, fmt.Sprintf("Verifing pubkey for %s...", chalk.Cyan.Color(alias+"@"+domain)))
+	displayHeader(chalker.DEFAULT, fmt.Sprintf("Verifing pubkey for %s...", color.CyanString(alias+"@"+domain)))
 
 	// New Client
 	var client paymail.ClientInterface
@@ -706,14 +706,14 @@ func displayTracingResults(tracing resty.TraceInfo, statusCode int) {
 	if tracing.IsConnWasIdle {
 		output = append(output,
 			fmt.Sprintf(`IsConnWasIdle | %s | ConnIdleTime | %s`,
-				chalk.Magenta.Color(fmt.Sprintf("%v", tracing.IsConnWasIdle)),
-				chalk.Magenta.Color(tracing.ConnIdleTime.String()),
+				color.MagentaString(fmt.Sprintf("%v", tracing.IsConnWasIdle)),
+				color.MagentaString(tracing.ConnIdleTime.String()),
 			))
 	}
 
 	// Connection reused?
 	if tracing.IsConnReused {
-		output = append(output, fmt.Sprintf(`IsConnReused | %s `, chalk.Magenta.Color(fmt.Sprintf("%v", tracing.IsConnReused))))
+		output = append(output, fmt.Sprintf(`IsConnReused | %s `, color.MagentaString(fmt.Sprintf("%v", tracing.IsConnReused))))
 	}
 
 	// Render the data
@@ -810,7 +810,7 @@ func (p *PaymailDetails) Display() {
 	displayPaymail := p.Paymail()
 
 	// Rendering profile information
-	displayHeader(chalker.BOLD, fmt.Sprintf("Results for %s", chalk.Cyan.Color(displayPaymail)))
+	displayHeader(chalker.BOLD, fmt.Sprintf("Results for %s", color.CyanString(displayPaymail)))
 
 	// No PKI - then we don't have a paymail
 	if p.PKI == nil || len(p.PKI.PubKey) == 0 {
@@ -821,57 +821,57 @@ func (p *PaymailDetails) Display() {
 	// Display the public profile if found
 	if p.PublicProfile != nil {
 		if len(p.PublicProfile.Name) > 0 {
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Name         : %s", chalk.Cyan.Color(p.PublicProfile.Name)))
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Name         : %s", color.CyanString(p.PublicProfile.Name)))
 		}
 		if len(p.PublicProfile.Avatar) > 0 {
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Avatar       : %s", chalk.Cyan.Color(p.PublicProfile.Avatar)))
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Avatar       : %s", color.CyanString(p.PublicProfile.Avatar)))
 		}
 	}
 
 	// Display the baemail compose url if found
 	if p.Baemail != nil && len(p.Baemail.ComposeURL) > 0 {
-		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Baemail      : %s", chalk.Cyan.Color(p.Baemail.ComposeURL)))
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Baemail      : %s", color.CyanString(p.Baemail.ComposeURL)))
 	}
 
 	// Display dime.ly if found
 	if len(p.Dimely) > 0 {
-		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Dime.ly      : %s", chalk.Cyan.Color(p.Dimely)))
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Dime.ly      : %s", color.CyanString(p.Dimely)))
 	}
 
 	// Display PowPing if found
 	if p.PowPing != nil && p.PowPing.Profile != nil && len(p.PowPing.Profile.Username) > 0 {
-		chalker.Log(chalker.DEFAULT, fmt.Sprintf("PowPing      : %s", chalk.Cyan.Color("https://powping.com/@"+p.PowPing.Profile.Username)))
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("PowPing      : %s", color.CyanString("https://powping.com/@"+p.PowPing.Profile.Username)))
 	}
 
 	// Do we have possible matches?
 	if p.Bitpics != nil && p.Bitpics.Result != nil && len(p.Bitpics.Result.Posts) > 0 {
 		resultNum := 1
-		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Bitpic URL   : %s", chalk.Cyan.Color(bitpic.URLFromPaymail(p.Bitpics.Result.Posts[0].Data.Paymail))))
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Bitpic URL   : %s", color.CyanString(bitpic.URLFromPaymail(p.Bitpics.Result.Posts[0].Data.Paymail))))
 		for _, post := range p.Bitpics.Result.Posts {
 			if len(post.Data.Paymail) > 0 {
-				chalker.Log(chalker.DEFAULT, fmt.Sprintf("Bitpic Img #%d: %s", resultNum, chalk.Cyan.Color(post.Data.BitFs)))
+				chalker.Log(chalker.DEFAULT, fmt.Sprintf("Bitpic Img #%d: %s", resultNum, color.CyanString(post.Data.BitFs)))
 			}
 			resultNum = resultNum + 1
 		}
 	} else if len(p.Bitpic) > 0 { // todo: maybe deprecate if search works indefinitely
 
 		// Display bitpic if found
-		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Bitpic       : %s", chalk.Cyan.Color(p.Bitpic)))
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Bitpic       : %s", color.CyanString(p.Bitpic)))
 	}
 
 	// Show pubkey
 	if p.PKI != nil && len(p.PKI.PubKey) > 0 {
-		chalker.Log(chalker.DEFAULT, fmt.Sprintf("PubKey       : %s", chalk.Cyan.Color(p.PKI.PubKey)))
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("PubKey       : %s", color.CyanString(p.PKI.PubKey)))
 	}
 
 	// Show address resolution details
 	if p.Resolution != nil && len(p.Resolution.Address) > 0 {
-		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Output Script: %s", chalk.Cyan.Color(p.Resolution.Output)))
-		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Address      : %s", chalk.Cyan.Color(p.Resolution.Address)))
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Output Script: %s", color.CyanString(p.Resolution.Output)))
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Address      : %s", color.CyanString(p.Resolution.Address)))
 
 		// If we have a signature
 		if len(p.Resolution.Signature) > 0 {
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Signature    : %s", chalk.Cyan.Color(p.Resolution.Signature)))
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Signature    : %s", color.CyanString(p.Resolution.Signature)))
 		}
 	}
 
@@ -879,22 +879,22 @@ func (p *PaymailDetails) Display() {
 	if p.Roundesk != nil && p.Roundesk.Profile != nil {
 
 		// Rendering profile information
-		displayHeader(chalker.BOLD, fmt.Sprintf("Roundesk profile for %s", chalk.Cyan.Color(displayPaymail)))
+		displayHeader(chalker.BOLD, fmt.Sprintf("Roundesk profile for %s", color.CyanString(displayPaymail)))
 
 		if len(p.Roundesk.Profile.Name) > 0 {
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Name      : %s", chalk.Cyan.Color(p.Roundesk.Profile.Name)))
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Name      : %s", color.CyanString(p.Roundesk.Profile.Name)))
 		}
 		if len(p.Roundesk.Profile.Headline) > 0 {
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Headline  : %s", chalk.Cyan.Color(p.Roundesk.Profile.Headline)))
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Headline  : %s", color.CyanString(p.Roundesk.Profile.Headline)))
 		}
 		if len(p.Roundesk.Profile.Bio) > 0 {
 			p.Roundesk.Profile.Bio = strings.TrimSuffix(p.Roundesk.Profile.Bio, "\n")
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Bio       : %s", chalk.Cyan.Color(p.Roundesk.Profile.Bio)))
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Bio       : %s", color.CyanString(p.Roundesk.Profile.Bio)))
 		}
 		if len(p.Roundesk.Profile.Twetch) > 0 {
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Twetch    : %s", chalk.Cyan.Color("https://twetch.app/u/"+p.Roundesk.Profile.Twetch)))
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Twetch    : %s", color.CyanString("https://twetch.app/u/"+p.Roundesk.Profile.Twetch)))
 		}
 
-		chalker.Log(chalker.DEFAULT, fmt.Sprintf("URL       : %s", chalk.Cyan.Color("https://roundesk.co/u/"+displayPaymail)))
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("URL       : %s", color.CyanString("https://roundesk.co/u/"+displayPaymail)))
 	}
 }

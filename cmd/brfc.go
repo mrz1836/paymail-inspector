@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/mrz1836/go-sanitize"
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/spf13/cobra"
 	"github.com/tonicpow/go-paymail"
-	"github.com/ttacon/chalk"
 )
 
 // brfcCmd represents the brfc command (Bitcoin SV Request-For-Comments)
@@ -21,14 +21,14 @@ var brfcCmd = &cobra.Command{
 	Example: applicationName + ` brfc list
 ` + applicationName + ` brfc search nChain
 ` + applicationName + ` brfc generate --title "BRFC Specifications" --author "andy (nChain)" --version 1`,
-	Long: chalk.Green.NewStyle().WithTextStyle(chalk.Bold).Style(`
+	Long: color.GreenString(`
 ___.           _____       
 \_ |__________/ ____\____  
  | __ \_  __ \   __\/ ___\ 
  | \_\ \  | \/|  | \  \___ 
  |___  /__|   |__|  \___  >
      \/                 \/`) + `
-` + chalk.Yellow.Color(`
+` + color.YellowString(`
 Use the [list] argument to show all known BRFC protocols.
 
 Use the [generate] argument with required flags to generate a new BRFC ID.
@@ -42,7 +42,7 @@ Whilst this is not the authoritative definition of the BRFC process, a summary i
 as the BRFC process is the nominated mechanism through which extensions to the paymail system 
 are defined and discovered during Service Discovery.
 
-Read more at: `+chalk.Cyan.Color("http://bsvalias.org/01-brfc-specifications.html")),
+Read more at: `+color.CyanString("http://bsvalias.org/01-brfc-specifications.html")),
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return chalker.Error("brfc requires either [list] or [generate] or [search]")
@@ -119,27 +119,26 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/01-brfc-specifications.htm
 
 				displayHeader(chalker.BOLD, brfc.Title+" v"+brfc.Version)
 
-				valid := chalk.Green.Color("(Valid)")
+				valid := color.GreenString("(Valid)")
 				// Validate the BRFC ID
 				if !skipBrfcValidation {
 					if ok, id, err := brfc.Validate(); err != nil {
 						chalker.Log(chalker.ERROR, fmt.Sprintf("Error validating brfc %s: %s", brfc.ID, err.Error()))
 					} else if !ok {
-						valid = chalk.Yellow.Color("(Invalid ID, generator says: " + id + ")")
-						// valid = chalk.Magenta.Color("(Invalid ID)")
+						valid = color.YellowString("(Invalid ID, generator says: " + id + ")")
 					}
 				}
 
-				chalker.Log(chalker.DEFAULT, fmt.Sprintf("ID        : %s %s", chalk.Cyan.Color(brfc.ID), valid))
+				chalker.Log(chalker.DEFAULT, fmt.Sprintf("ID        : %s %s", color.CyanString(brfc.ID), valid))
 
 				if len(brfc.Author) > 0 {
-					chalker.Log(chalker.DEFAULT, fmt.Sprintf("Author(s) : %s", chalk.Cyan.Color(brfc.Author)))
+					chalker.Log(chalker.DEFAULT, fmt.Sprintf("Author(s) : %s", color.CyanString(brfc.Author)))
 				}
 				if len(brfc.Alias) > 0 {
-					chalker.Log(chalker.DEFAULT, fmt.Sprintf("Alias     : %s", chalk.Cyan.Color(brfc.Alias)))
+					chalker.Log(chalker.DEFAULT, fmt.Sprintf("Alias     : %s", color.CyanString(brfc.Alias)))
 				}
 				if len(brfc.URL) > 0 {
-					chalker.Log(chalker.DEFAULT, fmt.Sprintf("URL       : %s", chalk.Cyan.Color(brfc.URL)))
+					chalker.Log(chalker.DEFAULT, fmt.Sprintf("URL       : %s", color.CyanString(brfc.URL)))
 				}
 			}
 
@@ -183,15 +182,15 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/01-brfc-specifications.htm
 			displayHeader(chalker.BOLD, "Generating BRFC ID...")
 
 			// Show the generated ID
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Generated ID: %s", chalk.Cyan.Color(brfc.ID)))
-			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Title       : %s", chalk.Cyan.Color(brfc.Title)))
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Generated ID: %s", color.CyanString(brfc.ID)))
+			chalker.Log(chalker.DEFAULT, fmt.Sprintf("Title       : %s", color.CyanString(brfc.Title)))
 
 			// Show optional fields
 			if len(brfc.Author) > 0 {
-				chalker.Log(chalker.DEFAULT, fmt.Sprintf("Author      : %s", chalk.Cyan.Color(brfc.Author)))
+				chalker.Log(chalker.DEFAULT, fmt.Sprintf("Author      : %s", color.CyanString(brfc.Author)))
 			}
 			if len(brfc.Version) > 0 {
-				chalker.Log(chalker.DEFAULT, fmt.Sprintf("Version     : %s", chalk.Cyan.Color(brfc.Version)))
+				chalker.Log(chalker.DEFAULT, fmt.Sprintf("Version     : %s", color.CyanString(brfc.Version)))
 			}
 
 			// Done
@@ -212,25 +211,25 @@ func showBrfc(brfc *paymail.BRFCSpec) {
 	displayHeader(chalker.BOLD, brfc.Title+" v"+brfc.Version)
 
 	// Validate the BRFC ID
-	valid := chalk.Green.Color("(Valid)")
+	valid := color.GreenString("(Valid)")
 	if !skipBrfcValidation {
 		if ok, id, err := brfc.Validate(); err != nil {
 			chalker.Log(chalker.ERROR, fmt.Sprintf("Error validating brfc %s: %s", brfc.ID, err.Error()))
 		} else if !ok {
-			valid = chalk.Yellow.Color("(Invalid ID, generator says: " + id + ")")
+			valid = color.YellowString("(Invalid ID, generator says: " + id + ")")
 		}
 	}
 
-	chalker.Log(chalker.DEFAULT, fmt.Sprintf("ID        : %s %s", chalk.Cyan.Color(brfc.ID), valid))
+	chalker.Log(chalker.DEFAULT, fmt.Sprintf("ID        : %s %s", color.CyanString(brfc.ID), valid))
 
 	if len(brfc.Author) > 0 {
-		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Author(s) : %s", chalk.Cyan.Color(brfc.Author)))
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Author(s) : %s", color.CyanString(brfc.Author)))
 	}
 	if len(brfc.Alias) > 0 {
-		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Alias     : %s", chalk.Cyan.Color(brfc.Alias)))
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Alias     : %s", color.CyanString(brfc.Alias)))
 	}
 	if len(brfc.URL) > 0 {
-		chalker.Log(chalker.DEFAULT, fmt.Sprintf("URL       : %s", chalk.Cyan.Color(brfc.URL)))
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("URL       : %s", color.CyanString(brfc.URL)))
 	}
 }
 

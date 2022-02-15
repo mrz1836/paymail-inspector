@@ -4,24 +4,24 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/spf13/cobra"
 	"github.com/tonicpow/go-paymail"
-	"github.com/ttacon/chalk"
 )
 
 // verifyCmd represents the verify command
 var verifyCmd = &cobra.Command{
 	Use:   "verify",
 	Short: "Verifies if a paymail is associated to a pubkey",
-	Long: chalk.Green.NewStyle().WithTextStyle(chalk.Bold).Style(`
+	Long: color.GreenString(`
                    .__  _____       
 ___  __ ___________|__|/ ____\__.__.
 \  \/ // __ \_  __ \  \   __<   |  |
  \   /\  ___/|  | \/  ||  |  \___  |
   \_/  \___  >__|  |__||__|  / ____|
            \/                \/`) + `
-` + chalk.Yellow.Color(`
+` + color.YellowString(`
 Verify will check the paymail address against a given pubkey using the provider domain (if capability is supported).
 
 This capability allows clients to verify if a given public key is a valid identity key for a given paymail handle.
@@ -30,7 +30,7 @@ The public key returned by pki flow for a given paymail handle may change over t
 This situation may produce troubles to verify data signed using old keys, because even having the keys, 
 the verifier doesn't know if the public key actually belongs to the right user.
 
-Read more at: `+chalk.Cyan.Color("http://bsvalias.org/05-verify-public-key-owner.html")),
+Read more at: `+color.CyanString("http://bsvalias.org/05-verify-public-key-owner.html")),
 	Aliases:    []string{"verification"},
 	SuggestFor: []string{"pubkey"},
 	Example: applicationName + " verify mrz@" + defaultDomainName + " 02ead23149a1e33df17325ec7a7ba9e0b20c674c57c630f527d69b866aa9b65b10" +
@@ -112,11 +112,11 @@ Read more at: `+chalk.Cyan.Color("http://bsvalias.org/05-verify-public-key-owner
 		}
 
 		// Rendering profile information
-		displayHeader(chalker.BOLD, fmt.Sprintf("Rendering verify response for %s...", chalk.Cyan.Color(paymailAddress)))
+		displayHeader(chalker.BOLD, fmt.Sprintf("Rendering verify response for %s...", color.CyanString(paymailAddress)))
 
 		// Show the results
-		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Paymail: %s", chalk.Cyan.Color(paymailAddress)))
-		chalker.Log(chalker.DEFAULT, fmt.Sprintf("PubKey : %s", chalk.Cyan.Color(pubKey)))
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("Paymail: %s", color.CyanString(paymailAddress)))
+		chalker.Log(chalker.DEFAULT, fmt.Sprintf("PubKey : %s", color.CyanString(pubKey)))
 
 		if verify.Match {
 			chalker.Log(chalker.SUCCESS, "Paymail & PubKey Match! (service responded: match=true)")

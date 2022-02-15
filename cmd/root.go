@@ -6,10 +6,10 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/fatih/color"
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/mrz1836/paymail-inspector/database"
 	"github.com/spf13/cobra"
-	"github.com/ttacon/chalk"
 )
 
 // rootCmd represents the base command when called without any sub-commands
@@ -18,14 +18,14 @@ var rootCmd = &cobra.Command{
 	Use:               applicationName,
 	Short:             "Inspect, validate domains or resolve paymail addresses",
 	Example:           applicationName + " -h",
-	Long: chalk.Green.NewStyle().WithTextStyle(chalk.Bold).Style(`
+	Long: color.GreenString(`
 __________                             .__.__    .___                                     __                
 \______   \_____  ___.__. _____ _____  |__|  |   |   | ____   ____________   ____   _____/  |_  ___________ 
  |     ___/\__  \<   |  |/     \\__  \ |  |  |   |   |/    \ /  ___/\____ \_/ __ \_/ ___\   __\/  _ \_  __ \
  |    |     / __ \\___  |  Y Y  \/ __ \|  |  |__ |   |   |  \\___ \ |  |_> >  ___/\  \___|  | (  <_> )  | \/
  |____|    (____  / ____|__|_|  (____  /__|____/ |___|___|  /____  >|   __/ \___  >\___  >__|  \____/|__|   
                 \/\/          \/     \/                   \/     \/ |__|        \/     \/     `+Version) + `
-` + chalk.Yellow.Color("Author: MrZ © 2021 github.com/mrz1836/"+applicationFullName) + `
+` + color.YellowString("Author: MrZ © 2021 github.com/mrz1836/"+applicationFullName) + `
 
 This CLI app is used for interacting with paymail service providers.
 
@@ -39,7 +39,7 @@ Help contribute via Github!
 func Execute() {
 
 	// Create a database connection (Don't require DB for now)
-	if err := database.Connect(applicationName); err != nil {
+	if err := database.Connect(applicationName, "db_"+applicationName); err != nil {
 		chalker.Log(chalker.ERROR, fmt.Sprintf("Error connecting to database: %s", err.Error()))
 	} else {
 		// Set this flag for caching detection
