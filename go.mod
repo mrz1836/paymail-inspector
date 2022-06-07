@@ -17,5 +17,5 @@ require (
 	github.com/ryanuber/columnize v2.1.2+incompatible
 	github.com/spf13/cobra v1.4.0
 	github.com/spf13/viper v1.12.0
-	github.com/tonicpow/go-paymail v0.7.7
+	github.com/tonicpow/go-paymail v0.7.8
 )
