@@ -11,6 +11,10 @@ to enable it.  You can execute the following once:
 
 	echo "autoload -U compinit; compinit" >> ~/.zshrc
 
+To load completions in your current shell session:
+
+	source <(paymail completion zsh); compdef _paymail paymail
+
 To load completions for every new session, execute once:
 
 #### Linux:
@@ -19,7 +23,7 @@ To load completions for every new session, execute once:
 
 #### macOS:
 
-	paymail completion zsh > /usr/local/share/zsh/site-functions/_paymail
+	paymail completion zsh > $(brew --prefix)/share/zsh/site-functions/_paymail
 
 You will need to start a new shell for this setup to take effect.
 
