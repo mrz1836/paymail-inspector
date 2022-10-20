@@ -330,7 +330,7 @@ windows                  Build for Windows (amd64)
 
 ## Examples & Tests
 All unit tests and [examples](docs/examples.md) run via [Github Actions](https://github.com/mrz1836/paymail-inspector/actions) and
-uses [Go version 1.16.x](https://golang.org/doc/go1.16). View the [configuration file](.github/workflows/run-tests.yml).
+uses [Go version 1.17.x](https://golang.org/doc/go1.16). View the [configuration file](.github/workflows/run-tests.yml).
 
 Run all tests (including integration tests)
 ```shell script
