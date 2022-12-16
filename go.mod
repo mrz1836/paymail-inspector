@@ -3,7 +3,7 @@ module github.com/mrz1836/paymail-inspector
 go 1.17
 
 require (
-	github.com/dgraph-io/badger/v3 v3.2103.4
+	github.com/dgraph-io/badger/v3 v3.2103.5
 	github.com/fatih/color v1.13.0
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/mitchellh/go-homedir v1.1.0
