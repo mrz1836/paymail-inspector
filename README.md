@@ -4,11 +4,11 @@
 
 [![Release](https://img.shields.io/github/release-pre/mrz1836/paymail-inspector.svg?logo=github&style=flat&v=1)](https://github.com/mrz1836/paymail-inspector/releases)
 [![Downloads](https://img.shields.io/github/downloads/mrz1836/paymail-inspector/total.svg?logo=github&style=flat&v=1)](https://github.com/mrz1836/paymail-inspector/releases)
-[![Build Status](https://img.shields.io/github/workflow/status/mrz1836/paymail-inspector/run-go-tests?logo=github&v=3)](https://github.com/mrz1836/paymail-inspector/actions)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/mrz1836/paymail-inspector/run-tests.yml?branch=master&logo=github&v=3)](https://github.com/mrz1836/paymail-inspector/actions)
 [![Report](https://goreportcard.com/badge/github.com/mrz1836/paymail-inspector?style=flat&v=1)](https://goreportcard.com/report/github.com/mrz1836/paymail-inspector)
 [![Go](https://img.shields.io/github/go-mod/go-version/mrz1836/paymail-inspector?v=1)](https://golang.org/)
 <br>
-[![Mergify Status](https://img.shields.io/endpoint.svg?url=https://gh.mergify.io/badges/mrz1836/paymail-inspector&style=flat&v=1)](https://mergify.io)
+[![Mergify Status](https://img.shields.io/endpoint.svg?url=https://api.mergify.com/v1/badges/mrz1836/paymail-inspector&style=flat&v=1)](https://mergify.io)
 [![Sponsor](https://img.shields.io/badge/sponsor-MrZ-181717.svg?logo=github&style=flat&v=1)](https://github.com/sponsors/mrz1836)
 [![Donate](https://img.shields.io/badge/donate-bitcoin-ff9900.svg?logo=bitcoin&style=flat&v=1)](https://mrz1818.com/?tab=tips&utm_source=github&utm_medium=sponsor-link&utm_campaign=paymail-inspector&utm_term=paymail-inspector&utm_content=paymail-inspector)
 
