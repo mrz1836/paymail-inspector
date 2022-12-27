@@ -710,8 +710,9 @@ github.com/modern-go/reflect2 v1.0.2/go.mod h1:yWuevngMOJpCy52FWWMvUC8ws7m/LJsjY
 github.com/mrz1836/go-api-router v0.5.0/go.mod h1:30bzDZMWc7Jx82YMNn7pbwJbXqfKbOW7NYbsKewO9A4=
 github.com/mrz1836/go-logger v0.3.1/go.mod h1:wvnL9EjhtiMOgABtr0Q8EwO4YNVTBTDMLlvKAXjSEy0=
 github.com/mrz1836/go-parameters v0.2.9/go.mod h1:GEdOPlL+jDhIPPQ3SDWoMwsboiwXIdVsOHy5PPLzz9E=
-github.com/mrz1836/go-sanitize v1.1.5 h1:LOywG3ijK/B/D9ik3hsniyIzA1JVZlM2wmp3Q/CBk88=
 github.com/mrz1836/go-sanitize v1.1.5/go.mod h1:HnnbbJTcBhbr770WyRL4SA95I4FFOnGg/RTLJybsuN8=
+github.com/mrz1836/go-sanitize v1.2.0 h1:B8HkDSXSkDa6VG49NWWJPVWh6TA8pffnqcB4M1pvRKI=
+github.com/mrz1836/go-sanitize v1.2.0/go.mod h1:5gWo0KQ+acEyiXYM17QSWT7c2E27xaO5hCTSDW6+vbk=
 github.com/mrz1836/go-validate v0.2.0 h1:F8AcgJRW0B/hUNFAXijrN/EGqYlAIkIIpMDkIMMRUho=
 github.com/mrz1836/go-validate v0.2.0/go.mod h1:IoGAb4rTAL6KgAxOiWL4ICwLqxGbKCKT1GyaSuE/4bk=
 github.com/mwitkow/go-conntrack v0.0.0-20161129095857-cc309e4a2223/go.mod h1:qRWi+5nqEBWmkhHvq77mSJWrCKwh8bxhgT7d/eI7P4U=
