@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/dgraph-io/badger/v3 v3.2103.5
-	github.com/fatih/color v1.13.0
+	github.com/fatih/color v1.14.0
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mrz1836/go-sanitize v1.2.0
@@ -37,7 +37,7 @@ require (
 	github.com/libsv/go-bt/v2 v2.1.1 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
-	github.com/mattn/go-isatty v0.0.16 // indirect
+	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/miekg/dns v1.1.50 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/mrz1836/go-validate v0.2.0 // indirect
