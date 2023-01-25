@@ -17,30 +17,34 @@ ifeq ($(REPO_OWNER),)
 	REPO_OWNER="mrz1836"
 endif
 
-.PHONY: build clean release
-
+.PHONY: all
 all: ## Runs multiple commands
 	@$(MAKE) test
 	@$(MAKE) gen-docs
 
+.PHONY: build
 build: ## Build all binaries (darwin, linux, windows)
 	@$(MAKE) darwin
 	@$(MAKE) linux
 	@$(MAKE) windows
 	@echo version: $(VERSION_SHORT)
 
+.PHONY: clean
 clean: ## Remove previous builds and any test cache data
 	@go clean -cache -testcache -i -r
 	@test $(DISTRIBUTIONS_DIR)
 	@if [ -d $(DISTRIBUTIONS_DIR) ]; then rm -r $(DISTRIBUTIONS_DIR); fi
 
+.PHONY: darwin
 darwin: ## Build for Darwin (macOS amd64)
 	@$(MAKE) $(DARWIN)
 
+.PHONY: gen-docs
 gen-docs: ## Generate documentation from all available commands (fresh install)
 	@$(MAKE) install
 	@$(CUSTOM_BINARY_NAME) --docs
 
+.PHONY: gif-render
 gif-render: ## Render gifs in .github dir (find/replace text etc)
 	@test $(name)
 	@find . -name 'gif.yml' -print0 | xargs -0 sed -i "" "s/Terminalizer/null/g"
@@ -51,15 +55,19 @@ gif-render: ## Render gifs in .github dir (find/replace text etc)
 	@cp -f *.gif .github/IMAGES/
 	@rm -rf *.gif && rm -rf gif.yml
 
+.PHONY: linux
 linux: ## Build for Linux (amd64)
 	@$(MAKE) $(LINUX)
 
+.PHONY: release
 release:: ## Runs common.release then runs godocs
 	@$(MAKE) godocs
 
+.PHONY: update-terminalizer
 update-terminalizer: ## Update the terminalizer application
 	@npm update -g terminalizer
 
+.PHONY: windows
 windows: ## Build for Windows (amd64)
 	@$(MAKE) $(WINDOWS)
 
