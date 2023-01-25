@@ -170,7 +170,7 @@ Additional paymail information can also be found via [MoneyButton's documentatio
 - [x] Public Profile [(f12f968c92d6)](https://github.com/bitcoin-sv-specs/brfc-paymail/pull/7/files)
 - [x] P2P Payment Destination ([2a40af698840](https://docs.moneybutton.com/docs/paymail-07-p2p-payment-destination.html))
 - [x] Sender Validation ([6745385c3fc0](http://bsvalias.org/04-02-sender-validation.html))
-- [ ] P2P Transactions ([5f1323cddf31](https://docs.moneybutton.com/docs/paymail-06-p2p-transactions.html))
+- [x] P2P Transactions ([5f1323cddf31](https://docs.moneybutton.com/docs/paymail-06-p2p-transactions.html))
 - [ ] Receiver Approvals ([3d7c2ca83a46](http://bsvalias.org/04-03-receiver-approvals.html))
 - [ ] Asset Information ([1300361cb2d4](https://docs.moneybutton.com/docs/paymail/paymail-08-asset-information.html))
 - [ ] SFP Paymail Extension Build Action ([189e32d93d28](https://docs.moneybutton.com/docs/sfp/paymail-09-sfp-build.html))
@@ -266,7 +266,7 @@ paymail whois mrz --no-cache
 <summary><strong><code>Application Deployment</code></strong></summary>
 <br/>
 
-[goreleaser](https://github.com/goreleaser/goreleaser) for easy binary deployment to Github and can be installed via: `brew install goreleaser`.
+[goreleaser](https://github.com/goreleaser/goreleaser) for easy binary deployment to GitHub and can be installed via: `brew install goreleaser`.
 
 The [.goreleaser.yml](.goreleaser.yml) file is used to configure [goreleaser](https://github.com/goreleaser/goreleaser).
 
@@ -329,8 +329,8 @@ windows                  Build for Windows (amd64)
 <br/>
 
 ## Examples & Tests
-All unit tests and [examples](docs/examples.md) run via [Github Actions](https://github.com/mrz1836/paymail-inspector/actions) and
-uses [Go version 1.17.x](https://golang.org/doc/go1.16). View the [configuration file](.github/workflows/run-tests.yml).
+All unit tests and [examples](docs/examples.md) run via [GitHub Actions](https://github.com/mrz1836/paymail-inspector/actions) and
+uses [Go version 1.18.x](https://golang.org/doc/go1.18). View the [configuration file](.github/workflows/run-tests.yml).
 
 Run all tests (including integration tests)
 ```shell script
