@@ -5,7 +5,7 @@ Author: MrZ © 2020 github.com/mrz1836/paymail-inspector
 
 This CLI tool can help you inspect, validate or resolve a paymail domain/address.
 
-Help contribute via Github!
+Help contribute via GitHub!
 */
 package main
 
