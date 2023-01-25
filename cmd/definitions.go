@@ -71,14 +71,14 @@ type Provider struct {
 
 // providers is a list of providers that user's can obtain a paymail
 var providers = []*Provider{
-	{"moneybutton.com", "https://tncpw.co/4c58a26f"},
-	{"handcash.io", "https://tncpw.co/742b1f09"},
-	{"relayx.io", "https://tncpw.co/4897634e"},
-	{"centbee.com", "https://tncpw.co/4350c72f"},
-	{"simply.cash", "https://tncpw.co/1ce8f70f"},
-	{"dotwallet.com", "https://tncpw.co/5745c80e"},
-	{"mypaymail.co", "https://tncpw.co/ee243a15"},
-	{"volt.id", "https://tncpw.co/e9ff2b0c"},
+	{"moneybutton.com", "https://tpow.app/4c58a26f"},
+	{"handcash.io", "https://tpow.app/742b1f09"},
+	{"relayx.io", "https://tpow.app/4897634e"},
+	{"centbee.com", "https://tpow.app/4350c72f"},
+	{"simply.cash", "https://tpow.app/1ce8f70f"},
+	{"dotwallet.com", "https://tpow.app/5745c80e"},
+	{"mypaymail.co", "https://tpow.app/ee243a15"},
+	{"volt.id", "https://tpow.app/e9ff2b0c"},
 }
 
 // getProvider will return a provider given the domain name

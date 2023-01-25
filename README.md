@@ -197,32 +197,32 @@ Additional paymail information can also be found via [MoneyButton's documentatio
 <summary><strong><code>Public Paymail Providers</code></strong></summary>
 <br/>
 
-- [MoneyButton](https://tncpw.co/4c58a26f)
-- [Handcash](https://tncpw.co/742b1f09)
-- [RelayX](https://tncpw.co/4897634e)
-- [Centbee](https://tncpw.co/4350c72f)
-- [Simply.cash](https://tncpw.co/1ce8f70f)
-- [DotWallet](https://tncpw.co/5745c80e)
-- [myPaymail](https://tncpw.co/ee243a15)
-- [Volt](https://tncpw.co/e9ff2b0c)
+- [MoneyButton](https://tpow.app/4c58a26f)
+- [Handcash](https://tpow.app/742b1f09)
+- [RelayX](https://tpow.app/4897634e)
+- [Centbee](https://tpow.app/4350c72f)
+- [Simply.cash](https://tpow.app/1ce8f70f)
+- [DotWallet](https://tpow.app/5745c80e)
+- [myPaymail](https://tpow.app/ee243a15)
+- [Volt](https://tpow.app/e9ff2b0c)
 </details>
 
 <details>
 <summary><strong><code>Integrated Services</code></strong></summary>
 <br/>
 
-- Unwriter's [bitpic](https://tncpw.co/e4d6ce84)
-- Unwriter's [powping](https://tncpw.co/3517f7fc)
-- Deggen's [Roundesk](https://tncpw.co/2d8d2e22) & [Baemail](https://tncpw.co/2c90c26b)
-- RelayX's [Dime.ly](https://tncpw.co/46a4d32d)
+- Unwriter's [bitpic](https://tpow.app/e4d6ce84)
+- Unwriter's [powping](https://tpow.app/3517f7fc)
+- Deggen's [Roundesk](https://tpow.app/2d8d2e22) & [Baemail](https://tpow.app/2c90c26b)
+- RelayX's [Dime.ly](https://tpow.app/46a4d32d)
 </details>
 
 <details>
 <summary><strong><code>Handle Providers</code></strong></summary>
 <br/>
 
-- [HandCash](https://tncpw.co/742b1f09)
-- [RelayX](https://tncpw.co/4897634e)
+- [HandCash](https://tpow.app/742b1f09)
+- [RelayX](https://tpow.app/4897634e)
 </details>
 
 <details>
@@ -374,7 +374,7 @@ The most basic way to show your support is to star :star2: the project, or to ra
 You can also support this project by [becoming a sponsor on GitHub](https://github.com/sponsors/mrz1836) :clap: 
 or by making a [**bitcoin donation**](https://mrz1818.com/?tab=tips&utm_source=github&utm_medium=sponsor-link&utm_campaign=paymail-inspector&utm_term=paymail-inspector&utm_content=paymail-inspector) to ensure this journey continues indefinitely! :rocket:
 
-Help by sharing: [![Twetch](https://img.shields.io/badge/share-twitter-00ACEE.svg)](https://twitter.com/intent/tweet?text=Paymail%20Inspector%20Rocks!%20Check%20it%20out:%20https%3A%2F%2Ftncpw.co%2F2d429aee) [![Twitter](https://img.shields.io/badge/share-twetch-085AF6.svg)](https://twetch.app/compose?description=Paymail%20Inspector%20Rocks!%20Check%20it%20out:%20https%3A%2F%2Ftncpw.co%2F2d429aee)
+Help by sharing: [![Twetch](https://img.shields.io/badge/share-twitter-00ACEE.svg)](https://twitter.com/intent/tweet?text=Paymail%20Inspector%20Rocks!%20Check%20it%20out:%20https%3A%2F%2Ftpow.app%2F2d429aee) [![Twitter](https://img.shields.io/badge/share-twetch-085AF6.svg)](https://twetch.app/compose?description=Paymail%20Inspector%20Rocks!%20Check%20it%20out:%20https%3A%2F%2Ftpow.app%2F2d429aee)
 
 [![Stars](https://img.shields.io/github/stars/mrz1836/paymail-inspector?label=Please%20like%20us&style=social)](https://github.com/mrz1836/paymail-inspector/stargazers)
 
