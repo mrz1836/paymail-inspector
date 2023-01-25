@@ -39,7 +39,7 @@ brew tap mrz1836/paymail-inspector && brew install paymail-inspector
 paymail
 ```
 
-**Install using a [compiled binary](https://github.com/mrz1836/paymail-inspector/releases)** on Linux, Mac or Windows _(Mac example)_
+**Install using a [compiled binary](https://github.com/mrz1836/paymail-inspector/releases)** on Linux or Mac _(Mac example)_
 ```shell script
 curl -LkSs https://github.com/mrz1836/paymail-inspector/releases/download/v0.3.24/paymail-inspector_macOS_64-bit.tar.gz -o app.tar.gz
 tar -zxf app.tar.gz && cd ./app/
@@ -159,6 +159,13 @@ All the generated command documentation can be found in [docs/commands](docs/com
 This application was built using the [official paymail specifications](http://bsvalias.org/index.html).
 
 Additional paymail information can also be found via [MoneyButton's documentation](https://docs.moneybutton.com/docs/paymail-overview.html).
+
+### Supported Operating Systems
+- [x] Linux
+- [x] Mac
+- [ ] Windows _(coming soon)_
+
+<br/>
 
 ### Implemented [BRFCs](http://bsvalias.org/01-brfc-specifications.html)
 - [x] BRFC ID Assignment ([assignment](http://bsvalias.org/01-02-brfc-id-assignment.html))
