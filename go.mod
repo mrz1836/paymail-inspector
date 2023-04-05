@@ -9,7 +9,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mrz1836/go-sanitize v1.2.1
 	github.com/ryanuber/columnize v2.1.2+incompatible
-	github.com/spf13/cobra v1.6.1
+	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.15.0
 	github.com/tonicpow/go-paymail v0.8.4
 )
