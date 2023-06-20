@@ -1,6 +1,6 @@
 module github.com/mrz1836/paymail-inspector
 
-go 1.18
+go 1.19
 
 require (
 	github.com/dgraph-io/badger/v3 v3.2103.5
