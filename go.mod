@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/dgraph-io/badger/v3 v3.2103.5
-	github.com/fatih/color v1.15.0
+	github.com/fatih/color v1.16.0
 	github.com/go-resty/resty/v2 v2.10.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mrz1836/go-sanitize v1.3.1
@@ -57,7 +57,7 @@ require (
 	golang.org/x/exp v0.0.0-20231006140011-7918f672742d // indirect
 	golang.org/x/mod v0.13.0 // indirect
 	golang.org/x/net v0.17.0 // indirect
-	golang.org/x/sys v0.13.0 // indirect
+	golang.org/x/sys v0.14.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
 	golang.org/x/tools v0.14.0 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
