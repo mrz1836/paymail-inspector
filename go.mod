@@ -10,7 +10,7 @@ require (
 	github.com/mrz1836/go-sanitize v1.3.1
 	github.com/ryanuber/columnize v2.1.2+incompatible
 	github.com/spf13/cobra v1.8.0
-	github.com/spf13/viper v1.18.1
+	github.com/spf13/viper v1.18.2
 	github.com/tonicpow/go-paymail v0.10.0
 )
 
