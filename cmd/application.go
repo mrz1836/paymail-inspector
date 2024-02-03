@@ -20,6 +20,8 @@ import (
 	"github.com/tonicpow/go-paymail"
 )
 
+const versionPrefix = ": v"
+
 // Core application loader (runs before every cmd)
 func init() {
 
@@ -30,10 +32,10 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	// Set the user agent for the application's external integrations
-	baemail.UserAgent = applicationFullName + ": v" + Version
-	bitpic.UserAgent = applicationFullName + ": v" + Version
-	powping.UserAgent = applicationFullName + ": v" + Version
-	roundesk.UserAgent = applicationFullName + ": v" + Version
+	baemail.UserAgent = applicationFullName + versionPrefix + Version
+	bitpic.UserAgent = applicationFullName + versionPrefix + Version
+	powping.UserAgent = applicationFullName + versionPrefix + Version
+	roundesk.UserAgent = applicationFullName + versionPrefix + Version
 
 	// Add config option
 	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "Custom config file (default is $HOME/"+applicationName+"/"+configFileDefault+".yaml)")
