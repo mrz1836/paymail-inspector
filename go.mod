@@ -11,7 +11,7 @@ require (
 	github.com/ryanuber/columnize v2.1.2+incompatible
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.18.2
-	github.com/tonicpow/go-paymail v0.10.0
+	github.com/tonicpow/go-paymail v0.10.1
 )
 
 require (
@@ -40,7 +40,7 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/miekg/dns v1.1.58 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
-	github.com/mrz1836/go-validate v0.2.0 // indirect
+	github.com/mrz1836/go-validate v0.2.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
@@ -55,7 +55,7 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.18.0 // indirect
 	golang.org/x/exp v0.0.0-20240119083558-1b970713d09a // indirect
-	golang.org/x/mod v0.14.0 // indirect
+	golang.org/x/mod v0.15.0 // indirect
 	golang.org/x/net v0.20.0 // indirect
 	golang.org/x/sys v0.16.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
