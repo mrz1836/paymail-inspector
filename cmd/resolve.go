@@ -35,7 +35,7 @@ Read more at: `+color.CyanString("http://bsvalias.org/04-01-basic-address-resolu
 	Example: applicationName + " resolve mrz@" + defaultDomainName + `
 ` + applicationName + " r mrz@" + defaultDomainName + `
 ` + applicationName + " r 1mrz",
-	Args: func(cmd *cobra.Command, args []string) error {
+	Args: func(_ *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return chalker.Error("resolve requires either a paymail address")
 		} else if len(args) > 1 {
@@ -43,7 +43,7 @@ Read more at: `+color.CyanString("http://bsvalias.org/04-01-basic-address-resolu
 		}
 		return nil
 	},
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, args []string) {
 
 		// Extract sender parts
 		senderAlias, senderDomain, senderAddress := paymail.SanitizePaymail(viper.GetString(flagSenderHandle))

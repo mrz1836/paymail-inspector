@@ -33,7 +33,7 @@ __  _  _|  |__   ____ |__| ______
 ` + color.YellowString(`
 
 Search `+strconv.Itoa(len(providers))+` public paymail providers for a handle.`),
-	Args: func(cmd *cobra.Command, args []string) error {
+	Args: func(_ *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return chalker.Error("whois requires a handle")
 		} else if len(args) > 1 {
@@ -41,7 +41,7 @@ Search `+strconv.Itoa(len(providers))+` public paymail providers for a handle.`)
 		}
 		return nil
 	},
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, args []string) {
 
 		// Handle to search
 		var handle string

@@ -36,7 +36,7 @@ Read more at: `+color.CyanString("http://bsvalias.org/02-02-capability-discovery
 	Aliases: []string{"c", "inspect"},
 	Example: applicationName + " capabilities " + defaultDomainName + `
 ` + applicationName + " c " + defaultDomainName,
-	Args: func(cmd *cobra.Command, args []string) error {
+	Args: func(_ *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return chalker.Error("capabilities requires either a domain or paymail address")
 		} else if len(args) > 1 {
@@ -44,7 +44,7 @@ Read more at: `+color.CyanString("http://bsvalias.org/02-02-capability-discovery
 		}
 		return nil
 	},
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, args []string) {
 
 		// Sanitize the domain
 		domain, _ := sanitize.Domain(args[0], false, true)

@@ -37,7 +37,7 @@ Read more at: `+color.CyanString("http://bsvalias.org/index.html")),
 ` + applicationName + " v " + defaultDomainName,
 	Aliases:    []string{"val", "v"},
 	SuggestFor: []string{"valid"},
-	Args: func(cmd *cobra.Command, args []string) error {
+	Args: func(_ *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return chalker.Error("validate requires either a domain or paymail address")
 		} else if len(args) > 1 {
@@ -45,7 +45,7 @@ Read more at: `+color.CyanString("http://bsvalias.org/index.html")),
 		}
 		return nil
 	},
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, args []string) {
 
 		var alias, domain, paymailAddress string
 

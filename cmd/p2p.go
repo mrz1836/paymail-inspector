@@ -38,7 +38,7 @@ Read more at: `+color.CyanString("https://docs.moneybutton.com/docs/paymail-07-p
 	SuggestFor: []string{"sending"},
 	Example: applicationName + " p2p mrz@" + defaultDomainName + `
 ` + applicationName + ` p2p \$mr-z`,
-	Args: func(cmd *cobra.Command, args []string) error {
+	Args: func(_ *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return chalker.Error("p2p requires a paymail address")
 		} else if len(args) > 1 {
@@ -46,7 +46,7 @@ Read more at: `+color.CyanString("https://docs.moneybutton.com/docs/paymail-07-p
 		}
 		return nil
 	},
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, args []string) {
 
 		// Set the domain and paymail
 		_, domain, paymailAddress := paymail.SanitizePaymail(paymail.ConvertHandle(args[0], false))

@@ -35,7 +35,7 @@ Read more at: `+color.CyanString("http://bsvalias.org/05-verify-public-key-owner
 	SuggestFor: []string{"pubkey"},
 	Example: applicationName + " verify mrz@" + defaultDomainName + " 02ead23149a1e33df17325ec7a7ba9e0b20c674c57c630f527d69b866aa9b65b10" +
 		"\n" + applicationName + " verify 1mrz 0352530c305378fd9dfd99f8c8c44e9092efa7c1674b61d4e9be65f92aa7a77bbe",
-	Args: func(cmd *cobra.Command, args []string) error {
+	Args: func(_ *cobra.Command, args []string) error {
 		if len(args) < 2 {
 			return chalker.Error("verify requires a paymail address AND pubkey")
 		} else if len(args) > 2 {
@@ -43,7 +43,7 @@ Read more at: `+color.CyanString("http://bsvalias.org/05-verify-public-key-owner
 		}
 		return nil
 	},
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, args []string) {
 
 		var paymailAddress, alias, domain, pubKey string
 

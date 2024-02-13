@@ -43,7 +43,7 @@ as the BRFC process is the nominated mechanism through which extensions to the p
 are defined and discovered during Service Discovery.
 
 Read more at: `+color.CyanString("http://bsvalias.org/01-brfc-specifications.html")),
-	Args: func(cmd *cobra.Command, args []string) error {
+	Args: func(_ *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return chalker.Error("brfc requires either [list] or [generate] or [search]")
 		}
@@ -52,7 +52,7 @@ Read more at: `+color.CyanString("http://bsvalias.org/01-brfc-specifications.htm
 		}
 		return nil
 	},
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, args []string) {
 
 		// Load the BRFC specifications via new client
 		client, err := newPaymailClient(false, nameServer)
