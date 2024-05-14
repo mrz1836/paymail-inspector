@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/dgraph-io/badger/v3 v3.2103.5
-	github.com/fatih/color v1.16.0
+	github.com/fatih/color v1.17.0
 	github.com/go-resty/resty/v2 v2.13.1
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mrz1836/go-sanitize v1.3.2
