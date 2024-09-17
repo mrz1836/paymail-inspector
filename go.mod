@@ -7,7 +7,7 @@ require (
 	github.com/fatih/color v1.17.0
 	github.com/go-resty/resty/v2 v2.14.0
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/mrz1836/go-sanitize v1.3.2
+	github.com/mrz1836/go-sanitize v1.3.3
 	github.com/ryanuber/columnize v2.1.2+incompatible
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
