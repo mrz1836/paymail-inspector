@@ -120,8 +120,8 @@ github.com/miekg/dns v1.1.61/go.mod h1:mnAarhS3nWaW+NVP2wTkYVIZyHNJ098SJZUki3eyk
 github.com/mitchellh/go-homedir v1.1.0 h1:lukF9ziXFxDFPkA1vsr5zpc1XuPDn/wFntq5mG+4E0Y=
 github.com/mitchellh/go-homedir v1.1.0/go.mod h1:SfyaCUpYCn1Vlf4IUYiD9fPX4A5wJrkLzIz1N1q0pr0=
 github.com/mitchellh/mapstructure v1.1.2/go.mod h1:FVVH3fgwuzCH5S8UJGiWEs2h04kUh9fWfEaFds41c1Y=
-github.com/mrz1836/go-sanitize v1.3.4 h1:nDmUbUGD6Tg0SAPL66c+UI7S97DPtskUT8cmZub19cY=
-github.com/mrz1836/go-sanitize v1.3.4/go.mod h1:w3j9KyYxbIGwzNKaMvTXpz2LW8YrOHkrXKHRXVeL07I=
+github.com/mrz1836/go-sanitize v1.3.5 h1:FPvYD1Q6cqAaOY97fx77TYhdlwWegDl1gab0toAbnv4=
+github.com/mrz1836/go-sanitize v1.3.5/go.mod h1:w3j9KyYxbIGwzNKaMvTXpz2LW8YrOHkrXKHRXVeL07I=
 github.com/mrz1836/go-validate v0.2.1 h1:LvhFvnZgemmJnZ/Ch9vEgY9YzKy+1Ka1Hx7yzpJEB00=
 github.com/mrz1836/go-validate v0.2.1/go.mod h1:IoGAb4rTAL6KgAxOiWL4ICwLqxGbKCKT1GyaSuE/4bk=
 github.com/pelletier/go-toml v1.2.0/go.mod h1:5z9KED0ma1S8pY6P1sdut58dfprrGBbd/94hg7ilaic=
