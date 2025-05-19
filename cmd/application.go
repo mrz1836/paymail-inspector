@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -60,7 +61,7 @@ func init() {
 // er is a basic helper method to catch errors loading the application
 func er(err error) {
 	if err != nil {
-		fmt.Println("Error:", err.Error())
+		log.Println("Error:", err.Error())
 		os.Exit(1)
 	}
 }
@@ -136,7 +137,7 @@ func setupAppResources() {
 	if err != nil {
 		// If it does not exist, make one!
 		if os.IsNotExist(err) {
-			er(os.MkdirAll(applicationDirectory, os.ModePerm))
+			er(os.MkdirAll(applicationDirectory, os.ModePerm)) //nolint:gosec // G301 - running locally
 		}
 	}
 }
