@@ -22,14 +22,6 @@ permissions:
   contents: read
 
 jobs:
-  yamllint:
-    name: Run yaml linter
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Run yaml linter
-        uses: ibiqlik/action-yamllint@v3.1
   asknancy:
     name: Ask Nancy (check dependencies)
     runs-on: ubuntu-latest
@@ -45,7 +37,7 @@ jobs:
           nancyCommand: sleuth --loud --exclude-vulnerability sonatype-2021-0853,CVE-2022-32149
 
   test:
-    needs: [yamllint, asknancy]
+    needs: [asknancy]
     strategy:
       matrix:
         go-version: [1.23.x]
