@@ -31,8 +31,8 @@ builds:
     - linux
     - windows
     goarm:
-    - 6
-    - 7
+    - "6"
+    - "7"
     ldflags:
     - -s -w -X github.com/mrz1836/{{ .ProjectName }}/cmd.Version={{ .Version }}
 
@@ -63,20 +63,30 @@ release:
 # Brews - OSX
 # ---------------------------
 brews:
-  -
-    tap:
+  - name: paymail-inspector
+    # The Homebrew Tap repo where the formula will be pushed
+    repository:
       owner: mrz1836
       name: homebrew-paymail-inspector
+      branch: main  # optional; defaults to the default branch
+      pull_request:
+        enabled: true
+        draft: false
+
     commit_author:
       name: mrz1836
       email: mrz1818@protonmail.ch
-    caveats: |
-      See the Github repo for more information
+
     homepage: https://github.com/mrz1836/paymail-inspector
-    description: &description |
+    description: |
       CLI app for interacting with paymail service providers
+
+    caveats: |
+      See the GitHub repo for more information.
+
     install: |
       bin.install "paymail"
+
     test: |
       system "#{bin}/paymail", "--version"
       system "#{bin}/paymail", "-h"
