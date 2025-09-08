@@ -57,7 +57,7 @@ jobs:
       #      if you need more than the default `go.sum`
       # ————————————————————————————————————————————————————————————————
       - name: Set up Go ${{ matrix.go-version }}
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: ${{ matrix.go-version }}
           cache: true                   # default, but explicit for clarity
