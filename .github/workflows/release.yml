@@ -34,7 +34,7 @@ jobs:
       # 2. Set up Go with a built‑in module and build cache
       # ———————————————————————————————————————————————
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version-file: go.mod # single source of truth
           cache: true
