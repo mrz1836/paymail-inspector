@@ -46,7 +46,7 @@ jobs:
       # 3. (Optional) Pre‑flight config validation
       # ———————————————————————————————————————————————
       - name: GoReleaser config check
-        uses: goreleaser/goreleaser-action@v6
+        uses: goreleaser/goreleaser-action@v7
         with:
           version: v2.0.1         # pin exact or at least major
           args: check
@@ -57,7 +57,7 @@ jobs:
       # 4. Build & publish the release
       # ———————————————————————————————————————————————
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v6
+        uses: goreleaser/goreleaser-action@v7
         with:
           version: v2.0.1
           args: release --clean --verbose
