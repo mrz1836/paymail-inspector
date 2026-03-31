@@ -54,7 +54,7 @@ pull_request_rules:
       - "#assignee=0"
     actions:
       assign:
-        users: [ "mrz1836" ]
+        users: ["mrz1836"]
 
   # ===============================================================================
   # ALERTS
@@ -165,11 +165,11 @@ pull_request_rules:
   - name: Welcome New Contributors
     conditions:
       - and:
-        - author!=dependabot[bot]
-        - author!=mergify[bot]
-        - author!=mrz1836
-        - author!=rohenaz
-        - author!=jadwahab
+          - author!=dependabot[bot]
+          - author!=mergify[bot]
+          - author!=mrz1836
+          - author!=rohenaz
+          - author!=jadwahab
     actions:
       comment:
         message: |
@@ -189,17 +189,7 @@ pull_request_rules:
         message: |
           This pull request looks stale. Feel free to reopen it if you think it's a mistake.
       label:
-        add: [ "stale" ]
-
-  # ===============================================================================
-  # BRANCHES
-  # ===============================================================================
-
-  - name: Delete head branch after merge
-    conditions:
-      - merged
-    actions:
-      delete_head_branch:
+        add: ["stale"]
 
   # ===============================================================================
   # CONVENTION
