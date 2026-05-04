@@ -10,9 +10,7 @@
 #  Created   : 2025-04-23
 #  Maintainer: @your-team-alias
 # ------------------------------------------------------------------------------------
-
 name: sync-labels
-
 #######################################################################################
 # EVENT TRIGGERS
 #
@@ -24,10 +22,9 @@ name: sync-labels
 #######################################################################################
 on:
   push:
-    branches: [master]           # Update if your default branch is "main"
+    branches: [master] # Update if your default branch is "main"
     paths:
-      - .github/labels.yml       # Runs *only* when this file changes
-
+      - .github/labels.yml # Runs *only* when this file changes
 #######################################################################################
 # GLOBAL PERMISSIONS
 #
@@ -37,7 +34,6 @@ on:
 permissions:
   contents: read
   issues: write
-
 jobs:
   sync-labels:
     # -------------------------------------------------------------------------------
@@ -46,7 +42,6 @@ jobs:
     # • ubuntu-latest maps to the latest LTS runner image.
     # -------------------------------------------------------------------------------
     runs-on: ubuntu-latest
-
     # -------------------------------------------------------------------------------
     #  CONCURRENCY
     #
@@ -56,7 +51,6 @@ jobs:
     concurrency:
       group: sync-labels-${{ github.ref }}
       cancel-in-progress: true
-
     steps:
       # ---------------------------------------------------------------------------
       # 1) Checkout repository
@@ -66,7 +60,6 @@ jobs:
       # ---------------------------------------------------------------------------
       - name: 🚚  Checkout code
         uses: actions/checkout@v6
-
       # ---------------------------------------------------------------------------
       # 2) Synchronize labels
       #
@@ -80,4 +73,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          manifest: .github/labels.yml      # Path to the label manifest
+          manifest: .github/labels.yml # Path to the label manifest

@@ -3,7 +3,6 @@
 # General
 # ---------------------------
 version: 2
-
 before:
   hooks:
     - make test
@@ -14,51 +13,42 @@ changelog:
       - '^.github:'
       - '^.vscode:'
       - '^test:'
-
 # ---------------------------
 # Builder
 # ---------------------------
 builds:
   - env:
-    - CGO_ENABLED=0
-    - GO111MODULE=on
+      - CGO_ENABLED=0
+      - GO111MODULE=on
     binary: "paymail"
     goarch:
-    - amd64
-    - arm64
+      - amd64
+      - arm64
     goos:
-    - darwin
-    - linux
-    - windows
+      - darwin
+      - linux
+      - windows
     goarm:
-    - "6"
-    - "7"
+      - "6"
+      - "7"
     ldflags:
-    - -s -w -X github.com/mrz1836/{{ .ProjectName }}/cmd.Version={{ .Version }}
-
+      - -s -w -X github.com/mrz1836/{{ .ProjectName }}/cmd.Version={{ .Version }}
 # ---------------------------
 # Archives + Checksums
 # ---------------------------
 archives:
   - wrap_in_directory: app
     name_template: >-
-      {{- .ProjectName }}_
-      {{- title .Os }}_
-      {{- if eq .Arch "amd64" }}x86_64
-      {{- else if eq .Arch "386" }}i386
-      {{- else }}{{ .Arch }}{{ end }}
-      {{- if .Arm }}v{{ .Arm }}{{ end -}}
+      {{- .ProjectName }}_ {{- title .Os }}_ {{- if eq .Arch "amd64" }}x86_64 {{- else if eq .Arch "386" }}i386 {{- else }}{{ .Arch }}{{ end }} {{- if .Arm }}v{{ .Arm }}{{ end -}}
 checksum:
   name_template: "{{ .ProjectName }}_checksums.txt"
   algorithm: sha256
-
 # ---------------------------
 # Github Release
 # ---------------------------
 release:
   prerelease: true
   name_template: "Release v{{.Version}}"
-
 # ---------------------------
 # Brews - OSX
 # ---------------------------
@@ -68,34 +58,27 @@ brews:
     repository:
       owner: mrz1836
       name: homebrew-paymail-inspector
-      branch: main  # optional; defaults to the default branch
+      branch: main # optional; defaults to the default branch
       pull_request:
         enabled: true
         draft: false
-
     commit_author:
       name: mrz1836
       email: mrz1818@protonmail.ch
-
     homepage: https://github.com/mrz1836/paymail-inspector
     description: |
       CLI app for interacting with paymail service providers
-
     caveats: |
       See the GitHub repo for more information.
-
     install: |
       bin.install "paymail"
-
     test: |
       system "#{bin}/paymail", "--version"
       system "#{bin}/paymail", "-h"
-
 # ---------------------------
 # Announce
 # ---------------------------
 announce:
-
   # See more at: https://goreleaser.com/customization/announce/#slack
   slack:
     enabled: false
@@ -104,12 +87,10 @@ announce:
     # username: ''
     # icon_emoji: ''
     # icon_url: ''
-
   # See more at: https://goreleaser.com/customization/announce/#twitter
   twitter:
     enabled: false
     message_template: '{{ .ProjectName }} {{ .Tag }} is out!'
-
   # See more at: https://goreleaser.com/customization/announce/#discord
   discord:
     enabled: false
@@ -120,7 +101,6 @@ announce:
     color: ''
     # Defaults to `https://goreleaser.com/static/avatar.png`
     icon_url: ''
-
   # See more at: https://goreleaser.com/customization/announce/#reddit
   reddit:
     enabled: false

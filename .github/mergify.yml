@@ -1,14 +1,12 @@
 pull_request_rules:
-
   # ===============================================================================
   # DEPENDABOT
   # ===============================================================================
-
   - name: Automatic Merge for Dependabot Minor Version Pull Requests
     conditions:
       - -draft
       - author~=^dependabot(|-preview)\[bot\]$
-      - check-success='test (1.23.x, ubuntu-latest)'
+      - check-success='test (1.25.x, ubuntu-latest)'
       - check-success='Analyze (go)'
       - title~=^Bump [^\s]+ from ([\d]+)\..+ to \1\.
     actions:
@@ -20,23 +18,21 @@ pull_request_rules:
   - name: Alert on major version detection
     conditions:
       - author~=^dependabot(|-preview)\[bot\]$
-      - check-success='test (1.23.x, ubuntu-latest)'
+      - check-success='test (1.25.x, ubuntu-latest)'
       - check-success='Analyze (go)'
       - -title~=^Bump [^\s]+ from ([\d]+)\..+ to \1\.
     actions:
       comment:
         message: "⚠️ @mrz1836: this is a major version bump and requires your attention"
-
   # ===============================================================================
   # AUTOMATIC MERGE (APPROVALS)
   # ===============================================================================
-
   - name: Automatic Merge ⬇️ on Approval ✔
     conditions:
       - "#approved-reviews-by>=1"
       - "#review-requested=0"
       - "#changes-requested-reviews-by=0"
-      - check-success='test (1.23.x, ubuntu-latest)'
+      - check-success='test (1.25.x, ubuntu-latest)'
       - check-success='Analyze (go)'
       - -title~=(?i)wip
       - label!=work-in-progress
@@ -44,22 +40,18 @@ pull_request_rules:
     actions:
       merge:
         method: merge
-
   # ===============================================================================
   # AUTHOR
   # ===============================================================================
-
   - name: Auto-Assign Author
     conditions:
       - "#assignee=0"
     actions:
       assign:
         users: ["mrz1836"]
-
   # ===============================================================================
   # ALERTS
   # ===============================================================================
-
   - name: Notify on merge
     conditions:
       - merged
@@ -81,7 +73,6 @@ pull_request_rules:
     actions:
       comment:
         message: "🆘 @{{author}}: unable to merge due to CI failure."
-
   # ===============================================================================
   # LABELS
   # ===============================================================================
@@ -102,7 +93,6 @@ pull_request_rules:
   # - test:      test related changes
   # - wip:       work in progress PR
   # ===============================================================================
-
   - name: Work in Progress
     conditions:
       - "head~=(?i)^wip" # if the PR branch starts with wip/
@@ -157,11 +147,9 @@ pull_request_rules:
     actions:
       label:
         add: ["idea"]
-
   # ===============================================================================
   # CONTRIBUTORS
   # ===============================================================================
-
   - name: Welcome New Contributors
     conditions:
       - and:
@@ -174,11 +162,9 @@ pull_request_rules:
       comment:
         message: |
           Welcome to our open-source project! 💘
-
   # ===============================================================================
   # STALE BRANCHES
   # ===============================================================================
-
   - name: Close stale pull request
     conditions:
       - base=master
@@ -191,24 +177,24 @@ pull_request_rules:
       label:
         add: ["stale"]
 
-  # ===============================================================================
-  # CONVENTION
-  # ===============================================================================
-  # https://www.conventionalcommits.org/en/v1.0.0/
-  # Premium feature only
+# ===============================================================================
+# CONVENTION
+# ===============================================================================
+# https://www.conventionalcommits.org/en/v1.0.0/
+# Premium feature only
 
-  #- name: Conventional Commit
-  #  conditions:
-  #    - "title~=^(fix|feat|docs|style|refactor|perf|test|build|ci|chore|revert)(?:\\(.+\\))?:"
-  #  actions:
-  #    post_check:
-  #      title: |
-  #        {% if check_succeed %}
-  #        Title follows Conventional Commit
-  #        {% else %}
-  #        Title does not follow Conventional Commit
-  #        {% endif %}
-  #      summary: |
-  #        {% if not check_succeed %}
-  #        Your pull request title must follow [Conventional Commit](https://www.conventionalcommits.org/en/v1.0.0/).
-  #        {% endif %}
+#- name: Conventional Commit
+#  conditions:
+#    - "title~=^(fix|feat|docs|style|refactor|perf|test|build|ci|chore|revert)(?:\\(.+\\))?:"
+#  actions:
+#    post_check:
+#      title: |
+#        {% if check_succeed %}
+#        Title follows Conventional Commit
+#        {% else %}
+#        Title does not follow Conventional Commit
+#        {% endif %}
+#      summary: |
+#        {% if not check_succeed %}
+#        Your pull request title must follow [Conventional Commit](https://www.conventionalcommits.org/en/v1.0.0/).
+#        {% endif %}

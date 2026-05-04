@@ -2,17 +2,15 @@
 # ----------------------
 codecov:
   require_ci_to_pass: true
-
 # Coverage configuration
 # ----------------------
 coverage:
   status:
     patch: false
-  range: 70..90     # First number represents red, and second represents green
+  range: 70..90 # First number represents red, and second represents green
   # (default is 70..100)
-  round: down       # up, down, or nearest
-  precision: 2      # Number of decimal places, between 0 and 5
-
+  round: down # up, down, or nearest
+  precision: 2 # Number of decimal places, between 0 and 5
 # Ignoring Paths
 # --------------
 # which folders/files to ignore
@@ -20,7 +18,6 @@ ignore:
   - ".make/**"
   - ".github/**"
   - "docs/**"
-
 # Parsers
 # --------------
 parsers:
@@ -30,7 +27,6 @@ parsers:
       loop: yes
       method: no
       macro: no
-
 # Pull request comments:
 # ----------------------
 # Diff is the Coverage Diff of the pull request.
