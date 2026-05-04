@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/bsv-blockchain/go-paymail"
 	"github.com/fatih/color"
 	"github.com/mrz1836/go-sanitize"
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/spf13/cobra"
-	"github.com/tonicpow/go-paymail"
 )
 
 // brfcCmd represents the brfc command (Bitcoin SV Request-For-Comments)
@@ -53,7 +53,6 @@ Read more at: `+color.CyanString("http://bsvalias.org/01-brfc-specifications.htm
 		return nil
 	},
 	Run: func(_ *cobra.Command, args []string) {
-
 		// Load the BRFC specifications via new client
 		client, err := newPaymailClient(false, nameServer)
 		if err != nil {
@@ -206,7 +205,6 @@ func simpleSearch(s, substr string) bool {
 
 // showBrfc will show a given brfc
 func showBrfc(brfc *paymail.BRFCSpec) {
-
 	// Header
 	displayHeader(chalker.BOLD, brfc.Title+" v"+brfc.Version)
 

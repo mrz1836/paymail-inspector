@@ -263,7 +263,7 @@ paymail whois mrz --no-cache
 - [columnize](https://github.com/ryanuber/columnize) for displaying terminal data in columns
 - [dns](https://github.com/miekg/dns) package for advanced DNS functionality
 - [go-homedir](https://github.com/mitchellh/go-homedir) to find the home directory
-- [go-paymail](https://github.com/tonicpow/go-paymail) for Paymail library support
+- [go-paymail](https://github.com/bsv-blockchain/go-paymail) for Paymail library support
 - [go-sanitize](https://github.com/mrz1836/go-sanitize) for sanitation and data formatting
 - [go-validate](https://github.com/mrz1836/go-validate) for domain/email/ip validations
 - [resty](https://github.com/go-resty/resty) for custom HTTP client support

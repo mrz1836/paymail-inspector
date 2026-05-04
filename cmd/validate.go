@@ -5,11 +5,11 @@ import (
 	"net"
 	"strings"
 
+	"github.com/bsv-blockchain/go-paymail"
 	"github.com/fatih/color"
 	"github.com/mrz1836/go-sanitize"
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/spf13/cobra"
-	"github.com/tonicpow/go-paymail"
 )
 
 // validateCmd represents the validate command
@@ -46,7 +46,6 @@ Read more at: `+color.CyanString("http://bsvalias.org/index.html")),
 		return nil
 	},
 	Run: func(_ *cobra.Command, args []string) {
-
 		var alias, domain, paymailAddress string
 
 		// Extract the parts given
@@ -105,7 +104,6 @@ Read more at: `+color.CyanString("http://bsvalias.org/index.html")),
 		// Validate the DNSSEC if the flag is true
 		displayHeader(chalker.DEFAULT, fmt.Sprintf("Checking %s for DNSSEC validation...", color.CyanString(checkDomain)))
 		if !skipDNSCheck {
-
 			// Fire the check request
 			if result := client.CheckDNSSEC(checkDomain); result.DNSSEC {
 				chalker.Log(chalker.SUCCESS, fmt.Sprintf("DNSSEC found and valid and found %d DS record(s)", result.Answer.DSRecordCount))

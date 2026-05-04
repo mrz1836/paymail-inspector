@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/bsv-blockchain/go-paymail"
 	"github.com/fatih/color"
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/spf13/cobra"
-	"github.com/tonicpow/go-paymail"
 )
 
 // verifyCmd represents the verify command
@@ -44,7 +44,6 @@ Read more at: `+color.CyanString("http://bsvalias.org/05-verify-public-key-owner
 		return nil
 	},
 	Run: func(_ *cobra.Command, args []string) {
-
 		var paymailAddress, alias, domain, pubKey string
 
 		// Convert handle if detected

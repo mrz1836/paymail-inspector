@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/bsv-blockchain/go-paymail"
 	"github.com/fatih/color"
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/tonicpow/go-paymail"
 )
 
 // resolveCmd represents the resolve command
@@ -44,7 +44,6 @@ Read more at: `+color.CyanString("http://bsvalias.org/04-01-basic-address-resolu
 		return nil
 	},
 	Run: func(_ *cobra.Command, args []string) {
-
 		// Extract sender parts
 		senderAlias, senderDomain, senderAddress := paymail.SanitizePaymail(viper.GetString(flagSenderHandle))
 

@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/bsv-blockchain/go-paymail"
 	"github.com/fatih/color"
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/spf13/cobra"
-	"github.com/tonicpow/go-paymail"
 )
 
 const (
@@ -47,7 +47,6 @@ Read more at: `+color.CyanString("https://docs.moneybutton.com/docs/paymail-07-p
 		return nil
 	},
 	Run: func(_ *cobra.Command, args []string) {
-
 		// Set the domain and paymail
 		_, domain, paymailAddress := paymail.SanitizePaymail(paymail.ConvertHandle(args[0], false))
 

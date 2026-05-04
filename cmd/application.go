@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/bsv-blockchain/go-paymail"
 	"github.com/mitchellh/go-homedir"
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/mrz1836/paymail-inspector/integrations/baemail"
@@ -18,14 +19,12 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
 	"github.com/spf13/viper"
-	"github.com/tonicpow/go-paymail"
 )
 
 const versionPrefix = ": v"
 
 // Core application loader (runs before every cmd)
 func init() {
-
 	// Set up the application resources
 	setupAppResources()
 
@@ -68,7 +67,6 @@ func er(err error) {
 
 // initConfig reads in config file and ENV variables if set
 func initConfig() {
-
 	// Custom configuration file and location
 	if configFile != "" {
 
@@ -79,7 +77,7 @@ func initConfig() {
 	} else {
 
 		// Make a dummy file if it doesn't exist
-		file, err := os.OpenFile(filepath.Join(applicationDirectory, configFileDefault+".yaml"), os.O_RDONLY|os.O_CREATE, 0600)
+		file, err := os.OpenFile(filepath.Join(applicationDirectory, configFileDefault+".yaml"), os.O_RDONLY|os.O_CREATE, 0o600)
 		er(err)
 		_ = file.Close() // Error is not needed here, just close and continue
 
@@ -100,7 +98,6 @@ func initConfig() {
 
 // generateDocumentation will generate all documentation about each command
 func generateDocumentation() {
-
 	// Replace the colorful logs in terminal (displays in Cobra docs) (color numbers generated)
 	replacer := strings.NewReplacer("[32m", "```", "[33m", "```\n", "[39m", "", "[22m", "", "[36m", "", "[1m", "", "[40m", "", "[49m", "", "\u001B", "", "[0m", "")
 	rootCmd.Long = replacer.Replace(rootCmd.Long)
@@ -124,7 +121,6 @@ func generateDocumentation() {
 
 // setupAppResources will set up the local application directories
 func setupAppResources() {
-
 	// Find home directory
 	home, err := homedir.Dir()
 	er(err)

@@ -5,11 +5,11 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/bsv-blockchain/go-paymail"
 	"github.com/fatih/color"
 	"github.com/mrz1836/go-sanitize"
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/spf13/cobra"
-	"github.com/tonicpow/go-paymail"
 )
 
 // capabilitiesCmd represents the capabilities command
@@ -45,7 +45,6 @@ Read more at: `+color.CyanString("http://bsvalias.org/02-02-capability-discovery
 		return nil
 	},
 	Run: func(_ *cobra.Command, args []string) {
-
 		// Sanitize the domain
 		domain, _ := sanitize.Domain(args[0], false, true)
 

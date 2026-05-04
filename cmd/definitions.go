@@ -1,12 +1,12 @@
 package cmd
 
 import (
+	"github.com/bsv-blockchain/go-paymail"
 	"github.com/mrz1836/go-sanitize"
 	"github.com/mrz1836/paymail-inspector/integrations/baemail"
 	"github.com/mrz1836/paymail-inspector/integrations/bitpic"
 	"github.com/mrz1836/paymail-inspector/integrations/powping"
 	"github.com/mrz1836/paymail-inspector/integrations/roundesk"
-	"github.com/tonicpow/go-paymail"
 )
 
 // Version is set manually (also make:build overwrites this value from Github's latest tag)

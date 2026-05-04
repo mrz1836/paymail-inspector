@@ -6,11 +6,11 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/bsv-blockchain/go-paymail"
 	"github.com/fatih/color"
 	"github.com/mrz1836/go-sanitize"
 	"github.com/mrz1836/paymail-inspector/chalker"
 	"github.com/spf13/cobra"
-	"github.com/tonicpow/go-paymail"
 )
 
 // whoisCmd represents the whois command
@@ -42,7 +42,6 @@ Search `+strconv.Itoa(len(providers))+` public paymail providers for a handle.`)
 		return nil
 	},
 	Run: func(_ *cobra.Command, args []string) {
-
 		// Handle to search
 		var handle string
 
