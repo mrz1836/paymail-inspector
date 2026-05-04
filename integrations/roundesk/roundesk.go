@@ -50,7 +50,6 @@ type Profile struct {
 // GetProfile will get a roundesk profile if it exists for the given paymail address
 // Specs: https://roundesk.co/
 func GetProfile(alias, domain string, tracing bool) (response *Response, err error) {
-
 	// Set the url for the request
 	reqURL := fmt.Sprintf("%su/%s@%s", Network, alias, domain)
 
@@ -62,7 +61,7 @@ func GetProfile(alias, domain string, tracing bool) (response *Response, err err
 		req.EnableTrace()
 	}
 	if resp, err = req.Get(reqURL); err != nil {
-		return
+		return response, err
 	}
 
 	// Start the response
@@ -80,12 +79,12 @@ func GetProfile(alias, domain string, tracing bool) (response *Response, err err
 			err = fmt.Errorf("bad response from roundesk: %d", response.StatusCode)
 		}
 
-		return
+		return response, err
 	}
 
 	// No profile result?
 	if string(resp.Body()) == "{}" || string(resp.Body()) == `{"granted":false}` {
-		return
+		return response, err
 	}
 
 	// Decode the body of the response
@@ -96,5 +95,5 @@ func GetProfile(alias, domain string, tracing bool) (response *Response, err err
 		response.Profile.Paymail = ""
 	}
 
-	return
+	return response, err
 }

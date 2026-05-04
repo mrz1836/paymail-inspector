@@ -37,7 +37,6 @@ Help contribute via Github!
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-
 	// Create a database connection (Don't require DB for now)
 	if err := database.Connect(applicationName, "db_"+applicationName); err != nil {
 		chalker.Log(chalker.ERROR, fmt.Sprintf("Error connecting to database: %s", err.Error()))

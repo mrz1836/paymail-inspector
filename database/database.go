@@ -13,13 +13,10 @@ import (
 	"github.com/dgraph-io/badger/v3"
 )
 
-var (
-	db *badger.DB // The active database connection
-)
+var db *badger.DB // The active database connection
 
 // Connect will make a new database connection and new folder/file(s) if needed
 func Connect(folder, database string) (err error) {
-
 	// Get the home dir
 	var home string
 	if home, err = os.UserHomeDir(); err != nil {
@@ -30,7 +27,7 @@ func Connect(folder, database string) (err error) {
 	opts := badger.DefaultOptions(filepath.Join(home, folder, database)).WithLogger(nil)
 	// opts.EventLogging = false
 	db, err = badger.Open(opts)
-	return
+	return err
 }
 
 // Disconnect will close the db connection

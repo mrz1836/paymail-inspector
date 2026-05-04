@@ -41,7 +41,6 @@ type Profile struct {
 // GetProfile will get a powping profile if it exists for the given paymail address
 // Specs: https://powping.com/about
 func GetProfile(alias, domain string, tracing bool) (response *Response, err error) {
-
 	// Set the url for the request
 	reqURL := fmt.Sprintf("%su?paymail=%s@%s", Network, alias, domain)
 
@@ -53,7 +52,7 @@ func GetProfile(alias, domain string, tracing bool) (response *Response, err err
 		req.EnableTrace()
 	}
 	if resp, err = req.Get(reqURL); err != nil {
-		return
+		return response, err
 	}
 
 	// Start the response
@@ -71,16 +70,16 @@ func GetProfile(alias, domain string, tracing bool) (response *Response, err err
 			err = fmt.Errorf("bad response from powping: %d", response.StatusCode)
 		}
 
-		return
+		return response, err
 	}
 
 	// No result
 	if string(resp.Body()) == "null" {
-		return
+		return response, err
 	}
 
 	// Decode the body of the response
 	err = json.Unmarshal(resp.Body(), &response.Profile)
 
-	return
+	return response, err
 }

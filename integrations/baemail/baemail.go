@@ -36,7 +36,6 @@ type Response struct {
 // HasProfile will check if a profile exists for the given paymail address
 // Specs: (no docs)
 func HasProfile(alias, domain string, tracing bool) (response *Response, err error) {
-
 	// Set the url for the request
 	reqURL := fmt.Sprintf("%s/api/exists/%s@%s", Network, alias, domain)
 
@@ -48,7 +47,7 @@ func HasProfile(alias, domain string, tracing bool) (response *Response, err err
 		req.EnableTrace()
 	}
 	if resp, err = req.Get(reqURL); err != nil {
-		return
+		return response, err
 	}
 
 	// Start the response
@@ -63,7 +62,7 @@ func HasProfile(alias, domain string, tracing bool) (response *Response, err err
 	response.StatusCode = resp.StatusCode()
 	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusNotModified {
 		err = fmt.Errorf("bad response from baemail provider: %d", response.StatusCode)
-		return
+		return response, err
 	}
 
 	// Test the response
@@ -72,7 +71,7 @@ func HasProfile(alias, domain string, tracing bool) (response *Response, err err
 		response.ComposeURL = Compose(alias, domain)
 	}
 
-	return
+	return response, err
 }
 
 // Compose will return an url for composing a baemail

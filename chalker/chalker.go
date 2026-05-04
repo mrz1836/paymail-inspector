@@ -26,7 +26,7 @@ func Error(body string) error {
 }
 
 // Log writes chalks to console
-func Log(level string, body string) {
+func Log(level, body string) {
 	switch level {
 	case INFO:
 		color.Cyan(body)

@@ -78,7 +78,6 @@ type Meta struct {
 // GetPic will check if a bitpic exists for the given paymail address and fetch the url if found
 // Specs: https://bitpic.network/about
 func GetPic(alias, domain string, tracing bool) (response *Response, err error) {
-
 	// Set the url for the request
 	reqURL := fmt.Sprintf("https://%s/exists/%s@%s", Network, alias, domain)
 
@@ -90,7 +89,7 @@ func GetPic(alias, domain string, tracing bool) (response *Response, err error) 
 		req.EnableTrace()
 	}
 	if resp, err = req.Get(reqURL); err != nil {
-		return
+		return response, err
 	}
 
 	// Start the response
@@ -105,7 +104,7 @@ func GetPic(alias, domain string, tracing bool) (response *Response, err error) 
 	response.StatusCode = resp.StatusCode()
 	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusNotModified {
 		err = fmt.Errorf("bad response from bitpic provider: %d", response.StatusCode)
-		return
+		return response, err
 	}
 
 	// Test the response
@@ -114,7 +113,7 @@ func GetPic(alias, domain string, tracing bool) (response *Response, err error) 
 		response.URL = URL(alias, domain)
 	}
 
-	return
+	return response, err
 }
 
 // URL will return an HTTP url for the bitpic avatar using alias and domain
@@ -138,7 +137,6 @@ func URLFromPaymail(paymail string) string {
 // Search will perform a search on the BitPic network
 // https://txt.bitpic.network/search/json?text=alias@domain
 func Search(alias, domain string, tracing bool) (response *SearchResponse, err error) {
-
 	// Set the url for the request
 	reqURL := fmt.Sprintf("https://txt.%s/search/json?text=%s@%s", bitPicURL, alias, domain)
 
@@ -150,7 +148,7 @@ func Search(alias, domain string, tracing bool) (response *SearchResponse, err e
 		req.EnableTrace()
 	}
 	if resp, err = req.Get(reqURL); err != nil {
-		return
+		return response, err
 	}
 
 	// Start the response
@@ -165,16 +163,16 @@ func Search(alias, domain string, tracing bool) (response *SearchResponse, err e
 	response.StatusCode = resp.StatusCode()
 	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusNotModified {
 		err = fmt.Errorf("bad response from bitpic provider: %d", response.StatusCode)
-		return
+		return response, err
 	}
 
 	// No profile result?
 	if string(resp.Body()) == "{}" {
-		return
+		return response, err
 	}
 
 	// Decode the body of the response
 	err = json.Unmarshal(resp.Body(), &response)
 
-	return
+	return response, err
 }
