@@ -96,7 +96,7 @@ loc: ## Total lines of code table
 	@echo "| Go Files   | $(LOC_GO)   | $(DATE)     |"
 
 .PHONY: release
-release: ## Run production release (requires github_token)
+release:: ## Run production release (requires github_token)
 	@echo "Running release..."
 	@test -n "$(github_token)"
 	@GITHUB_TOKEN=$(github_token) goreleaser --rm-dist
