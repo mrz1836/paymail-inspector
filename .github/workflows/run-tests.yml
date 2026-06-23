@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Write go list
         run: go list -json -m all > go.list
       - name: Ask Nancy
@@ -42,7 +42,7 @@ jobs:
       # 1. Check out the code so we can hash go.mod/go.sum for caching
       # ————————————————————————————————————————————————————————————————
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       # ————————————————————————————————————————————————————————————————
       # 2. Install the requested Go version *with built‑in caching enabled*
       #    • Caches GOMODCACHE and GOCACHE automatically
@@ -75,7 +75,7 @@ jobs:
       # 5. Cache golangci-lint analysis
       # ————————————————————————————————————————————————————————————————
       - name: Cache golangci-lint cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.cache/golangci-lint
           key: ${{ runner.os }}-golangci-${{ hashFiles('**/*.go', '.golangci.json') }}
