@@ -59,7 +59,7 @@ jobs:
       #   shallow clone (fetch-depth: 1) is fine.
       # ---------------------------------------------------------------------------
       - name: 🚚  Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       # ---------------------------------------------------------------------------
       # 2) Synchronize labels
       #
