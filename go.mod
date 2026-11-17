@@ -3,7 +3,7 @@ module github.com/mrz1836/paymail-inspector
 go 1.26.0
 
 require (
-	github.com/bsv-blockchain/go-paymail v0.28.0
+	github.com/bsv-blockchain/go-paymail v0.28.1
 	github.com/dgraph-io/badger/v3 v3.2103.5
 	github.com/fatih/color v1.19.0
 	github.com/go-resty/resty/v2 v2.17.2
@@ -15,7 +15,7 @@ require (
 )
 
 require (
-	github.com/bsv-blockchain/go-sdk v1.7.3 // indirect
+	github.com/bsv-blockchain/go-sdk v1.7.4 // indirect
 	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.7 // indirect
