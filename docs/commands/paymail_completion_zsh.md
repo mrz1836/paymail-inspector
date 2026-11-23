@@ -13,7 +13,7 @@ to enable it.  You can execute the following once:
 
 To load completions in your current shell session:
 
-	source <(paymail completion zsh); compdef _paymail paymail
+	source <(paymail completion zsh)
 
 To load completions for every new session, execute once:
 
@@ -35,19 +35,19 @@ paymail completion zsh [flags]
 ### Options
 
 ```
-  -h, --help              help for zsh
-      --no-descriptions   disable completion descriptions
+  -h, --help[=true|false]              help for zsh
+      --no-descriptions[=true|false]   disable completion descriptions
 ```
 
 ### Options inherited from parent commands
 
 ```
-      --bsvalias string   The bsvalias version (default "1.0")
-      --config string     Custom config file (default is $HOME/paymail/config.yaml)
-      --docs              Generate docs from all commands (./docs/commands)
-      --flush-cache       Flushes ALL cache, empties local database
-      --no-cache          Turn off caching for this specific command
-  -t, --skip-tracing      Turn off request tracing information
+      --bsvalias string             The bsvalias version to expect from providers (default "1.0")
+      --config string               Config file (default: <user config dir>/paymail-inspector/config.yaml)
+      --flush-cache[=true|false]    Empty the local response cache before running
+      --no-cache[=true|false]       Skip cached responses for this command (fresh results are still cached)
+      --no-color[=true|false]       Disable colored output (NO_COLOR is honored too)
+  -t, --skip-tracing[=true|false]   Hide per-request network timing
 ```
 
 ### SEE ALSO

@@ -1,67 +1,64 @@
 ## paymail resolve
 
-Resolves a paymail address
+Resolve a paymail address to its pubkey, output script, and profile
 
 ### Synopsis
 
-```
-                            .__               
-_______   ____   __________ |  |___  __ ____  
-\_  __ \_/ __ \ /  ___/  _ \|  |\  \/ // __ \ 
- |  | \/\  ___/ \___ (  <_> )  |_\   /\  ___/ 
+```text
+                            .__
+_______   ____   __________ |  |___  __ ____
+\_  __ \_/ __ \ /  ___/  _ \|  |\  \/ // __ \
+ |  | \/\  ___/ \___ (  <_> )  |_\   /\  ___/
  |__|    \___  >____  >____/|____/\_/  \___  >
              \/     \/                     \/
 ```
 
-Resolves a paymail address into a hex-encoded Bitcoin script, address and public profile (if found).
+Resolve a paymail address into its public key, a hex-encoded Bitcoin output
+script and address, and its public profile (when published).
 
-Given a sender and a receiver, where the sender knows the receiver's 
-paymail handle <alias>@<domain>.<tld>, the sender can perform Service Discovery against 
-the receiver and request a payment destination from the receiver's paymail service.
+Given a sender and a receiver, where the sender knows the receiver's paymail
+handle <alias>@<domain>.<tld>, the sender performs service discovery against
+the receiver and requests a payment destination from the receiver's paymail
+service.
 
-Read more at: http://bsvalias.org/04-01-basic-address-resolution.html
+Read more at: https://bitcoin-sv-specs.github.io/brfc-paymail/04-01-basic-address-resolution.html
 
 ```
-paymail resolve [flags]
+paymail resolve <paymail> [flags]
 ```
 
 ### Examples
 
 ```
-paymail resolve mrz@moneybutton.com
-paymail r mrz@moneybutton.com
-paymail r 1mrz
+  paymail resolve mrz@relayx.io
+  paymail r mrz@relayx.io --sender-handle you@relayx.io
+  paymail r 1mrz
 ```
 
 ### Options
 
 ```
-  -a, --amount uint            Amount in satoshis for the payment request
-  -h, --help                   help for resolve
-  -p, --purpose string         Purpose for the transaction
-      --sender-handle string   Sender's paymail handle. Required by bsvalias spec. Receiver paymail used if not specified.
-      --sender-name string     The sender's name
-  -s, --signature string       The signature of the entire request
-      --skip-baemail           Skip trying to get an associated Baemail account
-      --skip-bitpic            Skip trying to get an associated Bitpic
-      --skip-pki               Skip the pki request
-      --skip-powping           Skip trying to get an associated PowPing account
-      --skip-public-profile    Skip the public profile request
-      --skip-roundesk          Skip trying to get an associated Roundesk profile
+  -a, --amount uint                        Amount in satoshis for the payment request
+  -h, --help[=true|false]                  help for resolve
+  -p, --purpose string                     Purpose of the payment
+      --sender-handle string               Sender's paymail address (default: the receiver's address)
+      --sender-name string                 Sender's name
+  -s, --signature string                   Signature of the sender request (when the provider enforces sender validation)
+      --skip-public-profile[=true|false]   Skip the public profile request
 ```
 
 ### Options inherited from parent commands
 
 ```
-      --bsvalias string   The bsvalias version (default "1.0")
-      --config string     Custom config file (default is $HOME/paymail/config.yaml)
-      --docs              Generate docs from all commands (./docs/commands)
-      --flush-cache       Flushes ALL cache, empties local database
-      --no-cache          Turn off caching for this specific command
-  -t, --skip-tracing      Turn off request tracing information
+      --bsvalias string             The bsvalias version to expect from providers (default "1.0")
+      --config string               Config file (default: <user config dir>/paymail-inspector/config.yaml)
+      --flush-cache[=true|false]    Empty the local response cache before running
+      --no-cache[=true|false]       Skip cached responses for this command (fresh results are still cached)
+      --no-color[=true|false]       Disable colored output (NO_COLOR is honored too)
+  -t, --skip-tracing[=true|false]   Hide per-request network timing
 ```
 
 ### SEE ALSO
 
-* [paymail](paymail.md)	 - Inspect, validate domains or resolve paymail addresses
+* [paymail](paymail.md)	 - Inspect, validate and resolve paymail addresses and domains
 

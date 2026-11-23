@@ -1,11 +1,11 @@
 ## paymail verify
 
-Verifies if a paymail is associated to a pubkey
+Verify that a pubkey belongs to a paymail address
 
 ### Synopsis
 
-```
-                   .__  _____       
+```text
+                   .__  _____
 ___  __ ___________|__|/ ____\__.__.
 \  \/ // __ \_  __ \  \   __<   |  |
  \   /\  ___/|  | \/  ||  |  \___  |
@@ -13,45 +13,47 @@ ___  __ ___________|__|/ ____\__.__.
            \/                \/
 ```
 
-Verify will check the paymail address against a given pubkey using the provider domain (if capability is supported).
+Ask the provider of a paymail address whether a public key is a valid identity
+key for it (when the provider supports the capability). The arguments may be
+given in either order.
 
-This capability allows clients to verify if a given public key is a valid identity key for a given paymail handle.
+The key returned by pki for a handle can change over time, which makes data
+signed with an old key hard to verify: holding the key is not proof that it
+belonged to the user. This capability answers exactly that question.
 
-The public key returned by pki flow for a given paymail handle may change over time. 
-This situation may produce troubles to verify data signed using old keys, because even having the keys, 
-the verifier doesn't know if the public key actually belongs to the right user.
+The command exits non-zero when the provider reports no match.
 
-Read more at: http://bsvalias.org/05-verify-public-key-owner.html
+Read more at: https://bitcoin-sv-specs.github.io/brfc-paymail/05-verify-public-key-owner.html
 
 ```
-paymail verify [flags]
+paymail verify <paymail> <pubkey> [flags]
 ```
 
 ### Examples
 
 ```
-paymail verify mrz@moneybutton.com 02ead23149a1e33df17325ec7a7ba9e0b20c674c57c630f527d69b866aa9b65b10
-paymail verify 1mrz 0352530c305378fd9dfd99f8c8c44e9092efa7c1674b61d4e9be65f92aa7a77bbe
+  paymail verify mrz@simply.cash 022d613a707aeb7b0e2ed73157d401d7157bff7b6c692733caa656e8e4ed5570ec
+  paymail verify 022d613a707aeb7b0e2ed73157d401d7157bff7b6c692733caa656e8e4ed5570ec mrz@simply.cash
 ```
 
 ### Options
 
 ```
-  -h, --help   help for verify
+  -h, --help[=true|false]   help for verify
 ```
 
 ### Options inherited from parent commands
 
 ```
-      --bsvalias string   The bsvalias version (default "1.0")
-      --config string     Custom config file (default is $HOME/paymail/config.yaml)
-      --docs              Generate docs from all commands (./docs/commands)
-      --flush-cache       Flushes ALL cache, empties local database
-      --no-cache          Turn off caching for this specific command
-  -t, --skip-tracing      Turn off request tracing information
+      --bsvalias string             The bsvalias version to expect from providers (default "1.0")
+      --config string               Config file (default: <user config dir>/paymail-inspector/config.yaml)
+      --flush-cache[=true|false]    Empty the local response cache before running
+      --no-cache[=true|false]       Skip cached responses for this command (fresh results are still cached)
+      --no-color[=true|false]       Disable colored output (NO_COLOR is honored too)
+  -t, --skip-tracing[=true|false]   Hide per-request network timing
 ```
 
 ### SEE ALSO
 
-* [paymail](paymail.md)	 - Inspect, validate domains or resolve paymail addresses
+* [paymail](paymail.md)	 - Inspect, validate and resolve paymail addresses and domains
 
