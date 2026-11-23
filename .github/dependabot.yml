@@ -55,7 +55,7 @@ updates:
       semver-major-days: 14
       semver-minor-days: 7
       semver-patch-days: 3
-      exclude: ["github.com/bsv-blockchain/*", "github.com/mrz1836/*", "golang.org/x/*"]
+      exclude: ["github.com/bsv-blockchain/*", "github.com/mrz1836/*"]
 
   # ──────────────────────────────────────────────────────────────
   # 2. GitHub Actions Workflows
