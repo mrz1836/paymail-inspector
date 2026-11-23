@@ -1,0 +1,39 @@
+# EditorConfig helps maintain consistent coding styles
+root = true
+
+[*]
+charset                 = utf-8
+end_of_line             = lf
+indent_style            = tab
+indent_size             = 4
+insert_final_newline    = true
+trim_trailing_whitespace = true
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.{yml,yaml}]
+indent_style = space
+indent_size  = 2
+
+[*.{json,prettierrc}]
+indent_style = space
+indent_size  = 4
+
+[*.{js,mjs,cjs,ts}]
+indent_style = space
+indent_size  = 4
+
+[*.py]
+indent_style = space
+indent_size  = 4
+
+[{Makefile,*.mk}]
+indent_style = tab
+
+[*.{xml,cff}]
+indent_style = space
+indent_size  = 2
+
+[{LICENSE,Dockerfile,.gitignore,.dockerignore,.prettierignore}]
+insert_final_newline = true

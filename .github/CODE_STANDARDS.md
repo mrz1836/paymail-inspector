@@ -1,34 +1,51 @@
-# Code Standards
+# ✅ Code Standards
 
-This project uses the following code standards and specifications from:
-- [effective go](https://golang.org/doc/effective_go.html)
-- [go benchmarks](https://golang.org/pkg/testing/#hdr-Benchmarks)
-- [go examples](https://golang.org/pkg/testing/#hdr-Examples)
-- [go tests](https://golang.org/pkg/testing/)
-- [godoc](https://godoc.org/golang.org/x/tools/cmd/godoc)
-- [gofmt](https://golang.org/cmd/gofmt/)
-- [golangci-lint](https://golangci-lint.run/)
-- [report card](https://goreportcard.com/)
+Welcome to a modern Go codebase.
 
-### *effective go* standards
-View the [effective go](https://golang.org/doc/effective_go.html) standards documentation.
+This library follows best-in-class practices for clarity, performance, and maintainability.
 
-### *golangci-lint* specifications
-The package [golangci-lint](https://golangci-lint.run/usage/quick-start) runs several linters in one package/cmd.
+<br/>
 
-View the active linters in the [configuration file](../.golangci.yml).
+## 🎓 Effective Go
 
-Install via macOS:
-```shell
-brew install golangci-lint
-```
+We adhere to the patterns and philosophy in [Effective Go](https://golang.org/doc/effective_go.html).
 
-Install via Linux and Windows:
-```shell
-# binary will be $(go env GOPATH)/bin/golangci-lint
-curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.31.0
-golangci-lint --version
-```
+Stick to idiomatic code. Avoid cleverness when clarity wins.
 
-### *godoc* specifications
-All code is written with documentation in mind. Follow the best practices with naming, examples and function descriptions.
+<br/>
+
+## 🧰 Project Conventions
+
+Everything lives in our [AGENTS.md](./AGENTS.md) file. Read it. Bookmark it. Trust it.
+
+Here’s a quick overview of what you'll find:
+- Directory structure and related governance docs
+- Naming conventions for code and files
+- Commenting standards and templates
+- Development, testing, and coverage standards
+- Error handling practices in Go
+- Commit and branch naming conventions
+- Pull request conventions and required sections
+- Labeling conventions for GitHub issues/PRs
+- Build system and tooling overview
+- And more!
+
+This is intended for AI agents like [GPT](https://chatgpt.com/) and [Claude](https://claude.ai), but also for us human developers too!
+
+<br/>
+
+## 📄 Golang Reference Material
+
+When in doubt, check the official docs:
+
+* ✨ [Effective Go](https://golang.org/doc/effective_go.html)
+* ⚖️ [Go Benchmarks](https://golang.org/pkg/testing/#hdr-Benchmarks)
+* 📖 [Go Examples](https://golang.org/pkg/testing/#hdr-Examples)
+* ✅ [Go Testing Guide](https://golang.org/pkg/testing/)
+* 📃 [godoc](https://pkg.go.dev/golang.org/x/tools/cmd/godoc)
+* 🔧 [gofmt](https://golang.org/cmd/gofmt/)
+* 📊 [golangci-lint](https://golangci-lint.run/)
+
+<br/>
+
+Happy coding — keep it clean, idiomatic, and readable. ✨
