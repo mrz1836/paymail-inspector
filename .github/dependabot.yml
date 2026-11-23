@@ -11,15 +11,20 @@
 #   https://docs.github.com/en/code-security/dependabot/configuration-options-for-dependency-updates
 #
 # Security Hardened Defaults:
-#   • Weekly cadence (Tuesday 11:00 America/New_York) – align with typical maintenance windows.
+#   • Weekly cadence (Wednesday 11:00 America/New_York) – align with typical maintenance windows.
 #   • Direct dependencies only – prevents unsolicited transitive churn.
 #   • PRs labeled, assigned, and target the protected master branch.
 #   • PR titles prefixed with chore(scope): – conventional commits.
 #   • Force‑push and delete‑branch disabled via branch‑protection rules.
 #   • PR limit = 10 to avoid queue flooding.
 #   • All dependency PRs require passing CI checks before merging.
+#   • Cooldown – new releases must age 3 days (Go modules: patch 3 / minor 7 / major 14 days)
+#     before a version-update PR opens; first-party and trusted publishers are excluded.
+#     Security updates are never delayed by the cooldown.
 # ────────────────────────────────────────────────────────────────
+
 version: 2
+
 updates:
   # ──────────────────────────────────────────────────────────────
   # 1. Go Modules (go.mod / go.sum)
@@ -29,7 +34,7 @@ updates:
     target-branch: "master"
     schedule:
       interval: "weekly"
-      day: "tuesday"
+      day: "wednesday"
       time: "11:00"
       timezone: "America/New_York"
     allow:
@@ -45,6 +50,13 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
+    cooldown:
+      default-days: 3
+      semver-major-days: 14
+      semver-minor-days: 7
+      semver-patch-days: 3
+      exclude: ["github.com/bsv-blockchain/*", "github.com/mrz1836/*", "golang.org/x/*"]
+
   # ──────────────────────────────────────────────────────────────
   # 2. GitHub Actions Workflows
   # ──────────────────────────────────────────────────────────────
@@ -53,7 +65,7 @@ updates:
     target-branch: "master"
     schedule:
       interval: "weekly"
-      day: "tuesday"
+      day: "wednesday"
       time: "11:15"
       timezone: "America/New_York"
     allow:
@@ -67,6 +79,10 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
+    cooldown:
+      default-days: 3
+      exclude: ["actions/*", "github/*", "gitleaks/*", "ossf/*"]
+
   # ──────────────────────────────────────────────────────────────
   # 3. DevContainer (devcontainer.json : base image + features)
   # ──────────────────────────────────────────────────────────────
@@ -75,7 +91,7 @@ updates:
     target-branch: "master"
     schedule:
       interval: "weekly"
-      day: "tuesday"
+      day: "wednesday"
       time: "11:30"
       timezone: "America/New_York"
     allow:
@@ -89,3 +105,6 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
+    cooldown:
+      default-days: 3
+      exclude: ["ghcr.io/devcontainers/features/*"]

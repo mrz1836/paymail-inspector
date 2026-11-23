@@ -1,0 +1,217 @@
+# ------------------------------------------------------------------------------------
+#  Homebrew Tap Workflow (project-specific, not synced by go-broadcast)
+#
+#  Purpose: Publish each paymail-inspector release to the Homebrew tap at
+#  mrz1836/homebrew-paymail-inspector, so `brew install` keeps working while
+#  .goreleaser.yml stays the standard file synced across repositories.
+#
+#  The formula installs `paymail-inspector` plus a `paymail` symlink, the name
+#  the CLI has always answered to.
+#
+#  Triggers:
+#  - workflow_run: after GoFortress completes successfully for a v* tag push
+#    (GoReleaser publishes the release with the built-in GITHUB_TOKEN, and
+#    events caused by that token never start other workflows, so `release:`
+#    cannot be used here)
+#  - Manual: Via workflow_dispatch for a given tag (re-publish or backfill)
+#
+#  Maintainer: @mrz1836
+#
+#  SECURITY MODEL:
+#  - Runs from the default branch only; nothing from the triggering run is
+#    downloaded or executed: the formula is rendered from the published
+#    release's checksums file, read through the GitHub API.
+#  - No checkout, no third-party actions, read-only GITHUB_TOKEN.
+#  - The tap is written with HOMEBREW_TAP_TOKEN (falls back to ACCESS_TOKEN), a
+#    token scoped to the tap repository. Without one, the job skips cleanly.
+#  - The tag is validated as plain semver before it is used anywhere; release
+#    candidates and other pre-releases are never published to the tap.
+#
+# ------------------------------------------------------------------------------------
+
+name: Homebrew Tap
+
+# --------------------------------------------------------------------
+# Trigger Configuration
+# --------------------------------------------------------------------
+# zizmor's dangerous-triggers audit flags every `workflow_run` trigger. This one
+# uses no artifacts, outputs or code from the triggering run (see SECURITY MODEL).
+on: # zizmor: ignore[dangerous-triggers] see the SECURITY MODEL above
+  workflow_run:
+    workflows: ["GoFortress"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to publish to the tap (e.g. v1.2.3)"
+        type: string
+        required: true
+
+# Security: Restrict default permissions (jobs must explicitly request what they need)
+permissions: {}
+
+# --------------------------------------------------------------------
+# Concurrency Control
+# --------------------------------------------------------------------
+concurrency:
+  group: homebrew-tap
+  cancel-in-progress: false
+
+jobs:
+  # ----------------------------------------------------------------------------------
+  # Publish the Homebrew formula
+  # ----------------------------------------------------------------------------------
+  publish:
+    name: 🍺 Publish Homebrew Formula
+    # Successful GoFortress runs for tag pushes in this repository, or a manual run
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       startsWith(github.event.workflow_run.head_branch, 'v') &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    permissions:
+      contents: read # Read the published release and its checksums
+    env:
+      BINARY: paymail-inspector
+      TAP_REPO: mrz1836/homebrew-paymail-inspector
+      FORMULA_PATH: paymail-inspector.rb
+    steps:
+      # --------------------------------------------------------------------
+      # Render the formula from the release's checksums and push it to the tap
+      # --------------------------------------------------------------------
+      - name: 🍺 Render and publish formula
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN || secrets.ACCESS_TOKEN }}
+          INPUT_TAG: ${{ inputs.tag }}
+          RUN_TAG: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          set -euo pipefail
+
+          TAG="${INPUT_TAG:-$RUN_TAG}"
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "ℹ️ '$TAG' is not a stable release tag (vX.Y.Z); nothing to publish"
+            exit 0
+          fi
+
+          if [ -z "$TAP_TOKEN" ]; then
+            echo "::notice title=Homebrew Tap Skipped::Set the HOMEBREW_TAP_TOKEN secret to publish releases to $TAP_REPO"
+            exit 0
+          fi
+
+          VERSION="${TAG#v}"
+          echo "🔎 Reading release $TAG..."
+          if ! IS_DRAFT=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq '.isDraft'); then
+            echo "::warning title=Homebrew Tap Skipped::No published release found for $TAG"
+            exit 0
+          fi
+          if [ "$IS_DRAFT" = "true" ]; then
+            echo "ℹ️ $TAG is still a draft; nothing to publish"
+            exit 0
+          fi
+
+          WORK_DIR="$(mktemp -d)"
+          CHECKSUMS="$WORK_DIR/checksums.txt"
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" \
+            --pattern "${BINARY}_${VERSION}_checksums.txt" --output "$CHECKSUMS"
+
+          sha_for() {
+            local file="${BINARY}_${VERSION}_$1.tar.gz" sum
+            sum=$(awk -v f="$file" '$2 == f { print $1 }' "$CHECKSUMS")
+            if [[ ! "$sum" =~ ^[0-9a-f]{64}$ ]]; then
+              echo "::error title=Missing Archive::$file is not listed in the release checksums" >&2
+              exit 1
+            fi
+            echo "$sum"
+          }
+
+          DARWIN_AMD64=$(sha_for darwin_amd64)
+          DARWIN_ARM64=$(sha_for darwin_arm64)
+          LINUX_AMD64=$(sha_for linux_amd64)
+          LINUX_ARM64=$(sha_for linux_arm64)
+          BASE_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}"
+          FORMULA="$WORK_DIR/formula.rb"
+
+          cat > "$FORMULA" <<EOF
+          # typed: false
+          # frozen_string_literal: true
+
+          # Generated by .github/workflows/homebrew-tap.yml in ${GITHUB_REPOSITORY}. DO NOT EDIT.
+          class PaymailInspector < Formula
+            desc "Inspect, validate and resolve paymail addresses and domains"
+            homepage "https://github.com/${GITHUB_REPOSITORY}"
+            version "${VERSION}"
+            license "MIT"
+
+            on_macos do
+              on_intel do
+                url "${BASE_URL}/${BINARY}_${VERSION}_darwin_amd64.tar.gz"
+                sha256 "${DARWIN_AMD64}"
+              end
+              on_arm do
+                url "${BASE_URL}/${BINARY}_${VERSION}_darwin_arm64.tar.gz"
+                sha256 "${DARWIN_ARM64}"
+              end
+            end
+
+            on_linux do
+              on_intel do
+                url "${BASE_URL}/${BINARY}_${VERSION}_linux_amd64.tar.gz"
+                sha256 "${LINUX_AMD64}"
+              end
+              on_arm do
+                url "${BASE_URL}/${BINARY}_${VERSION}_linux_arm64.tar.gz"
+                sha256 "${LINUX_ARM64}"
+              end
+            end
+
+            def install
+              bin.install "${BINARY}"
+              bin.install_symlink "${BINARY}" => "paymail"
+            end
+
+            test do
+              assert_match version.to_s, shell_output("#{bin}/${BINARY} --version")
+              assert_match version.to_s, shell_output("#{bin}/paymail --version")
+            end
+          end
+          EOF
+
+          echo "📝 Rendered formula for $TAG:"
+          cat "$FORMULA"
+
+          # Write to the tap's default branch, which is where `brew` reads formulae
+          TAP_BRANCH=$(GH_TOKEN="$TAP_TOKEN" gh api "repos/${TAP_REPO}" --jq '.default_branch')
+
+          # One read of the current formula. On an HTTP error gh prints the error
+          # JSON to stdout, so only a successful read may supply the file SHA.
+          CURRENT_SHA=""
+          CURRENT_BODY=""
+          if CURRENT_JSON=$(GH_TOKEN="$TAP_TOKEN" gh api "repos/${TAP_REPO}/contents/${FORMULA_PATH}?ref=${TAP_BRANCH}" 2>/dev/null); then
+            CURRENT_SHA=$(jq -r '.sha' <<<"$CURRENT_JSON")
+            CURRENT_BODY=$(jq -r '.content' <<<"$CURRENT_JSON" | base64 -d)
+          fi
+
+          if [ "$CURRENT_BODY" = "$(cat "$FORMULA")" ]; then
+            echo "✅ The tap already publishes $TAG"
+            exit 0
+          fi
+
+          ARGS=(--method PUT "repos/${TAP_REPO}/contents/${FORMULA_PATH}"
+            -f message="Brew formula update for ${BINARY} version ${TAG}"
+            -f branch="$TAP_BRANCH"
+            -f content="$(base64 -w 0 "$FORMULA")")
+          if [ -n "$CURRENT_SHA" ]; then
+            ARGS+=(-f sha="$CURRENT_SHA")
+          fi
+
+          GH_TOKEN="$TAP_TOKEN" gh api "${ARGS[@]}" --jq '.commit.html_url'
+          echo "✅ Published $TAG to $TAP_REPO"
+          {
+            echo "### 🍺 Homebrew tap updated"
+            echo ""
+            echo "\`brew install mrz1836/paymail-inspector/paymail-inspector\` now installs **${TAG}**."
+          } >> "$GITHUB_STEP_SUMMARY"
