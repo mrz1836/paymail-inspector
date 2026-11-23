@@ -508,7 +508,8 @@ magex version:bump bump=patch push=true branch=master
 The tag triggers the Fortress release. Once it succeeds, the
 [Homebrew tap workflow](.github/workflows/homebrew-tap.yml) publishes the new version to
 [mrz1836/homebrew-paymail-inspector](https://github.com/mrz1836/homebrew-paymail-inspector)
-(this needs a `HOMEBREW_TAP_TOKEN` secret scoped to the tap).
+using a short-lived token from the repository's auto-merge GitHub App, so there is no
+personal access token to expire.
 
 </details>
 

@@ -21,9 +21,15 @@
 #  - Runs from the default branch only; nothing from the triggering run is
 #    downloaded or executed: the formula is rendered from the published
 #    release's checksums file, read through the GitHub API.
-#  - No checkout, no third-party actions, read-only GITHUB_TOKEN.
-#  - The tap is written with HOMEBREW_TAP_TOKEN (falls back to ACCESS_TOKEN), a
-#    token scoped to the tap repository. Without one, the job skips cleanly.
+#  - No checkout. The only action is GitHub's own create-github-app-token
+#    (pinned by SHA); everything else is the preinstalled gh CLI. The built-in
+#    GITHUB_TOKEN is read-only.
+#  - The tap is written with a short-lived token from the auto-merge GitHub App
+#    (the same App, key and `auto-merge` environment as auto-merge-on-approval):
+#    scoped to the tap repository and Contents: write only, revoked at job end.
+#    No personal access token is involved, so nothing expires.
+#  - The `auto-merge` environment only allows the default branch, so a run
+#    from any other branch cannot read the App key.
 #  - The tag is validated as plain semver before it is used anywhere; release
 #    candidates and other pre-releases are never published to the tap.
 #
@@ -72,20 +78,26 @@ jobs:
        github.event.workflow_run.head_repository.full_name == github.repository)
     runs-on: ubuntu-26.04
     timeout-minutes: 10
+    # Holds the App key; only the default branch may use it
+    environment:
+      name: auto-merge
+      deployment: false
     permissions:
       contents: read # Read the published release and its checksums
     env:
       BINARY: paymail-inspector
-      TAP_REPO: mrz1836/homebrew-paymail-inspector
+      TAP_OWNER: mrz1836
+      TAP_NAME: homebrew-paymail-inspector
       FORMULA_PATH: paymail-inspector.rb
     steps:
       # --------------------------------------------------------------------
-      # Render the formula from the release's checksums and push it to the tap
+      # Decide whether there is a stable, published release to publish
       # --------------------------------------------------------------------
-      - name: 🍺 Render and publish formula
+      - name: 🔎 Resolve release
+        id: release
         env:
           GH_TOKEN: ${{ github.token }}
-          TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN || secrets.ACCESS_TOKEN }}
+          APP_CLIENT_ID: ${{ vars.AUTO_MERGE_APP_CLIENT_ID }}
           INPUT_TAG: ${{ inputs.tag }}
           RUN_TAG: ${{ github.event.workflow_run.head_branch }}
         run: |
@@ -94,25 +106,63 @@ jobs:
           TAG="${INPUT_TAG:-$RUN_TAG}"
           if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "ℹ️ '$TAG' is not a stable release tag (vX.Y.Z); nothing to publish"
+            echo "publish=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          if [ -z "$TAP_TOKEN" ]; then
-            echo "::notice title=Homebrew Tap Skipped::Set the HOMEBREW_TAP_TOKEN secret to publish releases to $TAP_REPO"
+          if [ -z "$APP_CLIENT_ID" ]; then
+            echo "::notice title=Homebrew Tap Skipped::Set the AUTO_MERGE_APP_CLIENT_ID variable (and the App key in the auto-merge environment) to publish releases to $TAP_OWNER/$TAP_NAME"
+            echo "publish=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          VERSION="${TAG#v}"
           echo "🔎 Reading release $TAG..."
           if ! IS_DRAFT=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq '.isDraft'); then
             echo "::warning title=Homebrew Tap Skipped::No published release found for $TAG"
+            echo "publish=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           if [ "$IS_DRAFT" = "true" ]; then
             echo "ℹ️ $TAG is still a draft; nothing to publish"
+            echo "publish=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
+          {
+            echo "publish=true"
+            echo "tag=$TAG"
+          } >> "$GITHUB_OUTPUT"
+
+      # --------------------------------------------------------------------
+      # Mint a short-lived installation token for the tap repository only
+      # --------------------------------------------------------------------
+      - name: 🔑 Create GitHub App token
+        id: app-token
+        if: steps.release.outputs.publish == 'true'
+        uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3.4.0
+        with:
+          client-id: ${{ vars.AUTO_MERGE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.AUTO_MERGE_APP_PRIVATE_KEY }}
+          # Least privilege: the tap repository only, Contents: write only.
+          # Revoked automatically at job end.
+          owner: ${{ env.TAP_OWNER }}
+          repositories: ${{ env.TAP_NAME }}
+          permission-contents: write
+
+      # --------------------------------------------------------------------
+      # Render the formula from the release's checksums and push it to the tap
+      # --------------------------------------------------------------------
+      - name: 🍺 Render and publish formula
+        if: steps.release.outputs.publish == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAP_TOKEN: ${{ steps.app-token.outputs.token }}
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          set -euo pipefail
+
+          TAP_REPO="${TAP_OWNER}/${TAP_NAME}"
+          VERSION="${TAG#v}"
           WORK_DIR="$(mktemp -d)"
           CHECKSUMS="$WORK_DIR/checksums.txt"
           gh release download "$TAG" --repo "$GITHUB_REPOSITORY" \
