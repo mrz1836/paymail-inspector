@@ -1,7 +1,20 @@
-# Example configuration
-# Move this file to your home directory: ~/
-# Global Flag - Set the bsvalias version to target
+# paymail-inspector example configuration
+#
+# Copy to the default location (or pass any path with --config):
+#   macOS:   ~/Library/Application Support/paymail-inspector/config.yaml
+#   Linux:   ~/.config/paymail-inspector/config.yaml  (or $XDG_CONFIG_HOME/paymail-inspector/config.yaml)
+#   Windows: %AppData%\paymail-inspector\config.yaml
+#
+# A config left in ~/paymail/config.yaml by older releases is still read.
+#
+# Every key can also be set with a PAYMAIL_INSPECTOR_ environment variable,
+# e.g. PAYMAIL_INSPECTOR_SENDER_HANDLE=you@example.com. Flags win over the
+# environment, which wins over this file.
+
+# The bsvalias version providers must report (global flag: --bsvalias)
 bsvalias: "1.0"
-# Resolve Command - Default sender-handle and name is useful if you are making a lot of the transactions
+
+# Defaults for the sender request sent by `resolve` (flags: --sender-handle, --sender-name).
+# Handy when you resolve many addresses as the same sender.
 sender-name: "your name"
-sender-handle: "your@address.com"
+sender-handle: "you@example.com"

@@ -1,0 +1,564 @@
+# ------------------------------------------------------------------------------------
+#  🏰 GoFortress - Enterprise-grade CI/CD fortress for Go applications
+#
+#  Version: 1.9.0 | Released: 2026-08-13
+#
+#  Built Strong. Tested Harder.
+#
+#  GoFortress transforms your Go development pipeline into an impenetrable fortress
+#  of quality. Like a medieval fortress with multiple layers of defense, GoFortress
+#  employs multi-stage verification to ensure your code is battle-tested before deployment.
+#
+#  Your Code's Defense System:
+#  🏰 Fortress of Go: Multi-stage CI/CD pipeline for Go applications
+#  🛡️ Security Ramparts: Nancy, Govulncheck, Gitleaks guard against threats
+#  🏗️ Quality Battlements: Static analysis and comprehensive linting
+#  ⚔️ Testing Garrison: Multi-OS, multi-version matrices with race detection
+#  🎯 Performance Watchtowers: Real-time metrics and cache optimization
+#  🚀 Release Citadel: Automated deployments with GoReleaser and GoDocs
+#
+#  Maintainer: @mrz1836
+#  Repository: https://github.com/mrz1836/go-broadcast
+#
+#  Copyright 2025 @mrz1836
+#  SPDX-License-Identifier: MIT
+#
+#  This file is licensed under the MIT License.
+#  Attribution is requested if reused: Created by @mrz1836
+#
+#  FORK PR HANDLING:
+#  This workflow intelligently handles fork PRs by detecting fork status during setup
+#  and conditionally skipping jobs that require repository secrets. Jobs are categorized:
+#
+#  FORK-SAFE (Always run - secrets optional for private module auth):
+#    ✅ setup, warm-cache, code-quality, pre-commit, benchmarks, status-check
+#    Note: These jobs receive github-token for private Go module authentication (GOPRIVATE).
+#    On fork PRs, private module auth is skipped but jobs still run for public dependencies.
+#
+#  FORK-UNSAFE (Skipped on fork PRs - require secrets):
+#    ⛔ security (OSSI_TOKEN, OSSI_USERNAME, GITLEAKS_LICENSE)
+#    ⛔ test-suite (CODECOV_TOKEN for coverage uploads)
+#    ⛔ release (already tag-only, but extra safety for forks)
+#
+#  Fork contributors see clear messaging in setup summary explaining which jobs run.
+#  This provides security without workflow duplication or maintenance overhead.
+#
+# ------------------------------------------------------------------------------------
+
+name: GoFortress
+
+# --------------------------------------------------------------------
+# Trigger Configuration
+# --------------------------------------------------------------------
+on:
+  push:
+    branches:
+      - master # (Default) Main branch for production
+      - main # (Secondary) Main branch for production
+    tags:
+      - "v*" # Tags starting with 'v' (e.g., v1.0.0) trigger the workflow
+  pull_request:
+    branches:
+      - "**" # All branches for PRs
+
+# Security: Restrict default permissions (jobs must explicitly request what they need)
+permissions: {}
+
+# --------------------------------------------------------------------
+# Concurrency Control
+# --------------------------------------------------------------------
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+jobs:
+  # ----------------------------------------------------------------------------------
+  # Paths Filter (short-circuit for docs-only PRs)
+  #
+  # Decides whether this run touches only documentation/config files. When true,
+  # every downstream job's `needs:` chain skips, and the status-check rollup still
+  # reports success (it treats `skipped` as passing per its existing logic).
+  #
+  # Why this pattern and NOT `paths-ignore:` at the workflow level:
+  # - `paths-ignore:` skips the whole workflow, which means the required check
+  #   `🎯 All Tests Passed` never reports → branch protection blocks the merge.
+  # - The short-circuit pattern keeps the workflow running but causes work jobs
+  #   to skip, so the required check still publishes a green result.
+  #
+  # Pull request events resolve the changed-file list via `gh api /pulls/{n}/files`
+  # (the pre-installed GitHub CLI) — no checkout required, and `--paginate` handles
+  # PRs with more than 100 changed files. Push events (tags + master/main) always
+  # short-circuit to `docs-only=false` so the full pipeline runs on those refs.
+  # ----------------------------------------------------------------------------------
+  paths-check:
+    name: 📁 Paths Check
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read # Required: gh api reads PR files via the GitHub REST API (no checkout needed)
+    outputs:
+      # docs-only is TRUE only when the run contains NO non-docs changes.
+      # On pull_request events: resolved via gh api /pulls/{n}/files.
+      # On push events (master/main, tags): always false — full pipeline runs.
+      docs-only: ${{ steps.filter.outputs.docs-only }}
+    steps:
+      - name: 🔍 Detect docs-only changes
+        id: filter
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          if [[ "$EVENT" != "pull_request" ]]; then
+            echo "docs-only=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # List PR-changed files via the GitHub REST API. --paginate transparently
+          # handles PRs with more than 100 changed files.
+          files=$(gh api --paginate "/repos/${REPO}/pulls/${PR_NUMBER}/files" --jq '.[].filename')
+
+          # Drop any file that matches the docs/config allowlist. If any line
+          # survives the grep, at least one non-docs file changed.
+          non_docs=$(printf '%s\n' "$files" | grep -vE '(\.md$|^docs/|^LICENSE$|^\.gitignore$|^CODEOWNERS$|^\.github/ISSUE_TEMPLATE/|^\.github/PULL_REQUEST_TEMPLATE\.md$)' || true)
+
+          if [[ -z "$non_docs" ]]; then
+            echo "docs-only=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "docs-only=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  # ----------------------------------------------------------------------------------
+  # Setup Configuration (loads env + runs MAGE-X verification)
+  #
+  # The setup-config reusable workflow loads .github/env/ internally and runs the
+  # MAGE-X verification steps as part of the same job.
+  # ----------------------------------------------------------------------------------
+  setup:
+    name: 🔧 Setup Configuration
+    needs: [paths-check]
+    # Skip the entire pipeline when only docs/config files changed. status-check
+    # below still runs (it has `if: always()`) and reports green for branch protection.
+    if: needs.paths-check.outputs.docs-only != 'true'
+    permissions:
+      contents: read # Read repository content for setup configuration
+    uses: ./.github/workflows/fortress-setup-config.yml
+    secrets:
+      github-token: ${{ github.event.pull_request.head.repo.fork != true && (secrets.GH_PRIVATE_REPO_TOKEN || secrets.GITHUB_TOKEN) || '' }}
+  # ----------------------------------------------------------------------------------
+  # Warm Go Caches (Secrets optional: only needed when GOPRIVATE is set for private modules)
+  # ----------------------------------------------------------------------------------
+  warm-cache:
+    name: 💾 Warm Cache
+    needs: [setup]
+    if: needs.setup.outputs.cache-warming-enabled == 'true'
+    permissions:
+      contents: read # Read repository content for cache warming
+    uses: ./.github/workflows/fortress-warm-cache.yml
+    with:
+      env-json: ${{ needs.setup.outputs.env-json }}
+      warm-cache-matrix: ${{ needs.setup.outputs.warm-cache-matrix }}
+      go-primary-version: ${{ needs.setup.outputs.go-primary-version }}
+      go-secondary-version: ${{ needs.setup.outputs.go-secondary-version }}
+      redis-enabled: ${{ needs.setup.outputs.redis-enabled }}
+      redis-version: ${{ needs.setup.outputs.redis-version }}
+      redis-cache-force-pull: ${{ needs.setup.outputs.redis-cache-force-pull }}
+      go-sum-file: ${{ needs.setup.outputs.go-sum-file }}
+    secrets:
+      github-token: ${{ github.event.pull_request.head.repo.fork != true && (secrets.GH_PRIVATE_REPO_TOKEN || secrets.GITHUB_TOKEN) || '' }}
+  # ----------------------------------------------------------------------------------
+  # Security Scans (FORK-UNSAFE: Requires secrets - skipped on fork PRs)
+  # ----------------------------------------------------------------------------------
+  security:
+    name: 🔒 Security Scans
+    needs: [setup, warm-cache]
+    if: |
+      !cancelled() &&
+      needs.setup.result == 'success' &&
+      (needs.warm-cache.result == 'success' || needs.warm-cache.result == 'skipped') &&
+      needs.setup.outputs.security-scans-enabled == 'true' &&
+      needs.setup.outputs.is-fork-pr != 'true'
+    permissions:
+      contents: read # Read repository content for security scanning
+      pull-requests: write # Required: gitleaks creates PR comments (PR issue-comments require pull-requests: write)
+      security-events: write # Required: OSV-Scanner uploads SARIF to GitHub Code Scanning
+    uses: ./.github/workflows/fortress-security-scans.yml
+    with:
+      env-json: ${{ needs.setup.outputs.env-json }}
+      enable-nancy: ${{ needs.setup.outputs.nancy-enabled == 'true' }}
+      enable-govulncheck: ${{ needs.setup.outputs.govulncheck-enabled == 'true' }}
+      enable-gitleaks: ${{ needs.setup.outputs.gitleaks-enabled == 'true' }}
+      enable-osv: ${{ needs.setup.outputs.osv-enabled == 'true' }}
+      go-primary-version: ${{ needs.setup.outputs.go-primary-version }}
+      primary-runner: ${{ needs.setup.outputs.primary-runner }}
+      go-sum-file: ${{ needs.setup.outputs.go-sum-file }}
+    secrets:
+      github-token: ${{ github.event.pull_request.head.repo.fork != true && (secrets.GH_PRIVATE_REPO_TOKEN || secrets.GITHUB_TOKEN) || '' }}
+      gitleaks-license: ${{ secrets.GITLEAKS_LICENSE }}
+      guide-token: ${{ secrets.GUIDE_TOKEN }}
+      ossi-token: ${{ secrets.OSSI_TOKEN }}
+      ossi-username: ${{ secrets.OSSI_USERNAME }}
+  # ----------------------------------------------------------------------------------
+  # Pre-commit Checks (Secrets optional: only needed when GOPRIVATE is set for private modules)
+  # ----------------------------------------------------------------------------------
+  pre-commit:
+    name: 🪝 Pre-commit Checks
+    needs: [setup, warm-cache]
+    if: |
+      !cancelled() &&
+      needs.setup.result == 'success' &&
+      (needs.warm-cache.result == 'success' || needs.warm-cache.result == 'skipped') &&
+      needs.setup.outputs.pre-commit-enabled == 'true'
+    permissions:
+      contents: read # Read repository content for pre-commit checks
+    uses: ./.github/workflows/fortress-pre-commit.yml
+    with:
+      env-json: ${{ needs.setup.outputs.env-json }}
+      primary-runner: ${{ needs.setup.outputs.primary-runner }}
+      go-primary-version: ${{ needs.setup.outputs.go-primary-version }}
+      pre-commit-enabled: ${{ needs.setup.outputs.pre-commit-enabled }}
+      go-sum-file: ${{ needs.setup.outputs.go-sum-file }}
+    secrets:
+      github-token: ${{ github.event.pull_request.head.repo.fork != true && (secrets.GH_PRIVATE_REPO_TOKEN || secrets.GITHUB_TOKEN) || '' }}
+  # ----------------------------------------------------------------------------------
+  # Code Quality Checks (Secrets optional: only needed when GOPRIVATE is set for private modules)
+  # ----------------------------------------------------------------------------------
+  code-quality:
+    name: 📊 Code Quality
+    needs: [setup, warm-cache]
+    if: |
+      !cancelled() &&
+      needs.setup.result == 'success' &&
+      (needs.warm-cache.result == 'success' || needs.warm-cache.result == 'skipped')
+    permissions:
+      contents: read # Read repository content for code quality checks
+    uses: ./.github/workflows/fortress-code-quality.yml
+    with:
+      env-json: ${{ needs.setup.outputs.env-json }}
+      go-primary-version: ${{ needs.setup.outputs.go-primary-version }}
+      go-lint-enabled: ${{ needs.setup.outputs.go-lint-enabled }}
+      yaml-lint-enabled: ${{ needs.setup.outputs.yaml-lint-enabled }}
+      primary-runner: ${{ needs.setup.outputs.primary-runner }}
+      static-analysis-enabled: ${{ needs.setup.outputs.static-analysis-enabled }}
+      go-sum-file: ${{ needs.setup.outputs.go-sum-file }}
+    secrets:
+      github-token: ${{ github.event.pull_request.head.repo.fork != true && (secrets.GH_PRIVATE_REPO_TOKEN || secrets.GITHUB_TOKEN) || '' }}
+  # ----------------------------------------------------------------------------------
+  # Test Suite (FORK-UNSAFE: Requires CODECOV_TOKEN for coverage - skipped on fork PRs)
+  # ----------------------------------------------------------------------------------
+  test-suite:
+    name: 🧪 Test Suite
+    needs: [setup, warm-cache]
+    if: |
+      !cancelled() &&
+      needs.setup.result == 'success' &&
+      (needs.warm-cache.result == 'success' || needs.warm-cache.result == 'skipped') &&
+      needs.setup.outputs.is-fork-pr != 'true' &&
+      needs.setup.outputs.go-tests-enabled == 'true'
+    permissions:
+      # Effective permissions for the reusable-workflow chain are the intersection down
+      # each level, so pages:write / id-token:write are dropped here too (not just in
+      # fortress-test-suite.yml / fortress-coverage.yml): coverage deploys gh-pages via a
+      # plain git push (contents: write) and uses no actions/deploy-pages or OIDC.
+      contents: write # Write repository content and push to gh-pages branch for test execution
+      pull-requests: write # Required: go-coverage creates the PR coverage comment (PR issue-comments require pull-requests: write) and reads PR metadata
+      issues: write # Required: go-coverage posts/updates PR comments via the issues comments API
+      statuses: write # Required: Coverage workflow needs to create commit status checks
+      actions: read # Required: Coverage workflow needs to access artifacts from workflow runs
+    uses: ./.github/workflows/fortress-test-suite.yml
+    with:
+      code-coverage-enabled: ${{ needs.setup.outputs.code-coverage-enabled }}
+      coverage-provider: ${{ needs.setup.outputs.coverage-provider }}
+      env-json: ${{ needs.setup.outputs.env-json }}
+      fuzz-testing-enabled: ${{ needs.setup.outputs.fuzz-testing-enabled }}
+      go-tests-enabled: ${{ needs.setup.outputs.go-tests-enabled }}
+      go-primary-version: ${{ needs.setup.outputs.go-primary-version }}
+      go-secondary-version: ${{ needs.setup.outputs.go-secondary-version }}
+      primary-runner: ${{ needs.setup.outputs.primary-runner }}
+      race-detection-enabled: ${{ needs.setup.outputs.race-detection-enabled }}
+      test-matrix: ${{ needs.setup.outputs.test-matrix }}
+      redis-enabled: ${{ needs.setup.outputs.redis-enabled }}
+      redis-version: ${{ needs.setup.outputs.redis-version }}
+      redis-host: ${{ needs.setup.outputs.redis-host }}
+      redis-port: ${{ needs.setup.outputs.redis-port }}
+      redis-health-retries: ${{ needs.setup.outputs.redis-health-retries }}
+      redis-health-interval: ${{ needs.setup.outputs.redis-health-interval }}
+      redis-health-timeout: ${{ needs.setup.outputs.redis-health-timeout }}
+      redis-trust-service-health: ${{ needs.setup.outputs.redis-trust-service-health }}
+      go-sum-file: ${{ needs.setup.outputs.go-sum-file }}
+    secrets:
+      github-token: ${{ github.event.pull_request.head.repo.fork != true && (secrets.GH_PRIVATE_REPO_TOKEN || secrets.GITHUB_TOKEN) || '' }}
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+  # ----------------------------------------------------------------------------------
+  # Benchmark Suite (Secrets optional: only needed when GOPRIVATE is set for private modules)
+  # ----------------------------------------------------------------------------------
+  benchmarks:
+    name: 🏃 Benchmarks
+    needs: [setup, warm-cache]
+    if: |
+      !cancelled() &&
+      needs.setup.result == 'success' &&
+      (needs.warm-cache.result == 'success' || needs.warm-cache.result == 'skipped') &&
+      needs.setup.outputs.benchmarks-enabled == 'true'
+    permissions:
+      contents: read # Read repository content for benchmarking
+    uses: ./.github/workflows/fortress-benchmarks.yml
+    with:
+      env-json: ${{ needs.setup.outputs.env-json }}
+      benchmark-matrix: ${{ needs.setup.outputs.benchmark-matrix }}
+      primary-runner: ${{ needs.setup.outputs.primary-runner }}
+      go-primary-version: ${{ needs.setup.outputs.go-primary-version }}
+      go-secondary-version: ${{ needs.setup.outputs.go-secondary-version }}
+      benchmark-timeout: 30
+      redis-enabled: ${{ needs.setup.outputs.redis-enabled }}
+      redis-version: ${{ needs.setup.outputs.redis-version }}
+      redis-host: ${{ needs.setup.outputs.redis-host }}
+      redis-port: ${{ needs.setup.outputs.redis-port }}
+      redis-health-retries: ${{ needs.setup.outputs.redis-health-retries }}
+      redis-health-interval: ${{ needs.setup.outputs.redis-health-interval }}
+      redis-health-timeout: ${{ needs.setup.outputs.redis-health-timeout }}
+      redis-trust-service-health: ${{ needs.setup.outputs.redis-trust-service-health }}
+      go-sum-file: ${{ needs.setup.outputs.go-sum-file }}
+    secrets:
+      github-token: ${{ github.event.pull_request.head.repo.fork != true && (secrets.GH_PRIVATE_REPO_TOKEN || secrets.GITHUB_TOKEN) || '' }}
+  # ----------------------------------------------------------------------------------
+  # Final Status Check
+  # ----------------------------------------------------------------------------------
+  status-check:
+    name: 🎯 All Tests Passed
+    if: ${{ always() }}
+    needs: [paths-check, setup, warm-cache, security, code-quality, pre-commit, test-suite, benchmarks]
+    permissions:
+      contents: read # Read repository content for status checking
+    # Fallback to ubuntu-26.04 when setup was skipped (e.g. docs-only PR via paths-check)
+    # so this required check can still report a green result for branch protection.
+    runs-on: ${{ needs.setup.outputs.primary-runner || 'ubuntu-26.04' }}
+    steps:
+      # --------------------------------------------------------------------
+      # Build results summary showing job statuses
+      # --------------------------------------------------------------------
+      - name: 📊 Build results summary
+        env:
+          PATHS_RESULT: ${{ needs.paths-check.result }}
+          SETUP_RESULT: ${{ needs.setup.result }}
+          CACHE_RESULT: ${{ needs.warm-cache.result }}
+          SECURITY_RESULT: ${{ needs.security.result }}
+          QUALITY_RESULT: ${{ needs.code-quality.result }}
+          PRECOMMIT_RESULT: ${{ needs.pre-commit.result }}
+          TESTS_RESULT: ${{ needs.test-suite.result }}
+          BENCH_RESULT: ${{ needs.benchmarks.result }}
+          CACHE_ENABLED: ${{ needs.setup.outputs.cache-warming-enabled }}
+          PRECOMMIT_ENABLED: ${{ needs.setup.outputs.pre-commit-enabled }}
+          TESTS_ENABLED: ${{ needs.setup.outputs.go-tests-enabled }}
+        run: |
+          {
+            echo "## 🚦 Workflow Results"
+            echo ""
+            echo "| Component | Result | Status |"
+            echo "|-----------|--------|--------|"
+
+            # Helper function to determine result display
+            get_result_display() {
+              local result="$1"
+
+              if [[ "$result" == "failure" ]]; then
+                echo "❌ **FAILED**"
+              elif [[ "$result" == "cancelled" ]]; then
+                echo "⏹️ cancelled"
+              elif [[ "$result" == "skipped" ]]; then
+                echo "⏭️ skipped"
+              elif [[ "$result" == "success" ]]; then
+                echo "✅ success"
+              else
+                echo "$result"
+              fi
+            }
+
+            # Paths Check (docs-only short-circuit gate)
+            PATHS_DISPLAY=$(get_result_display "$PATHS_RESULT")
+            echo "| 📁 Paths Check | $PATHS_DISPLAY | Required |"
+
+            # Setup
+            SETUP_DISPLAY=$(get_result_display "$SETUP_RESULT")
+            echo "| 🎯 Setup | $SETUP_DISPLAY | Required |"
+
+            # MAGE-X verification is now a step inside Setup, no separate row needed
+
+            # Warm Cache
+            CACHE_REQ="Disabled"
+            [[ "$CACHE_ENABLED" == "true" ]] && CACHE_REQ="Required"
+            CACHE_DISPLAY=$(get_result_display "$CACHE_RESULT")
+            echo "| 💾 Warm Cache | $CACHE_DISPLAY | $CACHE_REQ |"
+
+            # Security
+            SECURITY_DISPLAY=$(get_result_display "$SECURITY_RESULT")
+            echo "| 🔒 Security | $SECURITY_DISPLAY | Required |"
+
+            # Code Quality
+            QUALITY_DISPLAY=$(get_result_display "$QUALITY_RESULT")
+            echo "| 📊 Code Quality | $QUALITY_DISPLAY | Required |"
+
+            # Pre-commit
+            PRECOMMIT_REQ="Skipped"
+            [[ "$PRECOMMIT_ENABLED" == "true" ]] && PRECOMMIT_REQ="Required"
+            PRECOMMIT_DISPLAY=$(get_result_display "$PRECOMMIT_RESULT")
+            echo "| 🪝 Pre-commit | $PRECOMMIT_DISPLAY | $PRECOMMIT_REQ |"
+
+            # Test Suite
+            TESTS_REQ="Skipped"
+            [[ "$TESTS_ENABLED" == "true" ]] && TESTS_REQ="Required"
+            TESTS_DISPLAY=$(get_result_display "$TESTS_RESULT")
+            echo "| 🧪 Test Suite | $TESTS_DISPLAY | $TESTS_REQ |"
+
+            # Benchmarks (always optional)
+            BENCH_DISPLAY=$(get_result_display "$BENCH_RESULT")
+            echo "| 🏃 Benchmarks | $BENCH_DISPLAY | Optional ⚠️ |"
+
+            echo ""
+
+            # Add explanatory note if benchmarks failed
+            if [[ "$BENCH_RESULT" == "failure" ]]; then
+              echo "⚠️ **Note**: Benchmarks failed but are currently non-blocking."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # --------------------------------------------------------------------
+      # Fail the workflow *only* when a dependency actually failed/canceled
+      # - 'skipped' is OK (e.g. feature flag off)
+      # - Benchmarks are currently optional (can fail without blocking)
+      # --------------------------------------------------------------------
+      - name: ❌ Fail if any required job errored
+        if: ${{ always() }}
+        run: |
+          FAILED=false
+
+          # Path detection must succeed. If it failed/was cancelled, the docs-only
+          # short-circuit could not be computed and the whole pipeline was skipped on a
+          # false premise — this required check must NOT report green in that case.
+          # (The intentional docs-only path leaves paths-check 'success', so it passes.)
+          if [[ "${{ needs.paths-check.result }}" == "failure" || "${{ needs.paths-check.result }}" == "cancelled" ]]; then
+            echo "❌ Paths check failed or was cancelled" >&2
+            FAILED=true
+          fi
+
+          # Check required jobs (these must pass)
+          if [[ "${{ needs.setup.result }}" == "failure" || "${{ needs.setup.result }}" == "cancelled" ]]; then
+            echo "❌ Setup failed or was cancelled" >&2
+            FAILED=true
+          fi
+
+          # Only check warm-cache if it was enabled
+          if [[ "${{ needs.setup.outputs.cache-warming-enabled }}" == "true" ]]; then
+            if [[ "${{ needs.warm-cache.result }}" == "failure" || "${{ needs.warm-cache.result }}" == "cancelled" ]]; then
+              echo "❌ Warm cache failed or was cancelled" >&2
+              FAILED=true
+            fi
+          fi
+
+          if [[ "${{ needs.security.result }}" == "failure" || "${{ needs.security.result }}" == "cancelled" ]]; then
+            echo "❌ Security scans failed or were cancelled" >&2
+            FAILED=true
+          fi
+
+          if [[ "${{ needs.code-quality.result }}" == "failure" || "${{ needs.code-quality.result }}" == "cancelled" ]]; then
+            echo "❌ Code quality checks failed or were cancelled" >&2
+            FAILED=true
+          fi
+
+          if [[ "${{ needs.pre-commit.result }}" == "failure" || "${{ needs.pre-commit.result }}" == "cancelled" ]]; then
+            echo "❌ Pre-commit checks failed or were cancelled" >&2
+            FAILED=true
+          fi
+
+          # Only check test-suite if it was enabled
+          if [[ "${{ needs.setup.outputs.go-tests-enabled }}" == "true" ]]; then
+            if [[ "${{ needs.test-suite.result }}" == "failure" || "${{ needs.test-suite.result }}" == "cancelled" ]]; then
+              echo "❌ Test suite failed or was cancelled" >&2
+              FAILED=true
+            fi
+          fi
+
+          # Check benchmarks (currently optional - just warn if they fail)
+          if [[ "${{ needs.benchmarks.result }}" == "failure" ]]; then
+            echo "⚠️  Benchmarks failed (non-blocking)" >&2
+          fi
+
+          if [[ "$FAILED" == "true" ]]; then
+            echo "❌ One or more required jobs failed – see details above." >&2
+            exit 1
+          fi
+
+      # --------------------------------------------------------------------
+      # Succeed if all required jobs passed or were skipped
+      # --------------------------------------------------------------------
+      - name: ✅ Mark workflow success
+        if: ${{ !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
+        run: |
+          echo "🎉 All required checks passed (skipped jobs are considered OK)."
+
+  # ----------------------------------------------------------------------------------
+  # Release Version (FORK-UNSAFE: PRs never trigger this, but extra fork safety included)
+  # ----------------------------------------------------------------------------------
+  release:
+    name: 🚀 Release Version
+    needs: [setup, test-suite, security, code-quality, pre-commit]
+    # Only run on successful tag pushes from same repository (not forks)
+    # Allow release even if test-suite was skipped (when ENABLE_GO_TESTS=false)
+    # Skip only on ENABLE_RELEASE=false (the repository publishes its own releases); no output still releases
+    if: |
+      !cancelled() &&
+      startsWith(github.ref, 'refs/tags/v') &&
+      needs.setup.outputs.release-enabled != 'false' &&
+      needs.setup.outputs.is-fork-pr != 'true' &&
+      needs.setup.result == 'success' &&
+      (needs.test-suite.result == 'success' || needs.test-suite.result == 'skipped') &&
+      needs.security.result == 'success' &&
+      needs.code-quality.result == 'success' &&
+      needs.pre-commit.result == 'success'
+    uses: ./.github/workflows/fortress-release.yml
+    with:
+      env-json: ${{ needs.setup.outputs.env-json }}
+      # RELEASE_RUNNER, resolved by setup (falls back to the primary runner)
+      primary-runner: ${{ needs.setup.outputs.release-runner || needs.setup.outputs.primary-runner }}
+      go-primary-version: ${{ needs.setup.outputs.go-primary-version }}
+      golangci-lint-version: ${{ needs.code-quality.outputs.golangci-lint-version }}
+      go-sum-file: ${{ needs.setup.outputs.go-sum-file }}
+    secrets:
+      github-token: ${{ github.event.pull_request.head.repo.fork != true && (secrets.GH_PRIVATE_REPO_TOKEN || secrets.GITHUB_TOKEN) || '' }}
+      slack-webhook: ${{ secrets.SLACK_WEBHOOK || '' }}
+    permissions:
+      contents: write # Required: goreleaser needs to create GitHub releases
+  # ----------------------------------------------------------------------------------
+  # Workflow Completion Report
+  # ----------------------------------------------------------------------------------
+  completion-report:
+    name: 📊 Workflow Completion Report
+    if: |
+      always() &&
+      needs.setup.result == 'success' &&
+      needs.setup.outputs.completion-report-enabled == 'true'
+    needs: [setup, pre-commit, security, code-quality, test-suite, benchmarks, release, status-check]
+    permissions:
+      contents: read # Read repository content for completion report
+      actions: read # Required for artifact downloads
+    uses: ./.github/workflows/fortress-completion-report.yml
+    with:
+      benchmarks-result: ${{ needs.benchmarks.result }}
+      code-quality-result: ${{ needs.code-quality.result }}
+      pre-commit-result: ${{ needs.pre-commit.result }}
+      env-json: ${{ needs.setup.outputs.env-json }}
+      primary-runner: ${{ needs.setup.outputs.primary-runner }}
+      release-result: ${{ needs.release.result }}
+      security-result: ${{ needs.security.result }}
+      setup-result: ${{ needs.setup.result }}
+      start-epoch: ${{ needs.setup.outputs.start-epoch }}
+      start-time: ${{ needs.setup.outputs.start-time }}
+      status-check-result: ${{ needs.status-check.result }}
+      test-matrix: ${{ needs.setup.outputs.test-matrix }}
+      test-suite-result: ${{ needs.test-suite.result }}
+      gofortress-version: ${{ needs.setup.outputs.gofortress-version }}
+      gofortress-released: ${{ needs.setup.outputs.gofortress-released }}
+      is-fork-pr: ${{ needs.setup.outputs.is-fork-pr }}
+      fork-security-mode: ${{ needs.setup.outputs.fork-security-mode }}

@@ -1,0 +1,21 @@
+project:
+  name: paymail-inspector
+  binary: paymail-inspector
+  module: github.com/mrz1836/paymail-inspector
+  main: ./cmd/paymail-inspector/main.go
+
+build:
+  # Custom ldflags with version injection
+  ldflags:
+    - "-s -w"
+    - "-X main.version={{.Version}}"
+    - "-X main.commit={{.Commit}}"
+    - "-X main.buildDate={{.Date}}"
+  flags:
+    - "-trimpath"
+  output: "./cmd/paymail-inspector"
+
+test:
+  # Match CI timeout configuration (TEST_TIMEOUT_RACE_COVER in .github/env/00-core.env)
+  # Default magex timeout is 10m which was killing tests prematurely
+  timeout: 30m

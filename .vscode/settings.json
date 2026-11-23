@@ -1,0 +1,99 @@
+{
+    "[go.mod]": {
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        },
+        "editor.formatOnSave": true
+    },
+    "[go]": {
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        },
+        "editor.defaultFormatter": "golang.go",
+        "editor.formatOnSave": true
+    },
+    "[go][go.mod]": {
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        }
+    },
+    "[yaml]": {
+        "editor.defaultFormatter": "redhat.vscode-yaml"
+    },
+    "files.associations": {
+        "application.yaml": "yaml-cloudformation"
+    },
+    "go.addTags": {
+        "options": "json=omitempty",
+        "promptForTags": false,
+        "tags": "json",
+        "transform": "snakecase"
+    },
+    "go.coverOnSave": false,
+    "go.coverageDecorator": {
+        "coveredHighlightColor": "rgba(64,128,64,0.5)",
+        "type": "gutter",
+        "uncoveredHighlightColor": "rgba(128,64,64,0.25)"
+    },
+    "go.delveConfig": {
+        "debugAdapter": "dlv-dap",
+        "dlvLoadConfig": {
+            "followPointers": true,
+            "maxArrayValues": 64,
+            "maxStringLen": 256,
+            "maxStructFields": -1,
+            "maxVariableRecurse": 1
+        },
+        "showGlobalVariables": false
+    },
+    "go.enableCodeLens": {
+        "runtest": true
+    },
+    "go.inlayHints.assignVariableTypes": true,
+    "go.inlayHints.compositeLiteralFields": true,
+    "go.inlayHints.compositeLiteralTypes": true,
+    "go.inlayHints.constantValues": true,
+    "go.inlayHints.functionTypeParameters": true,
+    "go.inlayHints.parameterNames": true,
+    "go.inlayHints.rangeVariableTypes": true,
+    "go.lintFlags": [
+        "--fast-only",
+        "--timeout=5m"
+    ],
+    "go.lintOnSave": "package",
+    "go.lintTool": "golangci-lint-v2",
+    "go.testExplorerPackages": ".*",
+    "go.testFlags": [
+        "-v",
+        "-race",
+        "-count=1"
+    ],
+    "go.toolsManagement.autoUpdate": true,
+    "go.useLanguageServer": true,
+    "gopls": {
+        "build.directoryFilters": [
+            "-node_modules",
+            "-vendor",
+            "-.git",
+            "-dist",
+            "-build",
+            "-.mage-cache"
+        ],
+        "formatting.gofumpt": true,
+        "formatting.local": "github.com/mrz1836/paymail-inspector",
+        "symbolMatcher": "fastfuzzy",
+        "symbolStyle": "full",
+        "ui.completion.completeFunctionCalls": true,
+        "ui.completion.usePlaceholders": true,
+        "ui.diagnostic.analyses": {
+            "nilness": true,
+            "shadow": true,
+            "unusedparams": true,
+            "unusedvariable": true,
+            "unusedwrite": true
+        },
+        "ui.diagnostic.staticcheck": true,
+        "ui.navigation.importShortcut": "Definition",
+        "ui.semanticTokens": true
+    }
+}

@@ -1,52 +1,55 @@
 ## paymail whois
 
-Find a paymail handle across several providers
+Find a handle across the public paymail providers
 
 ### Synopsis
 
-```
-        .__           .__        
+```text
+        .__           .__
 __  _  _|  |__   ____ |__| ______
 \ \/ \/ /  |  \ /  _ \|  |/  ___/
- \     /|   Y  (  <_> )  |\___ \ 
+ \     /|   Y  (  <_> )  |\___ \
   \/\_/ |___|  /\____/|__/____  >
              \/               \/
 ```
 
+Search 5 public paymail providers for a handle, in parallel, and show who
+owns it on each one, or where it is still available.
 
-Search 8 public paymail providers for a handle.
+The handle may be bare (mrz), a provider shortcut ($handle for HandCash,
+1handle for RelayX), or a full paymail address, whose alias is searched.
 
 ```
-paymail whois [flags]
+paymail whois <handle> [flags]
 ```
 
 ### Examples
 
 ```
-paymail whois mrz
-paymail w mrz
-paymail w \$mr-z
-paymail w 1mrz
+  paymail whois mrz
+  paymail w 1mrz
+  paymail w \$handcash
 ```
 
 ### Options
 
 ```
-  -h, --help   help for whois
+  -h, --help[=true|false]                  help for whois
+      --skip-public-profile[=true|false]   Skip the public profile requests
 ```
 
 ### Options inherited from parent commands
 
 ```
-      --bsvalias string   The bsvalias version (default "1.0")
-      --config string     Custom config file (default is $HOME/paymail/config.yaml)
-      --docs              Generate docs from all commands (./docs/commands)
-      --flush-cache       Flushes ALL cache, empties local database
-      --no-cache          Turn off caching for this specific command
-  -t, --skip-tracing      Turn off request tracing information
+      --bsvalias string             The bsvalias version to expect from providers (default "1.0")
+      --config string               Config file (default: <user config dir>/paymail-inspector/config.yaml)
+      --flush-cache[=true|false]    Empty the local response cache before running
+      --no-cache[=true|false]       Skip cached responses for this command (fresh results are still cached)
+      --no-color[=true|false]       Disable colored output (NO_COLOR is honored too)
+  -t, --skip-tracing[=true|false]   Hide per-request network timing
 ```
 
 ### SEE ALSO
 
-* [paymail](paymail.md)	 - Inspect, validate domains or resolve paymail addresses
+* [paymail](paymail.md)	 - Inspect, validate and resolve paymail addresses and domains
 

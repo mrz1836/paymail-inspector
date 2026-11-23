@@ -1,62 +1,54 @@
 {
     "formatters": {
         "enable": [
-            "gofmt"
+            "gofmt",
+            "gofumpt"
         ],
         "exclusions": {
             "generated": "lax",
             "paths": [
                 ".*\\.my\\.go$",
                 "lib/bad.go",
-                ".github",
                 ".make",
+                ".vscode",
                 "dist",
                 "third_party$",
-                "builtin$",
-                "examples$"
+                "builtin$"
             ]
         },
         "settings": {
             "gci": {
                 "sections": [
-                    "prefix(github.com/org/project)"
+                    "standard",
+                    "default",
+                    "prefix(github.com/mrz1836/paymail-inspector)"
                 ]
             },
             "gofmt": {
                 "simplify": true
             },
             "gofumpt": {
-                "extra-rules": false
+                "extra-rules": false,
+                "module-path": "github.com/mrz1836/paymail-inspector"
             },
             "goimports": {
                 "local-prefixes": [
-                    "github.com/org/project"
+                    "github.com/mrz1836/paymail-inspector"
                 ]
             }
         }
     },
     "issues": {
-        "max-issues-per-linter": 0,
-        "max-same-issues": 0,
-        "new": false,
-        "new-from-rev": "",
         "uniq-by-line": true
     },
     "linters": {
         "disable": [
-            "err113",
-            "gochecknoglobals",
             "gocritic",
-            "godot",
-            "godox",
-            "gomoddirectives",
-            "nilnesserr",
-            "nilnil",
-            "recvcheck",
-            "gochecknoinits"
+            "godot"
         ],
         "enable": [
             "asasalint",
+            "arangolint",
             "asciicheck",
             "bidichk",
             "bodyclose",
@@ -65,23 +57,40 @@
             "copyloopvar",
             "dogsled",
             "durationcheck",
+            "embeddedstructfieldcheck",
+            "err113",
+            "errcheck",
             "errchkjson",
             "errname",
             "errorlint",
             "exhaustive",
             "forbidigo",
+            "funcorder",
             "gocheckcompilerdirectives",
+            "gochecknoglobals",
+            "gochecknoinits",
             "gochecksumtype",
+            "gocognit",
+            "goconst",
+            "gocyclo",
+            "godox",
             "goheader",
+            "gomoddirectives",
             "gosec",
             "gosmopolitan",
+            "govet",
             "inamedparam",
+            "ineffassign",
             "loggercheck",
             "makezero",
             "mirror",
             "misspell",
             "musttag",
+            "nakedret",
+            "nestif",
             "nilerr",
+            "nilnesserr",
+            "nilnil",
             "noctx",
             "nolintlint",
             "nosprintfhostport",
@@ -89,102 +98,20 @@
             "predeclared",
             "protogetter",
             "reassign",
+            "recvcheck",
             "revive",
             "rowserrcheck",
             "spancheck",
             "sqlclosecheck",
+            "staticcheck",
             "testifylint",
             "unconvert",
             "unparam",
+            "unused",
             "wastedassign",
+            "wsl_v5",
             "zerologlint"
         ],
-        "exclusions": {
-            "generated": "lax",
-            "paths": [
-                ".*\\.my\\.go$",
-                "lib/bad.go",
-                ".github",
-                ".make",
-                "dist",
-                "third_party$",
-                "builtin$",
-                "examples$"
-            ],
-            "rules": [
-                {
-                    "linters": [
-                        "misspell"
-                    ],
-                    "path": "app/control/vendor_ip.go"
-                },
-                {
-                    "linters": [
-                        "misspell"
-                    ],
-                    "path": "app/control/vendor_ip_test.go"
-                },
-                {
-                    "linters": [
-                        "gocyclo"
-                    ],
-                    "path": "_test\\.go"
-                },
-                {
-                    "linters": [
-                        "gosec"
-                    ],
-                    "path": "internal/hmac/",
-                    "text": "weak cryptographic primitive"
-                },
-                {
-                    "linters": [
-                        "staticcheck"
-                    ],
-                    "text": "SA1019:"
-                },
-                {
-                    "linters": [
-                        "staticcheck"
-                    ],
-                    "text": "QF1003:"
-                },
-                {
-                    "linters": [
-                        "gosec"
-                    ],
-                    "text": "G202:"
-                },
-                {
-                    "linters": [
-                        "gosec"
-                    ],
-                    "text": "G115:"
-                },
-                {
-                    "linters": [
-                        "testifylint"
-                    ],
-                    "text": "suite-subtest-run: use ts.Run to run subtest"
-                },
-                {
-                    "linters": [
-                        "scopelint"
-                    ],
-                    "text": "Using the variable on range scope"
-                },
-                {
-                    "linters": [
-                        "lll"
-                    ],
-                    "source": "^//go:generate "
-                },
-                {
-                    "path": "(.+)\\.go$",
-                    "text": "abcdef"
-                }
-            ]
-        },
         "settings": {
             "dogsled": {
                 "max-blank-identifiers": 2
@@ -194,6 +121,9 @@
             },
             "exhaustive": {
                 "default-signifies-exhaustive": false
+            },
+            "funcorder": {
+                "constructor-after-struct": true
             },
             "funlen": {
                 "lines": 60,
@@ -206,25 +136,6 @@
                 "min-len": 3,
                 "min-occurrences": 10
             },
-            "gocritic": {
-                "disabled-checks": [
-                    "regexpMust"
-                ],
-                "disabled-tags": [
-                    "experimental"
-                ],
-                "enabled-tags": [
-                    "performance"
-                ],
-                "settings": {
-                    "captLocal": {
-                        "paramsOnly": true
-                    },
-                    "rangeValCopy": {
-                        "sizeThreshold": 32
-                    }
-                }
-            },
             "gocyclo": {
                 "min-complexity": 10
             },
@@ -232,16 +143,16 @@
                 "keywords": [
                     "NOTE",
                     "OPTIMIZE",
-                    "HACK"
+                    "HACK",
+                    "ATTN",
+                    "ATTENTION"
                 ]
             },
             "govet": {
-                "disable-all": false,
                 "enable": [
                     "atomicalign",
                     "shadow"
                 ],
-                "enable-all": false,
                 "settings": {
                     "printf": {
                         "funcs": [
@@ -280,29 +191,29 @@
                 "range-loops": true,
                 "simple": true
             },
-            "rowserrcheck": {
-                "packages": [
-                    "github.com/jmoiron/sqlx"
+            "revive": {
+                "rules": [
+                    {
+                        "arguments": [
+                            [],
+                            [],
+                            [
+                                {
+                                    "skipPackageNameChecks": true
+                                }
+                            ]
+                        ],
+                        "name": "var-naming"
+                    }
                 ]
-            },
-            "testpackage": {
-                "skip-regexp": "(export|internal)_test\\.go"
             },
             "unparam": {
                 "check-exported": false
-            },
-            "whitespace": {
-                "multi-func": false,
-                "multi-if": false
             },
             "wsl": {
                 "allow-assign-and-call": true,
                 "allow-cuddle-declarations": true,
                 "allow-multiline-assign": true,
-                "allow-separated-leading-comment": false,
-                "allow-trailing-comment": false,
-                "force-case-trailing-whitespace": 0,
-                "force-err-cuddling": false,
                 "strict-append": true
             }
         }
@@ -314,24 +225,25 @@
                 "print-issued-lines": true,
                 "print-linter-name": true
             }
-        },
-        "path-prefix": ""
+        }
     },
     "run": {
-        "allow-parallel-runners": false,
+        "allow-parallel-runners": true,
         "build-tags": [
-            "mytag"
+            "mage"
         ],
-        "concurrency": 4,
+        "concurrency": 8,
         "issues-exit-code": 1,
         "tests": true
     },
     "severity": {
-        "default": "error",
+        "default": "warning",
         "rules": [
             {
                 "linters": [
-                    "dupl"
+                    "dupl",
+                    "misspell",
+                    "makezero"
                 ],
                 "severity": "info"
             }

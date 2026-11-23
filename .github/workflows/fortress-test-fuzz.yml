@@ -1,0 +1,268 @@
+# ------------------------------------------------------------------------------------
+#  Fuzz Testing (Reusable Workflow) (GoFortress)
+#
+#  Purpose: Execute Go fuzz tests to detect edge cases and potential security
+#  vulnerabilities through automated input generation and testing.
+#
+#  This workflow handles:
+#    - Fuzz test execution on primary runner with primary Go version
+#    - Panic and error detection from fuzz test output
+#    - Failure analysis and structured reporting
+#    - Statistics collection and artifact uploading
+#    - Cache performance tracking
+#
+#  Maintainer: @mrz1836
+#
+# ------------------------------------------------------------------------------------
+
+name: GoFortress (Fuzz Tests)
+
+on:
+  workflow_call:
+    inputs:
+      env-json:
+        description: "JSON string of environment variables"
+        required: true
+        type: string
+      primary-runner:
+        description: "Primary runner OS"
+        required: true
+        type: string
+      go-primary-version:
+        description: "Primary Go version"
+        required: true
+        type: string
+      go-secondary-version:
+        description: "Secondary Go version"
+        required: true
+        type: string
+      fuzz-testing-enabled:
+        description: "Whether fuzz testing is enabled"
+        required: true
+        type: string
+      go-sum-file:
+        description: "Path to go.sum file for dependency verification"
+        required: true
+        type: string
+    secrets:
+      github-token:
+        description: "GitHub token for private module authentication (optional, only needed when GOPRIVATE is set)"
+        required: false
+
+# Security: Restrict default permissions (jobs must explicitly request what they need)
+permissions: {}
+
+jobs:
+  # ----------------------------------------------------------------------------------
+  # Fuzz Testing
+  # ----------------------------------------------------------------------------------
+  fuzz-tests:
+    name: 🧪 Fuzz Tests
+    if: inputs.fuzz-testing-enabled == 'true'
+    timeout-minutes: 15 # Fuzz tests have shorter timeout
+    permissions:
+      contents: read # Read repository content for testing
+    runs-on: ${{ inputs.primary-runner }}
+
+    steps:
+      # --------------------------------------------------------------------
+      # Checkout code (required for local actions)
+      # --------------------------------------------------------------------
+      - name: 📥 Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # --------------------------------------------------------------------
+      # Parse environment variables
+      # --------------------------------------------------------------------
+      - name: 🔧 Parse environment variables
+        uses: ./.github/actions/parse-env
+        with:
+          env-json: ${{ inputs.env-json }}
+
+      # --------------------------------------------------------------------
+      # Setup Go with caching and version management (primary version only)
+      # --------------------------------------------------------------------
+      - name: 🏗️ Setup Go with Cache
+        id: setup-go-fuzz
+        uses: ./.github/actions/setup-go-with-cache
+        with:
+          go-version: ${{ inputs.go-primary-version }}
+          matrix-os: ${{ inputs.primary-runner }}
+          go-primary-version: ${{ inputs.go-primary-version }}
+          go-secondary-version: ${{ inputs.go-secondary-version }}
+          go-sum-file: ${{ inputs.go-sum-file }}
+          enable-multi-module: ${{ env.ENABLE_MULTI_MODULE_TESTING }}
+          github-token: ${{ secrets.github-token }}
+
+      # --------------------------------------------------------------------
+      # Extract Go module directory from GO_SUM_FILE path
+      # --------------------------------------------------------------------
+      - name: 🔧 Extract Go module directory
+        uses: ./.github/actions/extract-module-dir
+        with:
+          go-sum-file: ${{ inputs.go-sum-file }}
+
+      # --------------------------------------------------------------------
+      # Setup MAGE-X (required for magex test commands)
+      # --------------------------------------------------------------------
+      - name: 🔧 Setup MAGE-X
+        uses: ./.github/actions/setup-magex
+        with:
+          magex-version: ${{ env.MAGE_X_VERSION }}
+          runner-os: ${{ inputs.primary-runner }}
+          use-local: ${{ env.MAGE_X_USE_LOCAL }}
+
+      # --------------------------------------------------------------------
+      # Start fuzz test timer
+      # --------------------------------------------------------------------
+      - name: ⏱️ Start fuzz test timer
+        id: fuzz-timer
+        run: |
+          echo "fuzz-start=$(date +%s)" >> $GITHUB_OUTPUT
+          echo "🕒 Fuzz test timer started at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+      # --------------------------------------------------------------------
+      # Run fuzz tests
+      # --------------------------------------------------------------------
+      - name: 🧪 Run fuzz tests
+        id: run-fuzz-tests
+        continue-on-error: true
+        run: |
+          echo "🧪 Running fuzz tests in parallel..."
+          FUZZ_TIMEOUT="${TEST_TIMEOUT_FUZZ:-5m}"
+          GO_MODULE_DIR="${{ env.GO_MODULE_DIR }}"
+
+          if [ -n "$GO_MODULE_DIR" ]; then
+            echo "🔧 Running magex test:fuzz from directory: $GO_MODULE_DIR"
+            (cd "$GO_MODULE_DIR" && magex test:fuzz time=5s -timeout $FUZZ_TIMEOUT) 2>&1 | tee fuzz-output.log
+          else
+            echo "🔧 Running magex test:fuzz from repository root"
+            magex test:fuzz time=5s -timeout $FUZZ_TIMEOUT 2>&1 | tee fuzz-output.log
+          fi
+
+          FUZZ_EXIT_CODE=${PIPESTATUS[0]}
+          echo "🔧 Fuzz tests completed with timeout: $FUZZ_TIMEOUT"
+
+          # Store the exit code for later steps
+          echo "FUZZ_EXIT_CODE=$FUZZ_EXIT_CODE" >> $GITHUB_ENV
+          echo "fuzz-exit-code=$FUZZ_EXIT_CODE" >> $GITHUB_OUTPUT
+
+          if [[ $FUZZ_EXIT_CODE -eq 0 ]]; then
+            echo "✅ Fuzz tests completed successfully"
+          else
+            echo "❌ Fuzz tests failed with exit code $FUZZ_EXIT_CODE"
+          fi
+
+      # --------------------------------------------------------------------
+      # Fuzz test failure analysis and reporting (using magex CI mode JSONL output)
+      # --------------------------------------------------------------------
+      - name: 🚨 Create Fuzz Test Failure Summary
+        if: failure()
+        run: |
+          echo "## 🚨 Fuzz Test Failures" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **OS**: ${{ inputs.primary-runner }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Go Version**: ${{ inputs.go-primary-version }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Use magex CI mode JSONL output if available
+          JSONL_FILE=".mage-x/ci-results-fuzz.jsonl"
+          if [ -f "$JSONL_FILE" ]; then
+            FAIL_COUNT=$(grep -c '"type":"failure"' "$JSONL_FILE" 2>/dev/null || echo "0")
+            echo "- **Failed Fuzz Tests**: $FAIL_COUNT" >> $GITHUB_STEP_SUMMARY
+
+            if [ "$FAIL_COUNT" -gt 0 ]; then
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "### 🔍 Failed Fuzz Tests" >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+              grep '"type":"failure"' "$JSONL_FILE" | head -5 | jq -r '.failure.test + " - " + (.failure.error // "test failed")' >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+            fi
+          elif [ -f fuzz-output.log ]; then
+            # Fallback to log file parsing
+            FAIL_COUNT=$(grep -c -E "^--- FAIL:" fuzz-output.log 2>/dev/null || echo "0")
+            echo "- **Failed Fuzz Tests**: $FAIL_COUNT" >> $GITHUB_STEP_SUMMARY
+
+            if [ "$FAIL_COUNT" -gt 0 ]; then
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "### 🔍 Failed Fuzz Tests" >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+              grep -E "^--- FAIL:" fuzz-output.log | head -5 >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "⚠️ No fuzz test output found" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      # --------------------------------------------------------------------
+      # Create GitHub annotations for fuzz test failures
+      # --------------------------------------------------------------------
+      - name: 📋 Annotate Key Fuzz Test Failures
+        if: failure()
+        run: |
+          # Use magex CI mode JSONL output if available
+          JSONL_FILE=".mage-x/ci-results-fuzz.jsonl"
+          if [ -f "$JSONL_FILE" ]; then
+            FAIL_COUNT=$(grep -c '"type":"failure"' "$JSONL_FILE" 2>/dev/null || echo "0")
+            echo "::error title=Fuzz Test Suite Failed::$FAIL_COUNT fuzz tests failed on ${{ inputs.primary-runner }} Go ${{ inputs.go-primary-version }}"
+
+            # Annotate first 3 failures from JSONL
+            if [ "$FAIL_COUNT" -gt 0 ]; then
+              grep '"type":"failure"' "$JSONL_FILE" | head -3 | while read -r line; do
+                TEST=$(echo "$line" | jq -r '.failure.test')
+                ERROR=$(echo "$line" | jq -r '.failure.error // "test failed"')
+                echo "::error title=Failed Fuzz Test::$TEST - $ERROR"
+              done
+            fi
+          elif [ -f fuzz-output.log ]; then
+            # Fallback to log file parsing
+            FAIL_COUNT=$(grep -c -E "^--- FAIL:" fuzz-output.log 2>/dev/null || echo "0")
+            echo "::error title=Fuzz Test Suite Failed::$FAIL_COUNT fuzz tests failed on ${{ inputs.primary-runner }} Go ${{ inputs.go-primary-version }}"
+
+            if [ "$FAIL_COUNT" -gt 0 ]; then
+              grep -E "^--- FAIL:" fuzz-output.log | head -3 | while read -r line; do
+                echo "::error title=Failed Fuzz Test::$line"
+              done
+            fi
+          fi
+
+      # --------------------------------------------------------------------
+      # Collect performance cache statistics
+      # --------------------------------------------------------------------
+      - name: 📊 Collect performance cache statistics
+        uses: ./.github/actions/collect-cache-stats
+        with:
+          workflow-name: fuzz
+          job-name: fuzz-tests
+          os: ${{ inputs.primary-runner }}
+          go-version: ${{ inputs.go-primary-version }}
+          cache-prefix: cache-stats
+          gomod-cache-hit: ${{ steps.setup-go-fuzz.outputs.module-cache-hit }}
+          gobuild-cache-hit: ${{ steps.setup-go-fuzz.outputs.build-cache-hit }}
+
+      # --------------------------------------------------------------------
+      # Upload performance cache statistics for completion report
+      # --------------------------------------------------------------------
+      - name: 📤 Upload performance cache statistics
+        if: always()
+        uses: ./.github/actions/upload-statistics
+        with:
+          artifact-name: cache-stats-fuzz
+          artifact-path: cache-stats-fuzz.json
+          retention-days: "1"
+
+      # --------------------------------------------------------------------
+      # Upload fuzz test outputs and failures for validation
+      # --------------------------------------------------------------------
+      - name: 📤 Upload fuzz test outputs
+        if: always()
+        uses: ./.github/actions/upload-artifact-resilient
+        with:
+          artifact-name: test-results-fuzz-${{ inputs.primary-runner }}-${{ inputs.go-primary-version }}
+          artifact-path: |
+            .mage-x/ci-results-fuzz.jsonl
+            fuzz-output.log
+          retention-days: "7"
+          if-no-files-found: ignore

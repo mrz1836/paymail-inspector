@@ -1,0 +1,113 @@
+# ------------------------------------------------------------------------------------
+#  Load Environment Variables Composite Action
+#
+#  Purpose: Loads and parses environment configuration from modular .github/env/
+#           files into JSON format for use across all GitHub Actions workflows.
+#
+#  Loading Strategy:
+#    1. Run .github/env/load-env.sh to load all modular env files
+#    2. Extract exported variables to JSON for workflow compatibility
+#
+#  Outputs:
+#    env-json: JSON object containing all environment variables
+#
+#  Usage:
+#    - uses: ./.github/actions/load-env
+#      id: load-env
+#
+#  Maintainer: @mrz1836
+#
+# ------------------------------------------------------------------------------------
+
+name: "Load Environment Variables"
+description: "Loads environment variables from modular .github/env/ files"
+
+outputs:
+  env-json:
+    description: "JSON object containing all environment variables"
+    value: ${{ steps.load-env.outputs.env-json }}
+  primary-runner:
+    description: "Primary runner OS extracted from environment variables"
+    value: ${{ steps.load-env.outputs.primary-runner }}
+  env-file-count:
+    description: "Number of env files loaded"
+    value: ${{ steps.load-env.outputs.env-file-count }}
+  var-count:
+    description: "Total number of variables loaded"
+    value: ${{ steps.load-env.outputs.var-count }}
+
+runs:
+  using: "composite"
+  steps:
+    # --------------------------------------------------------------------
+    # Load environment configuration from modular env files
+    # --------------------------------------------------------------------
+    - name: 🌍 Load environment variables
+      id: load-env
+      shell: bash
+      run: |
+        set -euo pipefail
+        echo "📋 Loading environment configuration..."
+
+        LOADER_SCRIPT=".github/env/load-env.sh"
+
+        if [[ ! -f "$LOADER_SCRIPT" ]]; then
+          echo "❌ ERROR: Environment loader not found at $LOADER_SCRIPT" >&2
+          exit 1
+        fi
+
+        # Source the loader script with verbose output
+        echo "🔄 Loading modular environment files..."
+        if ! source "$LOADER_SCRIPT" --verbose; then
+          echo "❌ ERROR: Failed to load environment configuration" >&2
+          exit 1
+        fi
+
+        # Extract the settings the env files define to JSON. Only those: the
+        # runner's own environment (HOME, PATH, RUNNER_*, GITHUB_*) stays out,
+        # because jobs that load env-json can run on another runner or OS.
+        # The files are the ones the loader reads (it skips 99-local.env in CI).
+        echo "📦 Extracting environment variables to JSON..."
+        ENV_KEYS=$(for env_file in .github/env/*.env; do
+          [[ "${CI:-false}" == "true" && "$(basename "$env_file")" == "99-local.env" ]] && continue
+          sed -n -E 's/^[[:space:]]*(export[[:space:]]+)?([A-Z_][A-Z0-9_]*)=.*/\2/p' "$env_file"
+        done | LC_ALL=C sort -u)
+        ENV_JSON=$(while IFS= read -r key; do
+          [[ -n "$key" && -n "${!key+set}" ]] || continue
+          printf '%s' "${!key}" | jq -Rs --arg key "$key" '{($key): .}'
+        done <<< "$ENV_KEYS" | jq -s 'add // {}')
+
+        TOTAL_COUNT=$(echo "$ENV_JSON" | jq 'keys | length')
+        echo "✅ Extracted $TOTAL_COUNT variables"
+
+        # Count env files loaded
+        ENV_FILE_COUNT=$(ls -1 .github/env/*.env 2>/dev/null | wc -l | tr -d ' ')
+
+        # Validate merged configuration
+        if [[ -z "$ENV_JSON" ]] || [[ "$ENV_JSON" == "null" ]] || [[ "$ENV_JSON" == "{}" ]]; then
+          echo "❌ ERROR: No valid environment variables found!" >&2
+          exit 1
+        fi
+
+        # Output final configuration
+        echo "env-json<<EOF" >> $GITHUB_OUTPUT
+        echo "$ENV_JSON" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
+        # Log summary
+        echo "✅ Environment configuration loaded successfully"
+        echo "📊 Total variables: $TOTAL_COUNT"
+        echo "📁 Env files loaded: $ENV_FILE_COUNT"
+
+        # Extract and validate PRIMARY_RUNNER
+        PRIMARY_RUNNER=$(echo "$ENV_JSON" | jq -r '.PRIMARY_RUNNER')
+        if [[ -z "$PRIMARY_RUNNER" ]] || [[ "$PRIMARY_RUNNER" == "null" ]]; then
+          echo "❌ ERROR: PRIMARY_RUNNER is not set in the configuration!" >&2
+          exit 1
+        fi
+        echo "primary-runner=$PRIMARY_RUNNER" >> $GITHUB_OUTPUT
+        echo "🖥️  Primary runner: $PRIMARY_RUNNER"
+
+        # Output counts
+        echo "env-file-count=$ENV_FILE_COUNT" >> $GITHUB_OUTPUT
+        echo "var-count=$TOTAL_COUNT" >> $GITHUB_OUTPUT

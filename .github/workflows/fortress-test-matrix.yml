@@ -1,0 +1,651 @@
+# ------------------------------------------------------------------------------------
+#  Test Matrix Execution (Reusable Workflow) (GoFortress)
+#
+#  Purpose: Execute Go tests across the configured runners and Go versions
+#  in a matrix strategy with native CI mode for failure detection and reporting.
+#
+#  This workflow handles:
+#    - Linux test execution (any Linux runner; ubuntu-* by default). Windows and
+#      macOS are NOT supported: every step here is bash-only AND the test-go job
+#      declares a Linux service container, which only runs on Linux runners. The
+#      preflight rejects non-Linux (windows*/macos*) runners. Do not add
+#      windows/macos runners without restructuring the job (separate no-services
+#      job) and adding shells.
+#    - Multiple Go version testing (primary, secondary)
+#    - Race detection and code coverage
+#    - Native CI mode for GitHub annotations and JSONL output
+#    - Cache performance tracking
+#
+#  CI Mode: magex automatically detects GitHub Actions and produces:
+#    - GitHub annotations with file:line locations
+#    - Step summary written to $GITHUB_STEP_SUMMARY
+#    - Structured output at .mage-x/ci-results.jsonl
+#
+#  Maintainer: @mrz1836
+#
+# ------------------------------------------------------------------------------------
+
+name: GoFortress (Test Matrix)
+
+on:
+  workflow_call:
+    inputs:
+      env-json:
+        description: "JSON string of environment variables"
+        required: true
+        type: string
+      test-matrix:
+        description: "Test matrix JSON"
+        required: true
+        type: string
+      primary-runner:
+        description: "Primary runner OS"
+        required: true
+        type: string
+      go-primary-version:
+        description: "Primary Go version"
+        required: true
+        type: string
+      go-secondary-version:
+        description: "Secondary Go version"
+        required: true
+        type: string
+      code-coverage-enabled:
+        description: "Whether code coverage is enabled"
+        required: true
+        type: string
+      race-detection-enabled:
+        description: "Whether race detection is enabled"
+        required: true
+        type: string
+      redis-enabled:
+        description: "Whether Redis service is enabled"
+        required: false
+        type: string
+        default: "false"
+      redis-version:
+        description: "Redis Docker image version"
+        required: false
+        type: string
+        default: "7-alpine"
+      redis-host:
+        description: "Redis host for tests"
+        required: false
+        type: string
+        default: "localhost"
+      redis-port:
+        description: "Redis port for tests"
+        required: false
+        type: string
+        default: "6379"
+      redis-health-retries:
+        description: "Redis health check retry count"
+        required: false
+        type: string
+        default: "10"
+      redis-health-interval:
+        description: "Redis health check interval in seconds"
+        required: false
+        type: string
+        default: "10"
+      redis-health-timeout:
+        description: "Redis health check timeout in seconds"
+        required: false
+        type: string
+        default: "5"
+      redis-trust-service-health:
+        description: "Trust GitHub Actions service container health checks"
+        required: false
+        type: string
+        default: "true"
+      go-sum-file:
+        description: "Path to go.sum file for dependency verification"
+        required: true
+        type: string
+    secrets:
+      github-token:
+        description: "GitHub token for private module authentication (optional, only needed when GOPRIVATE is set)"
+        required: false
+
+# Security: Restrict default permissions (jobs must explicitly request what they need)
+permissions: {}
+
+jobs:
+  # ----------------------------------------------------------------------------------
+  # Preflight: validate the caller-provided test matrix on a Linux runner
+  #
+  # This gates test-go (via `needs`) so an unsupported Windows runner fails fast with a
+  # clear message BEFORE test-go is scheduled. test-go declares a service container
+  # (redis, or a busybox placeholder when Redis is disabled), and GitHub initializes
+  # service containers during job setup — a phase that runs before every step and fails
+  # on Windows (service containers are Linux-only). An in-step guard inside test-go
+  # therefore cannot reliably run first; this preflight can, because a failed `needs`
+  # dependency prevents test-go (and all its matrix legs) from starting at all.
+  # ----------------------------------------------------------------------------------
+  validate-matrix:
+    name: 🧭 Validate test matrix
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: 🛑 Reject unsupported non-Linux runners
+        shell: bash
+        env:
+          # Route the matrix JSON through env: so it can't break out of the shell
+          # via ${{ }} interpolation.
+          TEST_MATRIX: ${{ inputs.test-matrix }}
+        run: |
+          # Fail fast on invalid JSON so the real error isn't a confusing fromJSON
+          # failure later in test-go.
+          if ! jq empty <<< "$TEST_MATRIX" 2>/dev/null; then
+            echo "::error title=Invalid test matrix::The test-matrix input is not valid JSON."
+            exit 1
+          fi
+
+          # Valid JSON isn't enough: a matrix must be an object. Guard here so a
+          # non-object (array/string/number) fails with this clear annotation instead
+          # of a raw jq indexing error in the extraction below.
+          if [[ "$(jq -r 'type' <<< "$TEST_MATRIX")" != "object" ]]; then
+            echo "::error title=Invalid test matrix::The test-matrix input must be a JSON object with an \"os\" array and/or an \"include\" array of entries containing \"os\"."
+            exit 1
+          fi
+
+          # Being an object isn't enough: validate the element types too, not just that
+          # "os"/"include" are arrays. Otherwise the jq extraction below can fail in a way that
+          # goes unnoticed: it runs inside a command substitution assignment (UNSUPPORTED=$(jq ...)),
+          # and set -e does not abort on a command that fails only inside such an assignment — so a
+          # jq error leaves UNSUPPORTED empty and lets a malformed matrix slip through to a confusing
+          # fromJSON() failure in test-go. This rejects shapes the
+          # array-only check missed (e.g. os: [123], include: ["bad"], include: [{"os":123}])
+          # whose non-string OS values would bypass the non-Linux guard or miscount runners.
+          #   - "os", when present, must be an array of strings.
+          #   - "include", when present, must be an array of objects; each entry's "os"
+          #     (if set) must be a string or an array of strings.
+          if ! jq -e '
+            ((has("os") | not) or (.os | type == "array" and all(.[]; type == "string")))
+            and ((has("include") | not) or (.include | type == "array" and all(.[];
+              type == "object"
+              and ((has("os") | not) or (.os | type == "string" or (type == "array" and all(.[]; type == "string")))))))
+          ' <<< "$TEST_MATRIX" >/dev/null; then
+            echo "::error title=Invalid test matrix::The test-matrix input must be a JSON object; when present, \"os\" must be an array of strings and \"include\" must be an array of objects (each include entry's \"os\", if set, must be a string or array of strings)."
+            exit 1
+          fi
+
+          # Every test-go leg sets runs-on to matrix.os, so the matrix must yield at least
+          # one runner OS. A matrix with none (e.g. {}, {"os":[]}, or an include with no "os")
+          # would produce jobs with an empty runs-on that fail at runner assignment — catch it
+          # here with a clear annotation instead.
+          if [[ "$(jq -r '[ (.include // [] | map(.os // empty)), (.os // []) ] | flatten | length' <<< "$TEST_MATRIX")" -eq 0 ]]; then
+            echo "::error title=Invalid test matrix::The test-matrix input must define at least one runner via an \"os\" array and/or \"include\" entries containing \"os\"."
+            exit 1
+          fi
+
+          # Collect every runner OS from both include-based and classic matrix shapes,
+          # then reject any non-Linux runner. This workflow is bash-only AND the
+          # test-go job unconditionally declares a service container (redis, or a
+          # busybox placeholder when disabled). Service containers require Docker and
+          # only run on Linux runners, so a macOS or Windows leg would fail at job
+          # setup ("Initialize containers") before any step runs.
+          UNSUPPORTED=$(jq -r '
+            [ (.include // [] | map(.os // empty)), (.os // []) ]
+            | flatten
+            | map(select(type == "string" and (ascii_downcase | (startswith("windows") or startswith("macos")))))
+            | unique | join(", ")
+          ' <<< "$TEST_MATRIX")
+
+          if [[ -n "$UNSUPPORTED" ]]; then
+            # Percent-encode before embedding untrusted matrix values in output, so a
+            # value containing %, CR, LF, ':' or ',' can't inject its own ::workflow-commands
+            # or break out of a command property list (workflow-command injection). % must be
+            # encoded first to avoid double-decode; ':' and ',' are the property delimiters
+            # GitHub recommends encoding for values placed in command properties (e.g. title=).
+            esc() { local s=$1; s=${s//'%'/%25}; s=${s//$'\r'/%0D}; s=${s//$'\n'/%0A}; s=${s//:/%3A}; s=${s//,/%2C}; printf '%s' "$s"; }
+            SAFE_UNSUPPORTED=$(esc "$UNSUPPORTED")
+            echo "::error title=Unsupported runner::Test matrix contains non-Linux runner(s): ${SAFE_UNSUPPORTED}. This workflow is bash-only and uses a Linux service container, so only Linux runners are supported (ubuntu-* by default). Set PRIMARY_RUNNER/SECONDARY_RUNNER to a Linux runner."
+            echo "❌ Non-Linux runners in matrix: ${SAFE_UNSUPPORTED}"
+            exit 1
+          fi
+          echo "✅ Test matrix contains only supported Linux runners."
+
+  # ----------------------------------------------------------------------------------
+  # Testing Matrix for Go (Parallel)
+  # ----------------------------------------------------------------------------------
+  test-go:
+    name: 🧪 Test (${{ matrix.name }})
+    needs: validate-matrix # Gate on preflight so non-Linux entries fail before service setup
+    timeout-minutes: 30 # Prevent hung tests
+    permissions:
+      contents: read # Read repository content for testing
+    strategy:
+      fail-fast: true
+      matrix: ${{ fromJSON(inputs.test-matrix) }}
+    runs-on: ${{ matrix.os }}
+
+    # Redis service container (conditionally enabled)
+    # The busybox placeholder (used when Redis is disabled) is digest-pinned to remove the
+    # floating ":latest" tag. The redis image intentionally follows inputs.redis-version, so
+    # it is tag-based by design (digest-pinning would defeat that configurability).
+    services:
+      redis:
+        image: ${{ inputs.redis-enabled == 'true' && format('redis:{0}', inputs.redis-version) || 'busybox@sha256:dc2d74b28e4cf8984fa52af1f39bc7c3d9c73760b41a74d629f5d11b1ab28616' }}
+        options: ${{ inputs.redis-enabled == 'true' && format('--health-cmd "redis-cli ping" --health-interval {0}s --health-timeout {1}s --health-retries {2}', inputs.redis-health-interval, inputs.redis-health-timeout, inputs.redis-health-retries) || '--entrypoint sh' }}
+        ports:
+          - ${{ inputs.redis-enabled == 'true' && format('{0}:{0}', inputs.redis-port) || '9999:9999' }}
+
+    steps:
+      # --------------------------------------------------------------------
+      # Checkout code (required for local actions)
+      # --------------------------------------------------------------------
+      - name: 📥 Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # --------------------------------------------------------------------
+      # Parse environment variables
+      # --------------------------------------------------------------------
+      - name: 🔧 Parse environment variables
+        uses: ./.github/actions/parse-env
+        with:
+          env-json: ${{ inputs.env-json }}
+
+      # --------------------------------------------------------------------
+      # Setup Go with caching and version management
+      # --------------------------------------------------------------------
+      - name: 🏗️ Setup Go with Cache
+        id: setup-go-test
+        uses: ./.github/actions/setup-go-with-cache
+        with:
+          go-version: ${{ matrix.go-version }}
+          matrix-os: ${{ matrix.os }}
+          go-primary-version: ${{ inputs.go-primary-version }}
+          go-secondary-version: ${{ inputs.go-secondary-version }}
+          go-sum-file: ${{ inputs.go-sum-file }}
+          enable-multi-module: ${{ env.ENABLE_MULTI_MODULE_TESTING }}
+          github-token: ${{ secrets.github-token }}
+
+      # --------------------------------------------------------------------
+      # Extract Go module directory from GO_SUM_FILE path
+      # --------------------------------------------------------------------
+      - name: 🔧 Extract Go module directory
+        uses: ./.github/actions/extract-module-dir
+        with:
+          go-sum-file: ${{ inputs.go-sum-file }}
+
+      # --------------------------------------------------------------------
+      # Setup MAGE-X (required for magex test commands)
+      # --------------------------------------------------------------------
+      - name: 🔧 Setup MAGE-X
+        uses: ./.github/actions/setup-magex
+        with:
+          magex-version: ${{ env.MAGE_X_VERSION }}
+          runner-os: ${{ matrix.os }}
+          use-local: ${{ env.MAGE_X_USE_LOCAL }}
+
+      # --------------------------------------------------------------------
+      # Setup benchstat (required for benchmark comparison tests)
+      # Note: benchstat requires Go 1.25+, action will skip for older versions
+      # --------------------------------------------------------------------
+      - name: 📊 Setup benchstat
+        uses: ./.github/actions/setup-benchstat
+        with:
+          benchstat-version: ${{ env.MAGE_X_BENCHSTAT_VERSION }}
+          benchstat-version-latest: ${{ env.MAGE_X_BENCHSTAT_VERSION_LATEST }}
+          benchstat-latest-min-go: ${{ env.MAGE_X_BENCHSTAT_VERSION_LATEST_MIN_GO }}
+          runner-os: ${{ matrix.os }}
+          go-version: ${{ matrix.go-version }}
+
+      # --------------------------------------------------------------------
+      # Setup mage (required for delegation tests that use mage binary)
+      # --------------------------------------------------------------------
+      - name: 🧙 Setup mage
+        uses: ./.github/actions/setup-mage
+        with:
+          mage-version: ${{ env.MAGE_X_MAGE_VERSION }}
+          runner-os: ${{ matrix.os }}
+
+      # --------------------------------------------------------------------
+      # Setup Redis service using composite action with caching
+      # --------------------------------------------------------------------
+      - name: 🗄️ Setup Redis Service
+        id: setup-redis
+        uses: ./.github/actions/setup-redis-service
+        with:
+          redis-enabled: ${{ inputs.redis-enabled }}
+          redis-version: ${{ inputs.redis-version }}
+          redis-host: ${{ inputs.redis-host }}
+          redis-port: ${{ inputs.redis-port }}
+          matrix-os: ${{ matrix.os }}
+          use-cache: "true"
+          trust-service-health: ${{ inputs.redis-trust-service-health }}
+
+      # --------------------------------------------------------------------
+      # Start test timer
+      # --------------------------------------------------------------------
+      - name: ⏱️ Start test timer
+        id: test-timer
+        run: |
+          TEST_START=$(date +%s)
+          echo "test-start=$TEST_START" >> $GITHUB_OUTPUT
+          echo "🕒 Test timer started at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+      # --------------------------------------------------------------------
+      # Run tests with native CI mode
+      # CI mode auto-detects GitHub Actions and produces:
+      # - GitHub annotations (::error file=path,line=N::)
+      # - Step summary ($GITHUB_STEP_SUMMARY)
+      # - Structured output (.mage-x/ci-results.jsonl)
+      # --------------------------------------------------------------------
+      - name: 🧪 Run tests
+        id: run-tests
+        continue-on-error: true
+        env:
+          # Route caller-provided matrix values through env: so they can never break out
+          # of the shell via ${{ }} interpolation (shell-safety invariant).
+          MATRIX_NAME: ${{ matrix.name }}
+          MATRIX_OS: ${{ matrix.os }}
+          MATRIX_GO_VERSION: ${{ matrix.go-version }}
+          # Caller-provided flags routed through env: too (shell-safety invariant).
+          RACE_DETECTION_ENABLED: ${{ inputs.race-detection-enabled || 'false' }}
+          CODE_COVERAGE_ENABLED: ${{ inputs.code-coverage-enabled || 'false' }}
+        run: |
+          # Determine test type based on inputs
+          RACE="${RACE_DETECTION_ENABLED:-false}"
+          COVER="${CODE_COVERAGE_ENABLED:-false}"
+
+          # These caller-controlled flags are echoed below; strip CR/LF and normalize to a
+          # strict true/false whitelist so a crafted value can't inject its own
+          # ::workflow-command onto a new line (output-injection). Anything not exactly "true"
+          # becomes "false", which also matches how the test-type branches interpret them.
+          RACE="${RACE//$'\r'/}"; RACE="${RACE//$'\n'/}"
+          COVER="${COVER//$'\r'/}"; COVER="${COVER//$'\n'/}"
+          [[ "$RACE" == "true" ]] || RACE="false"
+          [[ "$COVER" == "true" ]] || COVER="false"
+
+          echo "🔍 Race Detection Enabled: $RACE"
+          echo "🔍 Code Coverage Enabled: $COVER"
+
+          # Build unified magex command with timeout and appropriate test type
+          if [[ "$RACE" == "true" && "$COVER" == "true" ]]; then
+            TEST_TIMEOUT="${TEST_TIMEOUT_RACE_COVER:-30m}"
+            TEST_TYPE="coverrace"
+            echo "🏁 Running tests with race detection and coverage analysis (timeout: $TEST_TIMEOUT)..."
+          elif [[ "$RACE" != "true" && "$COVER" == "true" ]]; then
+            TEST_TIMEOUT="${TEST_TIMEOUT_RACE_COVER:-30m}"
+            TEST_TYPE="cover"
+            echo "🏁 Running tests with coverage analysis (timeout: $TEST_TIMEOUT)..."
+          elif [[ "$RACE" == "true" && "$COVER" != "true" ]]; then
+            TEST_TIMEOUT="${TEST_TIMEOUT:-30m}"
+            TEST_TYPE="race"
+            echo "🏁 Running tests with race detection (timeout: $TEST_TIMEOUT)..."
+          else
+            TEST_TIMEOUT="${TEST_TIMEOUT_UNIT:-20m}"
+            TEST_TYPE="short"
+            echo "🏁 Running short tests (skipping integration tests) (timeout: $TEST_TIMEOUT)..."
+          fi
+
+          # magex CI mode auto-detects GitHub Actions and produces structured output
+          MAGEX_CMD="magex test:${TEST_TYPE} -timeout $TEST_TIMEOUT"
+          echo "🔧 Running: $MAGEX_CMD"
+          echo ""
+
+          # Execute tests - CI mode automatically:
+          # - Parses test output in real-time
+          # - Emits GitHub annotations for failures
+          # - Writes step summary
+          # - Creates .mage-x/ci-results.jsonl
+          set +e
+          if [ "$ENABLE_MULTI_MODULE_TESTING" == "true" ]; then
+            echo "🔧 Multi-module testing enabled - running from repository root"
+            $MAGEX_CMD 2>&1 | tee test-output.log
+          elif [ -n "$GO_MODULE_DIR" ]; then
+            echo "🔧 Running from directory: $GO_MODULE_DIR"
+            (cd "$GO_MODULE_DIR" && $MAGEX_CMD) 2>&1 | tee test-output.log
+          else
+            echo "🔧 Running from repository root"
+            $MAGEX_CMD 2>&1 | tee test-output.log
+          fi
+          TEST_EXIT_CODE=${PIPESTATUS[0]}
+          set -e
+
+          # Set outputs
+          echo "test-exit-code=$TEST_EXIT_CODE" >> $GITHUB_OUTPUT
+          echo "🏁 Test execution completed with exit code: $TEST_EXIT_CODE"
+
+          # Emit GitHub annotation for test failures (surfaces at top of Actions UI)
+          if [[ "$TEST_EXIT_CODE" != "0" ]]; then
+            # Percent-encode untrusted matrix values before embedding in the workflow
+            # command so they can't inject their own ::commands or break out of a command
+            # property list (workflow-command injection). % must be encoded first to avoid
+            # double-decode; ':' and ',' are encoded because these values sit in the title=
+            # property, where an unescaped ',' would start a new (attacker-controlled) property.
+            esc() { local s=$1; s=${s//'%'/%25}; s=${s//$'\r'/%0D}; s=${s//$'\n'/%0A}; s=${s//:/%3A}; s=${s//,/%2C}; printf '%s' "$s"; }
+            echo "::error title=Test Suite Failed ($(esc "$MATRIX_NAME"))::Tests failed on $(esc "$MATRIX_OS") with Go $(esc "$MATRIX_GO_VERSION") - see job summary for details"
+          fi
+
+          # Calculate duration
+          TEST_END=$(date +%s)
+          TEST_DURATION=$((TEST_END - ${{ steps.test-timer.outputs.test-start }}))
+          echo "test-duration=$TEST_DURATION" >> $GITHUB_OUTPUT
+          echo "⏱️ Test duration: ${TEST_DURATION}s"
+
+      # --------------------------------------------------------------------
+      # Normalize CI results location for multi-module projects
+      # --------------------------------------------------------------------
+      - name: 🔄 Normalize CI results location
+        if: always()
+        run: |
+          # Ensure CI results are in expected location for artifact upload
+          # When running from GO_MODULE_DIR, results are created there
+          if [ -n "$GO_MODULE_DIR" ] && [ -f "$GO_MODULE_DIR/.mage-x/ci-results.jsonl" ]; then
+            mkdir -p .mage-x
+            if ! cp "$GO_MODULE_DIR/.mage-x/ci-results.jsonl" .mage-x/; then
+              echo "❌ Failed to copy CI results from $GO_MODULE_DIR/.mage-x/ci-results.jsonl to .mage-x/"
+              exit 1
+            fi
+            echo "✅ Copied CI results from module directory: $GO_MODULE_DIR"
+          elif [ -f ".mage-x/ci-results.jsonl" ]; then
+            echo "✅ CI results already in expected location"
+          else
+            echo "⚠️ No CI results file found (tests may have passed with no failures)"
+          fi
+
+      # --------------------------------------------------------------------
+      # Normalize coverage file name if coverage was generated
+      # --------------------------------------------------------------------
+      - name: 🔄 Normalize coverage file name
+        if: inputs.code-coverage-enabled == 'true' && steps.run-tests.outputs.test-exit-code == '0'
+        run: |
+          GO_MODULE_DIR="${{ env.GO_MODULE_DIR }}"
+
+          # Check module directory first
+          if [ -n "$GO_MODULE_DIR" ]; then
+            echo "📁 Looking for coverage files in module directory: $GO_MODULE_DIR"
+            for coverage_file in coverage.out coverage.txt cover.out cover.txt profile.out profile.txt; do
+              if [[ -f "$GO_MODULE_DIR/$coverage_file" ]]; then
+                echo "📁 Found coverage file: $GO_MODULE_DIR/$coverage_file"
+                echo "🔄 Moving to repository root as coverage.txt"
+                mv "$GO_MODULE_DIR/$coverage_file" coverage.txt
+                break
+              fi
+            done
+          fi
+
+          # Check root directory
+          for coverage_file in coverage.out coverage.txt cover.out cover.txt profile.out profile.txt; do
+            if [[ -f "$coverage_file" ]]; then
+              echo "📁 Found coverage file: $coverage_file"
+              if [[ "$coverage_file" != "coverage.txt" ]]; then
+                echo "🔄 Renaming to coverage.txt"
+                mv "$coverage_file" coverage.txt
+              fi
+              echo "✅ Coverage file normalized to coverage.txt"
+              break
+            fi
+          done
+
+          # Verify
+          if [[ -f coverage.txt ]] && [[ -s coverage.txt ]]; then
+            echo "✅ Coverage file verified: $(wc -l < coverage.txt) lines"
+          else
+            echo "⚠️ No coverage file found or file is empty"
+          fi
+
+      # --------------------------------------------------------------------
+      # Collect cache performance statistics
+      # --------------------------------------------------------------------
+      - name: 📊 Collect cache statistics
+        uses: ./.github/actions/collect-cache-stats
+        with:
+          workflow-name: test-${{ matrix.os }}-${{ matrix.go-version }}
+          job-name: test-go
+          os: ${{ matrix.os }}
+          go-version: ${{ matrix.go-version }}
+          cache-prefix: cache-stats
+          gomod-cache-hit: ${{ steps.setup-go-test.outputs.module-cache-hit }}
+          gobuild-cache-hit: ${{ steps.setup-go-test.outputs.build-cache-hit }}
+          redis-enabled: ${{ inputs.redis-enabled }}
+          redis-cache-hit: ${{ steps.setup-redis.outputs.cache-hit }}
+          redis-image-size: ${{ steps.setup-redis.outputs.image-size }}
+          redis-operation-time: ${{ steps.setup-redis.outputs.cache-operation-time }}
+
+      # --------------------------------------------------------------------
+      # Report Redis cache performance metrics
+      # --------------------------------------------------------------------
+      - name: 📊 Report Redis Cache Performance
+        if: inputs.redis-enabled == 'true'
+        env:
+          # Route caller-provided inputs and step outputs through env: (shell-safety invariant).
+          REDIS_ENABLED: ${{ inputs.redis-enabled }}
+          REDIS_VERSION: ${{ inputs.redis-version }}
+          REDIS_CACHE_HIT: ${{ steps.setup-redis.outputs.cache-hit }}
+          REDIS_IMAGE_SIZE: ${{ steps.setup-redis.outputs.image-size }}
+          REDIS_CACHE_OP_TIME: ${{ steps.setup-redis.outputs.cache-operation-time }}
+          REDIS_CONNECTION_TIME: ${{ steps.setup-redis.outputs.connection-time }}
+        run: |
+          # Strip CR/LF from caller-controlled inputs and step outputs before logging so a
+          # crafted value (e.g. a redis-version with an embedded newline) can't start a new
+          # line beginning with '::' and inject a GitHub workflow command (workflow-command
+          # injection). These are plain log lines — not ::commands — so removing newlines is
+          # sufficient and keeps values readable (percent-encoding is only decoded inside a
+          # ::command, and would visibly mangle legitimate values here).
+          for _v in REDIS_ENABLED REDIS_VERSION REDIS_CACHE_HIT REDIS_IMAGE_SIZE REDIS_CACHE_OP_TIME REDIS_CONNECTION_TIME; do
+            _tmp="${!_v}"; _tmp="${_tmp//$'\r'/}"; _tmp="${_tmp//$'\n'/}"; printf -v "$_v" '%s' "$_tmp"
+          done
+
+          echo "📊 Redis Cache Performance Report"
+          echo "================================="
+          echo "• Redis Enabled: ${REDIS_ENABLED}"
+          echo "• Redis Version: ${REDIS_VERSION}"
+          echo "• Cache Hit: ${REDIS_CACHE_HIT}"
+          echo "• Image Size: ${REDIS_IMAGE_SIZE}MB"
+          echo "• Cache Operation Time: ${REDIS_CACHE_OP_TIME}s"
+          echo "• Connection Time: ${REDIS_CONNECTION_TIME}s"
+
+      # --------------------------------------------------------------------
+      # Upload performance cache statistics for completion report
+      # --------------------------------------------------------------------
+      - name: 📤 Upload performance cache statistics
+        uses: ./.github/actions/upload-statistics
+        with:
+          artifact-name: cache-stats-test-${{ matrix.os }}-${{ matrix.go-version }}
+          artifact-path: cache-stats-test-${{ matrix.os }}-${{ matrix.go-version }}.json
+          retention-days: "1"
+
+      # --------------------------------------------------------------------
+      # Upload CI results (native CI mode output)
+      # --------------------------------------------------------------------
+      - name: 📤 Upload CI results
+        if: always()
+        uses: ./.github/actions/upload-artifact-resilient
+        with:
+          artifact-name: ci-results-${{ matrix.os }}-${{ matrix.go-version }}
+          artifact-path: |
+            .mage-x/ci-results.jsonl
+            test-output.log
+          retention-days: "7"
+          if-no-files-found: ignore
+
+      # --------------------------------------------------------------------
+      # Verify coverage file exists and upload for processing
+      # --------------------------------------------------------------------
+      - name: 🔍 Verify coverage file
+        if: inputs.code-coverage-enabled == 'true'
+        run: |
+          if [[ -f coverage.txt ]] && [[ -s coverage.txt ]]; then
+            echo "✅ Coverage file verified and ready for upload"
+            echo "📊 Coverage file size: $(wc -c < coverage.txt) bytes"
+            echo "📊 Coverage entries: $(wc -l < coverage.txt) lines"
+
+            # Basic validation
+            if head -1 coverage.txt | grep -q "mode:"; then
+              echo "✅ Coverage file format validation passed"
+            else
+              echo "⚠️ Coverage file may not be in expected Go coverage format"
+              head -3 coverage.txt
+            fi
+          else
+            echo "❌ Coverage file missing or empty"
+            if [[ "${{ steps.run-tests.outputs.test-exit-code }}" == "0" ]]; then
+              echo "::error::Tests passed but no coverage file generated despite coverage being enabled"
+            else
+              echo "::warning::No coverage file due to test failures"
+            fi
+          fi
+
+      # --------------------------------------------------------------------
+      # Upload coverage data for fortress-coverage workflow processing
+      # --------------------------------------------------------------------
+      - name: 📤 Upload coverage data
+        if: inputs.code-coverage-enabled == 'true' && hashFiles('coverage.txt') != '' && matrix.os == inputs.primary-runner && matrix.go-version == inputs.go-primary-version
+        uses: ./.github/actions/upload-artifact-resilient
+        with:
+          artifact-name: coverage-data
+          artifact-path: coverage.txt
+          retention-days: "7"
+          continue-on-error: "false"
+
+      # --------------------------------------------------------------------
+      # Enforce the real test outcome
+      # --------------------------------------------------------------------
+      # The 🧪 Run tests step uses continue-on-error so coverage/artifact steps
+      # still run on failure; it records the real result in
+      # steps.run-tests.outputs.test-exit-code. THIS gate is what actually fails
+      # the job on a non-zero exit. It is intentionally independent of the
+      # structured ci-results.jsonl parsing (validate-test-results): a package
+      # killed by a signal (e.g. "signal: hangup") or a build/vet failure emits
+      # no per-test FAIL event, so JSONL-based checks miss it while the process
+      # exit code does not. Without this gate a real failure is masked and only
+      # resurfaces downstream as the misleading "coverage file not found".
+      # Gate on run-tests actually having executed. If an earlier step (Go/MAGE-X
+      # setup, checkout, …) failed, run-tests is skipped and never records
+      # test-exit-code; without this gate the empty output reads as "!= 0" and this
+      # step masks the real setup failure behind a misleading "exited with '<unset>'".
+      # `outcome != 'skipped'` (not "output is empty") is deliberate: if run-tests
+      # *ran* but died before writing its output, we still enforce and fail closed
+      # rather than let a green slip through — run-tests is continue-on-error, so
+      # this step is the only thing that can fail the job on a bad test process.
+      - name: 🚦 Enforce test exit code
+        if: ${{ !cancelled() && steps.run-tests.outcome != 'skipped' }}
+        env:
+          # Route matrix values (caller-provided) and the recorded exit code through env:
+          # so nothing can break out of the shell via ${{ }} (shell-safety invariant).
+          MATRIX_NAME: ${{ matrix.name }}
+          MATRIX_OS: ${{ matrix.os }}
+          MATRIX_GO_VERSION: ${{ matrix.go-version }}
+          TEST_EXIT_CODE: ${{ steps.run-tests.outputs.test-exit-code }}
+        run: |
+          CODE="$TEST_EXIT_CODE"
+          if [[ "$CODE" != "0" ]]; then
+            # Percent-encode untrusted matrix values before embedding in the workflow
+            # command so they can't inject their own ::commands or break out of a command
+            # property list (workflow-command injection). % is encoded first to avoid
+            # double-decode; ':' and ',' are encoded because these values sit in the title=
+            # property, where an unescaped ',' would start a new (attacker-controlled) property.
+            # CODE is our own numeric exit code, so it needs no encoding.
+            esc() { local s=$1; s=${s//'%'/%25}; s=${s//$'\r'/%0D}; s=${s//$'\n'/%0A}; s=${s//:/%3A}; s=${s//,/%2C}; printf '%s' "$s"; }
+            echo "::error title=Test Suite Failed ($(esc "$MATRIX_NAME"))::go test exited with code '${CODE:-<unset>}' on $(esc "$MATRIX_OS") / Go $(esc "$MATRIX_GO_VERSION") — see the '🧪 Run tests' step and job summary"
+            echo "❌ Failing job: test process exited '${CODE:-<unset>}' (expected 0)."
+            exit 1
+          fi
+          echo "✅ Test process exited 0"

@@ -3,78 +3,89 @@
 # General
 # ---------------------------
 version: 2
+
 before:
   hooks:
-    - make test
+    - |
+      sh -c "if [ \"${SKIP_GORELEASER_TESTS}\" = \"true\" ]; then
+        echo 'Skipping tests (SKIP_GORELEASER_TESTS=true)'
+      else
+        magex test
+      fi"
 changelog:
+  use: github
   sort: asc
+  abbrev: 0
+  format: '[`{{ slice .SHA 0 7 }}`]({{ .GitURL }}/commit/{{ .SHA }}): {{ .Message }}{{ with .AuthorUsername }} (@{{ . }}){{ end }}'
+  groups:
+    - title: "Features"
+      regexp: '^.*?feat(\([[:word:]]+\))??!?:.+$'
+      order: 100
+    - title: "Bug Fixes"
+      regexp: '^.*?fix(\([[:word:]]+\))??!?:.+$'
+      order: 200
+    - title: "Documentation"
+      regexp: '^.*?docs?(\([[:word:]]+\))??!?:.+$'
+      order: 300
+    - title: "Refactoring"
+      regexp: '^.*?refactor(\([[:word:]]+\))??!?:.+$'
+      order: 400
+    - title: "Other Changes"
+      order: 9999
   filters:
     exclude:
-      - '^.github:'
-      - '^.vscode:'
-      - '^test:'
+      - "^test:"
+      - "^Merge pull request"
+      - "^Merge branch"
+
 # ---------------------------
 # Builder
 # ---------------------------
 builds:
-  - env:
+  - id: paymail-inspector
+    main: ./cmd/paymail-inspector
+    binary: paymail-inspector
+    env:
       - CGO_ENABLED=0
-      - GO111MODULE=on
-    binary: "paymail"
+    goos:
+      - linux
+      - darwin
+      - windows
     goarch:
       - amd64
       - arm64
-    goos:
-      - darwin
-      - linux
-      - windows
-    goarm:
-      - "6"
-      - "7"
     ldflags:
-      - -s -w -X github.com/mrz1836/{{ .ProjectName }}/cmd.Version={{ .Version }}
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.buildDate={{.Date}}
+
 # ---------------------------
-# Archives + Checksums
+# Archives
 # ---------------------------
 archives:
-  - wrap_in_directory: app
+  - id: paymail-inspector
     name_template: >-
-      {{- .ProjectName }}_ {{- title .Os }}_ {{- if eq .Arch "amd64" }}x86_64 {{- else if eq .Arch "386" }}i386 {{- else }}{{ .Arch }}{{ end }} {{- if .Arm }}v{{ .Arm }}{{ end -}}
+      {{- .ProjectName }}_{{- .Version }}_{{- .Os }}_{{- .Arch }}
+    files:
+      - LICENSE
+      - README.md
+
+# ---------------------------
+# Checksum
+# ---------------------------
 checksum:
-  name_template: "{{ .ProjectName }}_checksums.txt"
+  name_template: "{{ .ProjectName }}_{{ .Version }}_checksums.txt"
   algorithm: sha256
+
 # ---------------------------
 # Github Release
 # ---------------------------
 release:
-  prerelease: true
+  prerelease: auto
   name_template: "Release v{{.Version}}"
-# ---------------------------
-# Brews - OSX
-# ---------------------------
-brews:
-  - name: paymail-inspector
-    # The Homebrew Tap repo where the formula will be pushed
-    repository:
-      owner: mrz1836
-      name: homebrew-paymail-inspector
-      branch: main # optional; defaults to the default branch
-      pull_request:
-        enabled: true
-        draft: false
-    commit_author:
-      name: mrz1836
-      email: mrz1818@protonmail.ch
-    homepage: https://github.com/mrz1836/paymail-inspector
-    description: |
-      CLI app for interacting with paymail service providers
-    caveats: |
-      See the GitHub repo for more information.
-    install: |
-      bin.install "paymail"
-    test: |
-      system "#{bin}/paymail", "--version"
-      system "#{bin}/paymail", "-h"
+  replace_existing_artifacts: true
+
 # ---------------------------
 # Announce
 # ---------------------------
@@ -82,25 +93,28 @@ announce:
   # See more at: https://goreleaser.com/customization/announce/#slack
   slack:
     enabled: false
-    message_template: '{{ .ProjectName }} {{ .Tag }} is out! Changelog: https://github.com/mrz1836/{{ .ProjectName }}/releases/tag/{{ .Tag }}'
-    channel: '#test_slack'
+    message_template: "{{ .ProjectName }} {{ .Tag }} is out! Changelog: https://github.com/{{ .GitOwner }}/{{ .ProjectName }}/releases/tag/{{ .Tag }}"
+    channel: "#test_slack"
     # username: ''
     # icon_emoji: ''
     # icon_url: ''
+
   # See more at: https://goreleaser.com/customization/announce/#twitter
   twitter:
     enabled: false
-    message_template: '{{ .ProjectName }} {{ .Tag }} is out!'
+    message_template: "{{ .ProjectName }} {{ .Tag }} is out!"
+
   # See more at: https://goreleaser.com/customization/announce/#discord
   discord:
     enabled: false
-    message_template: '{{ .ProjectName }} {{ .Tag }} is out!'
+    message_template: "{{ .ProjectName }} {{ .Tag }} is out!"
     # Defaults to `GoReleaser`
-    author: ''
+    author: ""
     # Defaults to `3888754` - the grey-ish from goreleaser
-    color: ''
+    color: ""
     # Defaults to `https://goreleaser.com/static/avatar.png`
-    icon_url: ''
+    icon_url: ""
+
   # See more at: https://goreleaser.com/customization/announce/#reddit
   reddit:
     enabled: false
@@ -109,6 +123,6 @@ announce:
     # Username for your Reddit account
     username: ""
     # Defaults to `{{ .GitURL }}/releases/tag/{{ .Tag }}`
-    # url_template: 'https://github.com/mrz1836/{{ .ProjectName }}/releases/tag/{{ .Tag }}'
+    # url_template: 'https://github.com/{{ .GitOwner }}/{{ .ProjectName }}/releases/tag/{{ .Tag }}'
     # Defaults to `{{ .ProjectName }} {{ .Tag }} is out!`
-    title_template: '{{ .ProjectName }} {{ .Tag }} is out!'
+    title_template: "{{ .ProjectName }} {{ .Tag }} is out!"

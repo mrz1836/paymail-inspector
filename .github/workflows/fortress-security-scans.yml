@@ -1,0 +1,1065 @@
+# ------------------------------------------------------------------------------------
+#  Security Scans (Reusable Workflow) (GoFortress)
+#
+#  Purpose: Run all security scanning tools: Govulncheck (Go vulnerability scanning),
+#  OSV-Scanner (multi-source dependency scanning via OSV.dev), Gitleaks (secret
+#  scanning), and Nancy (legacy dependency checks; disabled by default).
+#
+#  Maintainer: @mrz1836
+#
+#  FAILURE HANDLING:
+#  - Each scan keeps `continue-on-error: true` so one failure does not mask another.
+#    A final `🚨 Aggregate failures` step exits non-zero if any real failure occurred.
+#    Intentionally inconclusive (never fail the job): Nancy skipped-no-token / rate-limited /
+#    payment-required / unreachable, and OSV-Scanner network/database errors. OSV findings
+#    fail the job when OSV_SCANNER_FAIL_ON_VULNERABILITY=true (the shipped default);
+#    set it to false to make OSV report-only.
+#
+# ------------------------------------------------------------------------------------
+
+name: GoFortress (Security Scans)
+
+on:
+  workflow_call:
+    inputs:
+      env-json:
+        description: "JSON string of environment variables"
+        required: true
+        type: string
+      enable-nancy:
+        description: "Enable Nancy security scan"
+        required: false
+        type: boolean
+        default: true
+      enable-govulncheck:
+        description: "Enable govulncheck security scan"
+        required: false
+        type: boolean
+        default: true
+      enable-gitleaks:
+        description: "Enable Gitleaks security scan"
+        required: false
+        type: boolean
+        default: true
+      enable-osv:
+        description: "Enable OSV-Scanner dependency scan"
+        required: false
+        type: boolean
+        default: true
+      primary-runner:
+        description: "Primary runner OS"
+        required: true
+        type: string
+      go-primary-version:
+        description: "Primary Go version"
+        required: true
+        type: string
+      go-sum-file:
+        description: "Path to go.sum file for dependency verification"
+        required: true
+        type: string
+    secrets:
+      github-token:
+        description: "GitHub token for API access"
+        required: true
+      gitleaks-license:
+        description: "Gitleaks license key"
+        required: false
+      ossi-username:
+        description: "Deprecated (legacy OSS Index / Nancy v1). Unused by Nancy v2 — kept for backward compatibility."
+        required: false
+      ossi-token:
+        description: "Deprecated (legacy OSS Index / Nancy v1). Unused by Nancy v2 — kept for backward compatibility."
+        required: false
+      guide-token:
+        description: "Sonatype Guide Personal Access Token (Bearer) for Nancy v2; exposed to Nancy as GUIDE_TOKEN. If unset, the Nancy scan is skipped with a warning."
+        required: false
+
+# Security: Restrict default permissions (jobs must explicitly request what they need)
+permissions: {}
+
+jobs:
+  # ----------------------------------------------------------------------------------
+  # Security Scans (single consolidated job)
+  #
+  # Workflow phases (each preserved as named, conditional, continue-on-error steps):
+  #   📥 Checkout (full history for gitleaks)
+  #   🔧 Parse env / Setup Go / Extract module dir / Setup MAGE-X (shared once)
+  #   💾 Restore + install govulncheck binary cache (if govulncheck enabled)
+  #
+  #   🛡️ Nancy:        write go list → install → run → annotations → summary → upload
+  #   🔐 Govulncheck:  run → annotations → summary → upload
+  #   🛰️ OSV-Scanner:  cache/install → run → annotations → summary → SARIF upload → artifact
+  #   🕵️ Gitleaks:     repo check → run → annotations → summary/fork notice
+  #
+  #   📊 Collect + upload cache statistics (single entry for merged job)
+  #   🚨 Aggregate failures (exit 1 if any scan reported a real failure)
+  # ----------------------------------------------------------------------------------
+  security-scans:
+    name: 🔒 Security Scans
+    runs-on: ${{ inputs.primary-runner }}
+    # Minutes, from SECURITY_SCAN_TIMEOUT_MINUTES (10-security.env); override in 90-project.env.
+    timeout-minutes: ${{ fromJSON(fromJSON(inputs.env-json).SECURITY_SCAN_TIMEOUT_MINUTES || '10') }}
+    if: ${{ inputs.enable-nancy || inputs.enable-govulncheck || inputs.enable-gitleaks || inputs.enable-osv }}
+    permissions:
+      contents: read # All scans
+      pull-requests: write # Gitleaks needs to create PR comments
+      security-events: write # OSV-Scanner uploads SARIF results to GitHub Code Scanning
+    steps:
+      # ====================================================================
+      # SHARED SETUP
+      # ====================================================================
+      - name: 📥 Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0 # Full history required for Gitleaks (other scans tolerate this)
+
+      - name: 🔧 Parse environment variables
+        uses: ./.github/actions/parse-env
+        with:
+          env-json: ${{ inputs.env-json }}
+
+      # Govulncheck may need a newer Go version than the project default — use it
+      # if set; the same Go install also covers Nancy's `go install`.
+      - name: 🏗️ Setup Go with Cache
+        id: setup-security
+        uses: ./.github/actions/setup-go-with-cache
+        with:
+          go-version: ${{ env.GOVULNCHECK_GO_VERSION || inputs.go-primary-version }}
+          matrix-os: ${{ inputs.primary-runner }}
+          go-primary-version: ${{ inputs.go-primary-version }}
+          go-secondary-version: ${{ inputs.go-primary-version }}
+          go-sum-file: ${{ inputs.go-sum-file }}
+          enable-multi-module: ${{ env.ENABLE_MULTI_MODULE_TESTING }}
+          github-token: ${{ secrets.github-token }}
+
+      - name: 🔧 Extract Go module directory
+        uses: ./.github/actions/extract-module-dir
+        with:
+          go-sum-file: ${{ inputs.go-sum-file }}
+
+      - name: 🔧 Setup MAGE-X
+        if: ${{ inputs.enable-govulncheck }}
+        uses: ./.github/actions/setup-magex
+        with:
+          magex-version: ${{ env.MAGE_X_VERSION }}
+          runner-os: ${{ inputs.primary-runner }}
+          use-local: ${{ env.MAGE_X_USE_LOCAL }}
+
+      # --------------------------------------------------------------------
+      # Govulncheck binary cache (restore + install on miss)
+      # --------------------------------------------------------------------
+      - name: 💾 Restore govulncheck binary cache
+        id: govuln-cache
+        if: ${{ inputs.enable-govulncheck }}
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cache/govulncheck-bin
+          key: ${{ inputs.primary-runner }}-govulncheck-${{ env.GOVULNCHECK_VERSION }}-go${{ env.GOVULNCHECK_GO_VERSION }}
+
+      - name: 🛠️ Make cached govulncheck usable
+        if: ${{ inputs.enable-govulncheck }}
+        run: |
+          set -euo pipefail
+          BIN_DIR="$HOME/.cache/govulncheck-bin"
+          GOVULN_BIN="$BIN_DIR/govulncheck"
+          if [[ -f "$GOVULN_BIN" ]]; then
+            echo "✅ Using cached govulncheck binary"
+            mkdir -p "$(go env GOPATH)/bin"
+            cp "$GOVULN_BIN" "$(go env GOPATH)/bin/"
+          fi
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+
+      - name: 📥 Install govulncheck (cache miss)
+        if: ${{ inputs.enable-govulncheck && steps.govuln-cache.outputs.cache-hit != 'true' }}
+        run: |
+          echo "⬇️ Cache miss – installing govulncheck..."
+          echo "🔧 Installing govulncheck version ${{ env.GOVULNCHECK_VERSION }}..."
+          go install golang.org/x/vuln/cmd/govulncheck@${{ env.GOVULNCHECK_VERSION }}
+          mkdir -p ~/.cache/govulncheck-bin
+          cp "$(go env GOPATH)/bin/govulncheck" ~/.cache/govulncheck-bin/
+          echo "✅ govulncheck installed and stored in cache"
+
+      # ====================================================================
+      # SHARED VULNERABILITY EXCLUSIONS
+      # ====================================================================
+      # Resolve ONE effective exclusion list for all dependency scanners. Merges the
+      # canonical SECURITY_VULN_EXCLUDES with the legacy per-tool variables
+      # (MAGE_X_CVE_EXCLUDES / NANCY_EXCLUDES) so projects that still set those older
+      # variables keep working (this workflow is synced across many repos). Each scanner
+      # consumes EFFECTIVE_VULN_EXCLUDES and silently ignores IDs outside its namespace.
+      - name: 🚫 Resolve shared vulnerability exclusions
+        if: ${{ inputs.enable-nancy || inputs.enable-govulncheck || inputs.enable-osv }}
+        run: |
+          # Concatenate all sources, split on commas, trim, drop blanks, dedupe
+          # (order-preserving), and re-join. Legacy vars are honored for compatibility.
+          EFFECTIVE="$(printf '%s,%s,%s' \
+            "${SECURITY_VULN_EXCLUDES:-}" "${MAGE_X_CVE_EXCLUDES:-}" "${NANCY_EXCLUDES:-}" \
+            | tr ',' '\n' | sed 's/[[:space:]]//g' | awk 'NF && !seen[$0]++' | paste -sd, -)"
+          echo "EFFECTIVE_VULN_EXCLUDES=${EFFECTIVE}" >> "$GITHUB_ENV"
+          if [[ -n "$EFFECTIVE" ]]; then
+            echo "🚫 Effective shared vulnerability exclusions: ${EFFECTIVE}"
+          else
+            echo "ℹ️  No vulnerability exclusions configured."
+          fi
+
+      # ====================================================================
+      # NANCY (DEPENDENCY CHECKS)
+      # ====================================================================
+      - name: 📝 Nancy — Write go list
+        if: ${{ inputs.enable-nancy }}
+        run: |
+          echo "📋 Generating module list for security scanning..."
+          GO_MODULE_DIR="${{ env.GO_MODULE_DIR }}"
+
+          if [ "$ENABLE_MULTI_MODULE_TESTING" == "true" ]; then
+            echo "🔧 Multi-module enabled - running go list from repository root"
+            go list -json -m all > go.list
+          elif [ -n "$GO_MODULE_DIR" ]; then
+            echo "🔧 Running go list from directory: $GO_MODULE_DIR"
+            (cd "$GO_MODULE_DIR" && go list -json -m all > ../go.list)
+          else
+            echo "🔧 Running go list from repository root"
+            go list -json -m all > go.list
+          fi
+
+          echo "✅ Module list generated successfully"
+
+      - name: 📥 Nancy — Install
+        if: ${{ inputs.enable-nancy }}
+        run: |
+          echo "📥 Installing nancy version ${{ env.NANCY_VERSION }}..."
+          # Nancy v2+ uses a semantic-import-versioned module path (…/nancy/v2) and
+          # authenticates to the Sonatype Guide backend with a Bearer token (the free
+          # anonymous OSS Index tier was removed in v2). Keep the /v2 suffix in sync
+          # with the major version of NANCY_VERSION; if you roll back to v1.x, drop it.
+          go install github.com/sonatype-nexus-community/nancy/v2@${{ env.NANCY_VERSION }}
+          echo "✅ Nancy installed successfully"
+
+      - name: 🛡️ Nancy — Run scan
+        id: run-nancy
+        if: ${{ inputs.enable-nancy }}
+        continue-on-error: true
+        env:
+          # Nancy v2 authenticates to the Sonatype Guide backend with a Bearer token
+          # read from the GUIDE_TOKEN env var, sourced from the dedicated `guide-token`
+          # secret (generate a Personal Access Token at
+          # https://guide.sonatype.com/settings/tokens). Routed through `env:` — never
+          # interpolated into the shell body or the command line — so the token is never
+          # exposed in process args or logs. If the secret is absent/empty the scan is
+          # skipped with a warning (see the guard below) instead of failing CI.
+          GUIDE_TOKEN: ${{ secrets.guide-token }}
+        run: |
+          echo "🔍 Running Nancy security scan..."
+          # Guard: Nancy v2 requires a Sonatype Guide token. If none is configured, skip
+          # the scan entirely — no API calls, no Guide credits consumed — and emit a
+          # warning rather than failing CI or firing an unauthenticated request.
+          if [[ -z "${GUIDE_TOKEN:-}" ]]; then
+            echo "nancy-status=skipped-no-token" >> $GITHUB_OUTPUT
+            echo "⚠️  Nancy scan skipped - no Sonatype Guide token configured (GUIDE_TOKEN secret empty)."
+            echo "    Add a GUIDE_TOKEN repository secret from https://guide.sonatype.com/settings/tokens"
+            echo "    to enable dependency scanning. Not failing CI; govulncheck still covers Go vulns."
+            exit 0
+          fi
+          set +e
+          # --skip-update-check: avoid Nancy's GitHub self-update check, which hits
+          # api.github.com on every run and can rate-limit / fail in CI. It is an
+          # unrelated network dependency that we don't want influencing the scan outcome.
+          # (Flag is supported by both v1.2.0 and v2.x.)
+          # Exclusions come from the shared, resolved list (EFFECTIVE_VULN_EXCLUDES).
+          # Nancy's --exclude-vulnerability requires a non-empty argument, so fall back to
+          # a harmless placeholder when the list is empty.
+          NANCY_EXCLUDE_ARG="${EFFECTIVE_VULN_EXCLUDES:-CVE-0000-00000}"
+          nancy sleuth --skip-update-check --loud --exclude-vulnerability "$NANCY_EXCLUDE_ARG" < go.list 2>&1 | tee nancy-output.log
+          NANCY_EXIT_CODE=${PIPESTATUS[0]}
+          set -e
+
+          echo "nancy-exit-code=$NANCY_EXIT_CODE" >> $GITHUB_OUTPUT
+          if [[ $NANCY_EXIT_CODE -eq 0 ]]; then
+            echo "nancy-status=success" >> $GITHUB_OUTPUT
+            echo "✅ Nancy scan completed - no vulnerabilities found"
+          elif grep -qiE 'rate limited by OSS Index|Error:.*(429|too many requests)' nancy-output.log; then
+            echo "nancy-status=rate-limited" >> $GITHUB_OUTPUT
+            echo "⚠️  Nancy scan inconclusive - the backend rate-limited the request (not failing CI)."
+            echo "    Set the GUIDE_TOKEN secret to a valid Sonatype Guide token to lift the limit."
+            echo "    Manage tokens at https://guide.sonatype.com/settings/tokens"
+          elif grep -qiE '402 Payment Required|Error:.*(402|payment required|out of credits|credit limit|quota exceeded|usage limit|insufficient credit)' nancy-output.log; then
+            echo "nancy-status=payment-required" >> $GITHUB_OUTPUT
+            echo "⚠️  Nancy scan inconclusive - Sonatype Guide credits exhausted / payment required (not failing CI)."
+            echo "    The Guide free plan includes a limited number of hits per billing period (e.g. 500),"
+            echo "    which a full dependency scan can consume quickly. Check usage or reduce scan frequency."
+            echo "    Manage credits/token at https://guide.sonatype.com/settings/tokens"
+          elif grep -qiE 'Error:.*(guide API request failed|api/v3/component-report|https?://[^" ]*ossindex|dial tcp|lookup [^ ]+ on |no such host|connection refused|connection reset|network is unreachable|i/o timeout|TLS handshake timeout|context deadline exceeded|Client\.Timeout|server misbehaving|temporary failure in name resolution)' nancy-output.log; then
+            # OSS Index was unreachable (DNS/network/TLS failure or HTTP error) before
+            # Nancy could complete the scan. This is an infrastructure hiccup, not a
+            # vulnerability detection, so it is treated as inconclusive and does NOT fail CI.
+            echo "nancy-status=unreachable" >> $GITHUB_OUTPUT
+            echo "⚠️  Nancy scan inconclusive - OSS Index was unreachable (network/DNS error; not failing CI)."
+            echo "    This is typically a transient connectivity issue with ossindex.sonatype.org."
+          else
+            echo "nancy-status=failure" >> $GITHUB_OUTPUT
+            echo "❌ Nancy scan completed - vulnerabilities detected (exit code: $NANCY_EXIT_CODE)"
+          fi
+
+      - name: 📋 Nancy — Annotations (vulnerabilities)
+        if: always() && steps.run-nancy.outputs.nancy-status == 'failure'
+        run: |
+          echo "::error title=Nancy Security Scan Failed::Vulnerabilities detected in Go dependencies - see job summary for details"
+
+      - name: 📋 Nancy — Annotations (skipped — no token)
+        if: always() && steps.run-nancy.outputs.nancy-status == 'skipped-no-token'
+        run: |
+          echo "::warning title=Nancy Skipped::No Sonatype Guide token configured (GUIDE_TOKEN secret empty), so the dependency scan was skipped. CI was not failed. Add a GUIDE_TOKEN secret from https://guide.sonatype.com/settings/tokens to enable it."
+
+      - name: 📋 Nancy — Annotations (rate-limited)
+        if: always() && steps.run-nancy.outputs.nancy-status == 'rate-limited'
+        run: |
+          echo "::warning title=Nancy Rate Limited::Sonatype Guide rate-limited the scan; results inconclusive. CI was not failed."
+
+      - name: 📋 Nancy — Annotations (payment-required)
+        if: always() && steps.run-nancy.outputs.nancy-status == 'payment-required'
+        run: |
+          echo "::warning title=Nancy Payment Required::Sonatype Guide credits exhausted / 402 Payment Required; results inconclusive. CI was not failed. The Guide free plan has a limited number of hits per billing period."
+
+      - name: 📋 Nancy — Annotations (unreachable)
+        if: always() && steps.run-nancy.outputs.nancy-status == 'unreachable'
+        run: |
+          echo "::warning title=Nancy Unreachable::The Sonatype Guide / OSS Index backend was unreachable (network/DNS/TLS error); results inconclusive. CI was not failed. This is usually a transient connectivity issue and will clear on the next run."
+
+      - name: 📊 Nancy — Job Summary
+        if: always() && inputs.enable-nancy
+        run: |
+          NANCY_STATUS="${{ steps.run-nancy.outputs.nancy-status }}"
+
+          {
+            echo "## 🛡️ Nancy Security Scan Summary"
+            echo ""
+            echo "| Scan Details | Status |"
+            echo "|---|---|"
+            echo "| **Tool** | Nancy Sleuth |"
+            echo "| **Mode** | Loud mode with exclusions |"
+            echo "| **Scope** | All Go modules |"
+            echo "| **Version** | ${{ env.NANCY_VERSION }} |"
+          } >> $GITHUB_STEP_SUMMARY
+
+          if [[ "$NANCY_STATUS" == "success" ]]; then
+            echo "| **Result** | ✅ No vulnerabilities found |" >> $GITHUB_STEP_SUMMARY
+          elif [[ "$NANCY_STATUS" == "skipped-no-token" ]]; then
+            echo "| **Result** | ⏭️ Skipped — no Sonatype Guide token configured (CI not failed) |" >> $GITHUB_STEP_SUMMARY
+          elif [[ "$NANCY_STATUS" == "rate-limited" ]]; then
+            echo "| **Result** | ⚠️ Rate limited by Sonatype Guide — scan inconclusive (CI not failed) |" >> $GITHUB_STEP_SUMMARY
+          elif [[ "$NANCY_STATUS" == "payment-required" ]]; then
+            echo "| **Result** | ⚠️ Sonatype Guide 402 / credits exhausted — scan inconclusive (CI not failed) |" >> $GITHUB_STEP_SUMMARY
+          elif [[ "$NANCY_STATUS" == "unreachable" ]]; then
+            echo "| **Result** | ⚠️ Guide/OSS Index unreachable (network/DNS error) — scan inconclusive (CI not failed) |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| **Result** | ❌ Vulnerabilities detected |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          {
+            echo ""
+            echo "### 🚫 Excluded Vulnerabilities"
+            echo "The following vulnerabilities were excluded from the scan:"
+            echo "${{ env.EFFECTIVE_VULN_EXCLUDES }}"
+          } >> $GITHUB_STEP_SUMMARY
+
+          if [[ "$NANCY_STATUS" == "skipped-no-token" ]]; then
+            {
+              echo ""
+              echo "### ⏭️ Nancy Skipped — No Sonatype Guide Token"
+              echo ""
+              echo "Nancy v2 requires a **Sonatype Guide** Bearer token, and no \`GUIDE_TOKEN\` secret is configured, so the dependency scan was skipped. **CI was not failed.**"
+              echo ""
+              echo "**To enable Nancy:**"
+              echo ""
+              echo "1. Generate a Personal Access Token at <https://guide.sonatype.com/settings/tokens>."
+              echo "2. Add it as a repository secret named \`GUIDE_TOKEN\`."
+              echo ""
+              echo "> **Heads up:** the Guide **free plan** meters usage (~500 hits/billing period) and a full scan of this repo queries ~100–200 components, so it can be exhausted in a few runs. \`govulncheck\` is already enabled in this pipeline and covers Go vulnerabilities for free."
+            } >> $GITHUB_STEP_SUMMARY
+          elif [[ "$NANCY_STATUS" == "rate-limited" ]]; then
+            {
+              echo ""
+              echo "### ⚠️ Sonatype Guide Rate Limit"
+              echo ""
+              echo "Sonatype's backend rate-limited this request before Nancy could complete the scan."
+              echo "**This is not a vulnerability detection** and CI has **not** been failed for this run."
+              echo ""
+              echo "**To remediate (recommended):**"
+              echo ""
+              echo "1. Generate a Personal Access Token at <https://guide.sonatype.com/settings/tokens>."
+              echo "2. Add it as a repository secret named \`GUIDE_TOKEN\` (Nancy v2 reads it as the Bearer token)."
+              echo ""
+              echo "Authenticated requests have a substantially higher rate limit and avoid this state."
+            } >> $GITHUB_STEP_SUMMARY
+            if [[ -f nancy-output.log ]]; then
+              {
+                echo ""
+                echo "<details>"
+                echo "<summary>Click to expand Nancy output</summary>"
+                echo ""
+                echo '```'
+                head -50 nancy-output.log
+                echo '```'
+                echo "</details>"
+              } >> $GITHUB_STEP_SUMMARY
+            fi
+          elif [[ "$NANCY_STATUS" == "payment-required" ]]; then
+            {
+              echo ""
+              echo "### ⚠️ Sonatype Guide Credits Exhausted / Payment Required (402)"
+              echo ""
+              echo "Sonatype Guide returned **402 Payment Required**, indicating the account's credit allotment for the current billing period has been exhausted."
+              echo "**This is not a vulnerability detection** and CI has **not** been failed for this run."
+              echo ""
+              echo "> **Note:** the Guide **free plan** includes a limited number of hits per billing period (e.g. ~500). A full dependency scan of this repo queries ~100–200 components, so a handful of runs can exhaust it. Consider reducing how often Nancy runs (e.g. release/tag or a weekly schedule only) or relying on \`govulncheck\`, which is already enabled in this pipeline and is free."
+              echo ""
+              echo "**To remediate:**"
+              echo ""
+              echo "1. Check your usage / plan at <https://guide.sonatype.com>."
+              echo "2. Generate a Personal Access Token at <https://guide.sonatype.com/settings/tokens>."
+              echo "3. Store it in the \`GUIDE_TOKEN\` repository secret (Nancy v2 reads it as the Bearer token)."
+            } >> $GITHUB_STEP_SUMMARY
+            if [[ -f nancy-output.log ]]; then
+              {
+                echo ""
+                echo "<details>"
+                echo "<summary>Click to expand Nancy output</summary>"
+                echo ""
+                echo '```'
+                head -50 nancy-output.log
+                echo '```'
+                echo "</details>"
+              } >> $GITHUB_STEP_SUMMARY
+            fi
+          elif [[ "$NANCY_STATUS" == "unreachable" ]]; then
+            {
+              echo ""
+              echo "### ⚠️ OSS Index Unreachable"
+              echo ""
+              echo "Nancy could not reach Sonatype's OSS Index (\`ossindex.sonatype.org\`) due to a network, DNS, or TLS error, so the scan could not complete."
+              echo "**This is not a vulnerability detection** and CI has **not** been failed for this run."
+              echo ""
+              echo "This is typically a transient connectivity issue on the runner and will usually clear on the next run. If it persists, verify that the runner has outbound network access to \`ossindex.sonatype.org\` (HTTPS/443)."
+            } >> $GITHUB_STEP_SUMMARY
+            if [[ -f nancy-output.log ]]; then
+              {
+                echo ""
+                echo "<details>"
+                echo "<summary>Click to expand Nancy output</summary>"
+                echo ""
+                echo '```'
+                head -50 nancy-output.log
+                echo '```'
+                echo "</details>"
+              } >> $GITHUB_STEP_SUMMARY
+            fi
+          elif [[ "$NANCY_STATUS" == "failure" ]] && [[ -f nancy-output.log ]]; then
+            {
+              echo ""
+              echo "### 🚨 Vulnerability Details"
+              echo ""
+              echo "<details>"
+              echo "<summary>Click to expand full scan output</summary>"
+              echo ""
+              echo '```'
+              head -200 nancy-output.log
+              echo '```'
+              echo "</details>"
+            } >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: 📤 Nancy — Upload scan results
+        if: always() && inputs.enable-nancy
+        uses: ./.github/actions/upload-artifact-resilient
+        with:
+          artifact-name: nancy-scan-results
+          artifact-path: nancy-output.log
+          retention-days: "7"
+          if-no-files-found: ignore
+
+      # ====================================================================
+      # GOVULNCHECK (VULNERABILITY CHECKS)
+      # ====================================================================
+      - name: 🔐 Govulncheck — Run
+        id: run-govulncheck
+        if: ${{ inputs.enable-govulncheck }}
+        continue-on-error: true
+        env:
+          # govulncheck (via `magex deps:audit`) reads MAGE_X_CVE_EXCLUDES. Feed it the
+          # resolved effective list (shared list merged with any legacy vars) so every
+          # scanner stays in sync.
+          MAGE_X_CVE_EXCLUDES: ${{ env.EFFECTIVE_VULN_EXCLUDES }}
+        run: |
+          echo "🔍 Running vulnerability analysis..."
+          GO_MODULE_DIR="${{ env.GO_MODULE_DIR }}"
+
+          if [ -n "${MAGE_X_CVE_EXCLUDES:-}" ]; then
+            echo "🚫 Shared vulnerability exclusions: $MAGE_X_CVE_EXCLUDES"
+          fi
+
+          set +e
+          if [ "$ENABLE_MULTI_MODULE_TESTING" == "true" ]; then
+            echo "🔧 Multi-module enabled - running magex deps:audit from repository root"
+            magex deps:audit 2>&1 | tee govulncheck-output.log
+            GOVULN_EXIT_CODE=${PIPESTATUS[0]}
+          elif [ -n "$GO_MODULE_DIR" ]; then
+            echo "🔧 Running magex deps:audit from directory: $GO_MODULE_DIR"
+            (cd "$GO_MODULE_DIR" && magex deps:audit 2>&1 | tee ../govulncheck-output.log)
+            GOVULN_EXIT_CODE=${PIPESTATUS[0]}
+          else
+            echo "🔧 Running magex deps:audit from repository root"
+            magex deps:audit 2>&1 | tee govulncheck-output.log
+            GOVULN_EXIT_CODE=${PIPESTATUS[0]}
+          fi
+          set -e
+
+          echo "govuln-exit-code=$GOVULN_EXIT_CODE" >> $GITHUB_OUTPUT
+          if [[ $GOVULN_EXIT_CODE -eq 0 ]]; then
+            echo "govuln-status=success" >> $GITHUB_OUTPUT
+            echo "✅ Vulnerability scan completed - no vulnerabilities found"
+          else
+            echo "govuln-status=failure" >> $GITHUB_OUTPUT
+            echo "❌ Vulnerability scan completed - vulnerabilities detected (exit code: $GOVULN_EXIT_CODE)"
+          fi
+
+      - name: 📋 Govulncheck — Annotations
+        if: always() && steps.run-govulncheck.outputs.govuln-status == 'failure'
+        run: |
+          echo "::error title=Govulncheck Failed::Go vulnerabilities detected - see job summary for details"
+
+      - name: 📊 Govulncheck — Job Summary
+        if: always() && inputs.enable-govulncheck
+        run: |
+          GOVULN_STATUS="${{ steps.run-govulncheck.outputs.govuln-status }}"
+
+          {
+            echo "## 🔐 govulncheck Summary"
+            echo ""
+            echo "| Analysis Details | Status |"
+            echo "|---|---|"
+            echo "| **Tool** | govulncheck (Official Go Security Tool) |"
+            echo "| **Installation** | $( [[ '${{ steps.govuln-cache.outputs.cache-hit }}' == 'true' ]] && echo '💾 From cache' || echo '📥 Fresh install' ) |"
+            echo "| **Scope** | All packages in module |"
+          } >> $GITHUB_STEP_SUMMARY
+
+          if [[ "$GOVULN_STATUS" == "success" ]]; then
+            echo "| **Result** | ✅ No vulnerabilities detected |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| **Result** | ❌ Vulnerabilities detected |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          {
+            echo "| **Version** | ${{ env.GOVULNCHECK_VERSION }} |"
+            echo ""
+          } >> $GITHUB_STEP_SUMMARY
+
+          if [ -n "${EFFECTIVE_VULN_EXCLUDES:-}" ]; then
+            {
+              echo "### 🚫 Excluded Vulnerabilities"
+              echo "The following vulnerabilities were excluded from the scan:"
+              echo "\`${EFFECTIVE_VULN_EXCLUDES}\`"
+              echo ""
+            } >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [[ "$GOVULN_STATUS" != "success" ]] && [[ -f govulncheck-output.log ]]; then
+            {
+              echo "### 🚨 Vulnerability Details"
+              echo ""
+              echo "<details>"
+              echo "<summary>Click to expand full scan output</summary>"
+              echo ""
+              echo '```'
+              head -200 govulncheck-output.log
+              echo '```'
+              echo "</details>"
+            } >> $GITHUB_STEP_SUMMARY
+          else
+            echo "🎯 **Analysis completed successfully with no security issues found.**" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: 📤 Govulncheck — Upload results
+        if: always() && inputs.enable-govulncheck
+        uses: ./.github/actions/upload-artifact-resilient
+        with:
+          artifact-name: govulncheck-scan-results
+          artifact-path: govulncheck-output.log
+          retention-days: "7"
+          if-no-files-found: ignore
+
+      # ====================================================================
+      # OSV-SCANNER (MULTI-SOURCE DEPENDENCY SCANNING)
+      # ====================================================================
+      # OSV-Scanner (google/osv-scanner) checks Go dependencies against the OSV.dev
+      # database (GHSA, the Go vuln DB, and 30+ other advisory sources). It replaces
+      # Nancy, which now requires the credit-metered Sonatype Guide backend. Free, no
+      # account or API key. Findings are published to GitHub Code Scanning as SARIF.
+      #
+      # Resilience contract (mirrors the other scanners):
+      #   exit 0         → success (no known vulnerabilities)
+      #   exit 1         → vulnerabilities found (fails CI when
+      #                    OSV_SCANNER_FAIL_ON_VULNERABILITY=true, the shipped default;
+      #                    report-only when it is set to false)
+      #   any other exit → tooling / network / OSV.dev database error → inconclusive,
+      #                    NEVER fails CI (same philosophy as Nancy/govulncheck)
+      #
+      # The binary is version-pinned and cached exactly like govulncheck.
+      - name: 💾 Restore OSV-Scanner binary cache
+        id: osv-cache
+        if: ${{ inputs.enable-osv }}
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cache/osv-scanner-bin
+          # The pinned digests are part of the key so a pin correction (same version,
+          # new digest) invalidates stale entries and re-saves the verified binary
+          # under a fresh key (cache entries are immutable per key). The restored
+          # binary is ALSO re-verified below — the key is an optimization, not the
+          # trust boundary.
+          key: ${{ inputs.primary-runner }}-osv-scanner-${{ env.OSV_SCANNER_VERSION }}-${{ env.OSV_SCANNER_SHA256_LINUX_AMD64 }}-${{ env.OSV_SCANNER_SHA256_LINUX_ARM64 }}-go${{ env.GOVULNCHECK_GO_VERSION }}
+
+      - name: 📥 Install / verify OSV-Scanner
+        if: ${{ inputs.enable-osv }}
+        env:
+          # Config values (from committed env files) routed through env rather than
+          # interpolated into the shell body — script-injection-safe by convention.
+          OSV_SCANNER_VERSION: ${{ env.OSV_SCANNER_VERSION }}
+          OSV_SCANNER_SHA256_LINUX_AMD64: ${{ env.OSV_SCANNER_SHA256_LINUX_AMD64 }}
+          OSV_SCANNER_SHA256_LINUX_ARM64: ${{ env.OSV_SCANNER_SHA256_LINUX_ARM64 }}
+        run: |
+          set -euo pipefail
+
+          # ----------------------------------------------------------------
+          # Supply-chain-hardened install of the OFFICIAL prebuilt release
+          # binary (github.com/google/osv-scanner), replacing `go install`.
+          #
+          # Why not `go install`: it resolves and verifies OSV-Scanner's ENTIRE
+          # transitive module graph against sum.golang.org on every cache miss,
+          # coupling this security gate's availability to Google's checksum DB
+          # and turning dozens of transitive deps into flake surfaces (observed:
+          # HTTP/2 INTERNAL_ERROR stream resets on unrelated transitive modules).
+          #
+          # Trust model: the version is pinned (OSV_SCANNER_VERSION) and the exact
+          # SHA-256 of the release binary is pinned in a COMMITTED env file (the
+          # trust anchor lives in version control, reviewed via PR). EVERY binary
+          # placed on PATH — whether restored from cache or freshly downloaded —
+          # must match the committed pin first. A cached binary that fails the
+          # check (a legacy `go install` build, or a poisoned cache entry) is
+          # discarded and the single pinned binary is re-downloaded over HTTPS and
+          # re-verified — a stronger guarantee than a runtime-fetched checksum,
+          # with a far smaller network surface. The digest pins are kept in
+          # lockstep with the version by the updater
+          # (magefiles/version_checker.go: ChecksumPins).
+          # ----------------------------------------------------------------
+
+          # Defense-in-depth: the pinned version is interpolated into a download
+          # URL, so require a strict vMAJOR.MINOR.PATCH tag before use. Values are
+          # trusted (committed), so this simply fails loud on a malformed pin.
+          if [[ ! "${OSV_SCANNER_VERSION}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::OSV_SCANNER_VERSION '${OSV_SCANNER_VERSION}' is not a strict vMAJOR.MINOR.PATCH tag"
+            exit 1
+          fi
+
+          # Resolve the runner platform to the release asset name + its pinned digest.
+          os="$(uname -s | tr '[:upper:]' '[:lower:]')"
+          case "$(uname -m)" in
+            x86_64 | amd64)  arch="amd64" ;;
+            aarch64 | arm64) arch="arm64" ;;
+            *) echo "::error::Unsupported CPU architecture '$(uname -m)'"; exit 1 ;;
+          esac
+
+          case "${os}_${arch}" in
+            linux_amd64) expected_sha="${OSV_SCANNER_SHA256_LINUX_AMD64}" ;;
+            linux_arm64) expected_sha="${OSV_SCANNER_SHA256_LINUX_ARM64}" ;;
+            *) echo "::error::No pinned OSV-Scanner digest for ${os}/${arch}; add one to .github/env/10-security.env"; exit 1 ;;
+          esac
+          if [[ ! "${expected_sha}" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "::error::Pinned OSV-Scanner digest for ${os}/${arch} is missing or malformed (expected 64 lowercase hex chars)"
+            exit 1
+          fi
+
+          gobin="$(go env GOPATH)/bin"
+          cache_bin="$HOME/.cache/osv-scanner-bin/osv-scanner"
+          mkdir -p "${gobin}" "$HOME/.cache/osv-scanner-bin"
+          echo "${gobin}" >> "$GITHUB_PATH"
+
+          # Fast path: trust the cached binary ONLY when its digest matches the
+          # committed pin. This closes the cache-hit bypass — a restored binary is
+          # never placed on PATH unverified, so a stale legacy build or a poisoned
+          # cache entry cannot slip past the pin.
+          if [[ -f "${cache_bin}" ]] \
+            && [[ "$(sha256sum "${cache_bin}" | awk '{print $1}')" == "${expected_sha}" ]]; then
+            echo "✅ Using cached OSV-Scanner ${OSV_SCANNER_VERSION} (digest verified against the committed pin)"
+            install -m 0755 "${cache_bin}" "${gobin}/osv-scanner"
+            exit 0
+          fi
+          if [[ -f "${cache_bin}" ]]; then
+            echo "♻️ Cached OSV-Scanner binary failed the pin check — re-downloading the verified release binary"
+            rm -f "${cache_bin}"
+          fi
+
+          asset="osv-scanner_${os}_${arch}"
+          url="https://github.com/google/osv-scanner/releases/download/${OSV_SCANNER_VERSION}/${asset}"
+          echo "⬇️ Downloading OSV-Scanner ${OSV_SCANNER_VERSION} (${os}/${arch}) from the official release..."
+
+          tmp_bin="$(mktemp)"
+          trap 'rm -f "${tmp_bin}"' EXIT
+
+          # HTTPS-only, TLS 1.2+, fail on HTTP errors, exponential-backoff retries
+          # so a transient CDN blip doesn't fail the job.
+          curl --proto '=https' --tlsv1.2 -fsSL \
+            --retry 5 --retry-all-errors --retry-max-time 120 \
+            --connect-timeout 30 --max-time 300 \
+            -o "${tmp_bin}" "${url}"
+
+          # Verify BEFORE the binary is ever made executable, cached, or run.
+          actual_sha="$(sha256sum "${tmp_bin}" | awk '{print $1}')"
+          if [[ "${actual_sha}" != "${expected_sha}" ]]; then
+            echo "::error::OSV-Scanner checksum mismatch for ${asset} — refusing to install"
+            echo "::error::expected ${expected_sha}"
+            echo "::error::actual   ${actual_sha}"
+            exit 1
+          fi
+          echo "✅ Verified OSV-Scanner ${asset} SHA-256 against the committed pin"
+
+          # Only the VERIFIED binary is ever written to PATH or the cache path
+          # (GOPATH/bin was placed on PATH above; the cache is keyed by version+digest).
+          install -m 0755 "${tmp_bin}" "${gobin}/osv-scanner"
+          install -m 0755 "${tmp_bin}" "${cache_bin}"
+          echo "✅ OSV-Scanner installed and stored in cache"
+
+      - name: 🛰️ OSV-Scanner — Run scan
+        id: run-osv
+        if: ${{ inputs.enable-osv }}
+        continue-on-error: true
+        run: |
+          echo "🔍 Running OSV-Scanner dependency scan..."
+          # Build an OSV-Scanner config from the shared single-source exclusion list.
+          # Each comma-separated advisory ID becomes an [[IgnoredVulns]] entry. IDs are
+          # sanitized to [A-Za-z0-9-] (the advisory-ID charset) to keep the TOML safe.
+          OSV_CONFIG_ARGS=()
+          if [[ -n "${EFFECTIVE_VULN_EXCLUDES:-}" ]]; then
+            OSV_CFG="$(mktemp)"
+            {
+              echo "# Auto-generated from the shared exclusion list — do not edit."
+              IFS=',' read -ra _ids <<< "${EFFECTIVE_VULN_EXCLUDES}" || true
+              for _id in "${_ids[@]}"; do
+                _id="${_id//[^A-Za-z0-9-]/}"
+                [[ -z "$_id" ]] && continue
+                printf '[[IgnoredVulns]]\nid = "%s"\nreason = "Excluded via the shared vulnerability exclusion list"\n' "$_id"
+              done
+            } > "$OSV_CFG"
+            echo "🔕 Applying shared vulnerability exclusions: ${EFFECTIVE_VULN_EXCLUDES}"
+            OSV_CONFIG_ARGS=(--config "$OSV_CFG")
+          fi
+          set +e
+          # Authoritative scan → SARIF for GitHub Code Scanning; exit code drives status.
+          osv-scanner scan source -r . \
+            "${OSV_CONFIG_ARGS[@]}" \
+            --format sarif \
+            --output-file osv-results.sarif \
+            --verbosity error
+          OSV_EXIT_CODE=$?
+          # Best-effort human-readable summary; its result NEVER affects the status.
+          osv-scanner scan source -r . \
+            "${OSV_CONFIG_ARGS[@]}" \
+            --format markdown \
+            --output-file osv-results.md \
+            --verbosity error >/dev/null 2>&1 || true
+          set -e
+
+          echo "osv-exit-code=$OSV_EXIT_CODE" >> $GITHUB_OUTPUT
+          if [[ $OSV_EXIT_CODE -eq 0 ]]; then
+            echo "osv-status=success" >> $GITHUB_OUTPUT
+            echo "✅ OSV-Scanner completed - no known vulnerabilities found"
+          elif [[ $OSV_EXIT_CODE -eq 1 ]]; then
+            echo "osv-status=vulnerabilities" >> $GITHUB_OUTPUT
+            echo "⚠️  OSV-Scanner found known vulnerabilities - see Code Scanning / job summary"
+          else
+            # 127/128/etc. → tooling, network, or OSV.dev/database error. Inconclusive.
+            echo "osv-status=error" >> $GITHUB_OUTPUT
+            echo "⚠️  OSV-Scanner did not complete (exit $OSV_EXIT_CODE) - inconclusive, not failing CI"
+          fi
+
+      - name: 📋 OSV-Scanner — Annotations (vulnerabilities)
+        if: always() && steps.run-osv.outputs.osv-status == 'vulnerabilities'
+        env:
+          OSV_FAIL: ${{ env.OSV_SCANNER_FAIL_ON_VULNERABILITY }}
+        run: |
+          if [[ "${OSV_FAIL}" == "true" ]]; then
+            echo "::error title=OSV-Scanner::Known vulnerabilities found in dependencies — see the Security tab (Code Scanning) and job summary."
+          else
+            echo "::warning title=OSV-Scanner::Known vulnerabilities found in dependencies (report-only mode) — see the Security tab (Code Scanning) and job summary."
+          fi
+
+      - name: 📋 OSV-Scanner — Annotations (inconclusive)
+        if: always() && steps.run-osv.outputs.osv-status == 'error'
+        run: |
+          echo "::warning title=OSV-Scanner Inconclusive::OSV-Scanner did not complete (network / OSV.dev / tooling error). Results inconclusive; CI was not failed. Usually transient."
+
+      - name: 📊 OSV-Scanner — Job Summary
+        if: always() && inputs.enable-osv
+        env:
+          OSV_STATUS: ${{ steps.run-osv.outputs.osv-status }}
+          OSV_FAIL: ${{ env.OSV_SCANNER_FAIL_ON_VULNERABILITY }}
+        run: |
+          {
+            echo "## 🛰️ OSV-Scanner Summary"
+            echo ""
+            echo "| Scan Details | Status |"
+            echo "|---|---|"
+            echo "| **Tool** | OSV-Scanner (google/osv-scanner) |"
+            echo "| **Database** | OSV.dev (GHSA, Go vuln DB, +30 sources) |"
+            echo "| **Scope** | Go modules (recursive source scan) |"
+            echo "| **Version** | ${{ env.OSV_SCANNER_VERSION }} |"
+          } >> $GITHUB_STEP_SUMMARY
+
+          # Precompute presentation values in plain variables (avoids fragile nested
+          # quoting inside echo/command-substitution).
+          if [[ "${OSV_FAIL}" == "true" ]]; then
+            ENFORCEMENT="Blocking (fail on findings)"
+            VULN_ICON="❌"
+          else
+            ENFORCEMENT="Report-only (warn)"
+            VULN_ICON="⚠️"
+          fi
+          echo "| **Enforcement** | ${ENFORCEMENT} |" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "$OSV_STATUS" == "success" ]]; then
+            echo "| **Result** | ✅ No known vulnerabilities found |" >> $GITHUB_STEP_SUMMARY
+          elif [[ "$OSV_STATUS" == "vulnerabilities" ]]; then
+            echo "| **Result** | ${VULN_ICON} Known vulnerabilities found — details in Code Scanning |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| **Result** | ⚠️ Inconclusive — scanner/network error (CI not failed) |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [[ "$OSV_STATUS" == "vulnerabilities" ]] && [[ -f osv-results.md ]]; then
+            {
+              echo ""
+              echo "### 🚨 Vulnerability Details"
+              echo ""
+              echo "<details>"
+              echo "<summary>Click to expand OSV-Scanner findings</summary>"
+              echo ""
+              cat osv-results.md
+              echo ""
+              echo "</details>"
+            } >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: 📤 OSV-Scanner — Upload SARIF to Code Scanning
+        # Publishes findings to the repository's Security tab. Resilient: a Code
+        # Scanning hiccup must not fail the security job.
+        if: always() && inputs.enable-osv && hashFiles('osv-results.sarif') != ''
+        continue-on-error: true
+        uses: github/codeql-action/upload-sarif@1bd86f2fdb4b86187fa4059f16f31a3202acc9ea # v4.39.4
+        with:
+          sarif_file: osv-results.sarif
+          category: osv-scanner
+
+      - name: 📤 OSV-Scanner — Upload scan artifacts
+        if: always() && inputs.enable-osv
+        uses: ./.github/actions/upload-artifact-resilient
+        with:
+          artifact-name: osv-scanner-results
+          artifact-path: |
+            osv-results.sarif
+            osv-results.md
+          retention-days: "7"
+          if-no-files-found: ignore
+
+      # ====================================================================
+      # GITLEAKS (SECRET SCANNING)
+      # ====================================================================
+      - name: 🔍 Gitleaks — Check repository security conditions
+        id: gitleaks-repo-check
+        if: ${{ inputs.enable-gitleaks }}
+        env:
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_HEAD_REF: ${{ github.head_ref }}
+          PR_HEAD_REPO: ${{ github.event.pull_request.head.repo && github.event.pull_request.head.repo.full_name || '' }}
+        run: |
+          echo "🔍 Checking repository security conditions..."
+          echo "Event Name: $GITHUB_EVENT_NAME"
+          echo "Actor: $GITHUB_ACTOR"
+          echo "Repository: $GITHUB_REPOSITORY"
+          echo "Head Ref: $GITHUB_HEAD_REF"
+
+          if [[ "$GITHUB_EVENT_NAME" == "workflow_call" ]]; then
+            echo "✅ Workflow call from same repository - security scans allowed"
+            echo "is_same_repo=true" >> $GITHUB_OUTPUT
+          elif [[ "$PR_HEAD_REPO" == "$GITHUB_REPOSITORY" ]] || [[ -z "$PR_HEAD_REPO" ]]; then
+            echo "✅ Same repository or push event - security scans allowed"
+            echo "is_same_repo=true" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️  Fork detected - skipping secret-sensitive scans for security"
+            echo "PR Head Repo: $PR_HEAD_REPO"
+            echo "is_same_repo=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 🕵️ Gitleaks — Run scan
+        id: run-gitleaks
+        if: ${{ inputs.enable-gitleaks && steps.gitleaks-repo-check.outputs.is_same_repo == 'true' }}
+        continue-on-error: true
+        # Pinned to gitleaks-action v3.0.0 (SHA verified). If a "Node.js actions are
+        # deprecated" warning appears, it originates upstream in this action's runtime and
+        # is harmless until the maintainers ship a newer Node runtime.
+        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITLEAKS_LICENSE: ${{ secrets.gitleaks-license }}
+          GITLEAKS_NOTIFY_USER_LIST: ${{ env.GITLEAKS_NOTIFY_USER_LIST }}
+          GITLEAKS_ENABLE_COMMENTS: "true"
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "true"
+          GITLEAKS_ENABLE_SUMMARY: "true"
+          GITLEAKS_VERSION: ${{ env.GITLEAKS_VERSION }}
+          GITLEAKS_CONFIG: ${{ env.GITLEAKS_CONFIG_FILE }}
+
+      - name: 📋 Gitleaks — Annotations
+        if: always() && inputs.enable-gitleaks && steps.gitleaks-repo-check.outputs.is_same_repo == 'true' && steps.run-gitleaks.outcome == 'failure'
+        run: |
+          echo "::error title=Gitleaks Secret Scan Failed::Secrets detected in repository - see job summary for details"
+
+      - name: 📊 Gitleaks — Job Summary
+        if: always() && inputs.enable-gitleaks && steps.gitleaks-repo-check.outputs.is_same_repo == 'true'
+        run: |
+          GITLEAKS_OUTCOME="${{ steps.run-gitleaks.outcome }}"
+
+          {
+            echo "## 🕵️ Gitleaks Secret Scan Summary"
+            echo ""
+            echo "| Scan Details | Status |"
+            echo "|---|---|"
+            echo "| **Tool** | Gitleaks |"
+            echo "| **Version** | ${{ env.GITLEAKS_VERSION }} |"
+            echo "| **Scope** | All commits and files |"
+            echo "| **Config** | $([ -n "${{ env.GITLEAKS_CONFIG_FILE }}" ] && echo "Custom: \`${{ env.GITLEAKS_CONFIG_FILE }}\`" || echo "Default (built-in rules)") |"
+          } >> $GITHUB_STEP_SUMMARY
+
+          if [[ "$GITLEAKS_OUTCOME" == "success" ]]; then
+            {
+              echo "| **Result** | ✅ No secrets detected |"
+              echo ""
+              echo "🎯 **Secret scan completed successfully.**"
+            } >> $GITHUB_STEP_SUMMARY
+          else
+            {
+              echo "| **Result** | ❌ Secrets detected |"
+              echo ""
+              echo "### 🚨 Action Required"
+              echo ""
+              echo "Gitleaks has detected secrets in the repository. Please review the scan output and remove any exposed secrets."
+              echo ""
+              echo "**Note:** The detailed findings are available in the Gitleaks-generated summary above this section."
+            } >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: 📊 Gitleaks — Fork Security Notice
+        if: ${{ inputs.enable-gitleaks && steps.gitleaks-repo-check.outputs.is_same_repo == 'false' }}
+        run: |
+          {
+            echo "## 🕵️ Gitleaks Secret Scan Summary"
+            echo ""
+            echo "| 🔒 Security Details | ⚠️  Status |"
+            echo "|---|---|"
+            echo "| **Tool** | Gitleaks |"
+            echo "| **Fork Detected** | ${{ github.event.pull_request.head.repo && github.event.pull_request.head.repo.full_name || 'N/A (not a PR event)' }} |"
+            echo "| **Base Repository** | ${{ github.repository }} |"
+            echo "| **Result** | ⚠️  Skipped for security (fork cannot access secrets) |"
+            echo ""
+            echo "🔒 **Secret scanning was skipped because this PR comes from a fork. This is a security feature to prevent secret exposure.**"
+          } >> $GITHUB_STEP_SUMMARY
+
+      # ====================================================================
+      # SHARED: cache statistics + final failure aggregation
+      # ====================================================================
+      - name: 📊 Collect cache statistics
+        if: always()
+        uses: ./.github/actions/collect-cache-stats
+        with:
+          workflow-name: security-scans
+          job-name: security-scans
+          os: ${{ inputs.primary-runner }}
+          go-version: ${{ inputs.go-primary-version }}
+          cache-prefix: cache-stats
+          gomod-cache-hit: ${{ steps.setup-security.outputs.module-cache-hit }}
+          gobuild-cache-hit: ${{ steps.setup-security.outputs.build-cache-hit }}
+
+      - name: 📤 Upload infrastructure cache statistics
+        if: always()
+        uses: ./.github/actions/upload-statistics
+        with:
+          artifact-name: cache-stats-security-scans
+          artifact-path: cache-stats-security-scans.json
+
+      # --------------------------------------------------------------------
+      # Aggregate failures: exit non-zero if any scan reported a REAL failure.
+      # Preserves the per-scan isolation while still failing the parent
+      # workflow's `security` job as before.
+      #
+      # Intentionally NOT treated as failures:
+      # - Nancy skipped-no-token (no Sonatype Guide token configured — scan not run)
+      # - Nancy rate-limited (backend throttled the request — inconclusive)
+      # - Nancy payment-required (Sonatype Guide credits exhausted — inconclusive)
+      # - Nancy unreachable (Guide/OSS Index network/DNS/TLS error — inconclusive)
+      # - Gitleaks skipped due to fork (security policy, not a finding)
+      # --------------------------------------------------------------------
+      - name: 🚨 Aggregate failures
+        if: always()
+        # Security: workflow_call inputs and step results are routed through
+        # `env:` rather than interpolated into the shell body. This prevents
+        # script injection (SonarCloud githubactions script-injection rule) by
+        # passing values as environment data, never splicing them into the script.
+        env:
+          ENABLE_NANCY: ${{ inputs.enable-nancy }}
+          ENABLE_GOVULNCHECK: ${{ inputs.enable-govulncheck }}
+          ENABLE_GITLEAKS: ${{ inputs.enable-gitleaks }}
+          ENABLE_OSV: ${{ inputs.enable-osv }}
+          NANCY_STATUS: ${{ steps.run-nancy.outputs.nancy-status }}
+          GOVULN_STATUS: ${{ steps.run-govulncheck.outputs.govuln-status }}
+          GITLEAKS_OUTCOME: ${{ steps.run-gitleaks.outcome }}
+          GITLEAKS_SAME_REPO: ${{ steps.gitleaks-repo-check.outputs.is_same_repo }}
+          OSV_STATUS: ${{ steps.run-osv.outputs.osv-status }}
+          OSV_FAIL_ON_VULN: ${{ env.OSV_SCANNER_FAIL_ON_VULNERABILITY }}
+        run: |
+          FAILED=0
+
+          if [[ "${ENABLE_NANCY}" == "true" ]] && [[ "${NANCY_STATUS}" == "failure" ]]; then
+            echo "❌ Nancy detected vulnerabilities in dependencies"
+            FAILED=1
+          fi
+
+          if [[ "${ENABLE_GOVULNCHECK}" == "true" ]] && [[ "${GOVULN_STATUS}" == "failure" ]]; then
+            echo "❌ Govulncheck detected vulnerabilities"
+            FAILED=1
+          fi
+
+          if [[ "${ENABLE_GITLEAKS}" == "true" ]] \
+              && [[ "${GITLEAKS_SAME_REPO}" == "true" ]] \
+              && [[ "${GITLEAKS_OUTCOME}" == "failure" ]]; then
+            echo "❌ Gitleaks detected secrets in the repository"
+            FAILED=1
+          fi
+
+          # OSV-Scanner fails the job ONLY when it found vulnerabilities AND enforcement
+          # is enabled. Inconclusive states (network / OSV.dev / database errors) never
+          # fail CI — same resilience contract as the other dependency scanners.
+          if [[ "${ENABLE_OSV}" == "true" ]] \
+              && [[ "${OSV_STATUS}" == "vulnerabilities" ]] \
+              && [[ "${OSV_FAIL_ON_VULN}" == "true" ]]; then
+            echo "❌ OSV-Scanner detected known vulnerabilities in dependencies"
+            FAILED=1
+          elif [[ "${ENABLE_OSV}" == "true" ]] && [[ "${OSV_STATUS}" == "vulnerabilities" ]]; then
+            echo "⚠️  OSV-Scanner found vulnerabilities (report-only mode; not failing CI)"
+          fi
+
+          if [[ $FAILED -ne 0 ]]; then
+            exit 1
+          fi
+
+          echo "✅ All enabled security scans passed (or were inconclusive without finding issues)"

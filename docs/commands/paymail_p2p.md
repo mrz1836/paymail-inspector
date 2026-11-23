@@ -1,57 +1,59 @@
 ## paymail p2p
 
-Starts a new P2P payment request
+Start a P2P payment request and list its outputs
 
 ### Synopsis
 
-```
-       ________         
-______ \_____  \______  
-\____ \ /  ____/\____ \ 
+```text
+       ________
+______ \_____  \______
+\____ \ /  ____/\____ \
 |  |_> >       \|  |_> >
-|   __/\_______ \   __/ 
+|   __/\_______ \   __/
 |__|           \/__|
 ```
 
-This command will start a new P2P request with the receiver and optional amount expected (in Satoshis).
+Start a P2P payment destination request with the receiver for an amount in
+satoshis, and list the outputs (script, satoshis, address) and the reference
+it returns.
 
-This protocol is an alternative protocol to basic address resolution. 
-Instead of returning one address, it returns a list of outputs with a reference number. 
-It is only intended to be used with P2P Transactions and will continue to function even 
-after basic address resolution is deprecated.
+P2P payment destination is the successor to basic address resolution: rather
+than one address it returns a set of outputs for a P2P transaction.
 
-Read more at: https://docs.moneybutton.com/docs/paymail-07-p2p-payment-destination.html
+Read more at: https://tsc.bsvblockchain.org/standards/paymail/ (BRFC 2a40af698840)
 
 ```
-paymail p2p [flags]
+paymail p2p <paymail> [flags]
 ```
 
 ### Examples
 
 ```
-paymail p2p mrz@moneybutton.com
-paymail p2p \$mr-z
+  paymail p2p \$handcash
+  paymail p2p \$handcash --satoshis 5000
+  paymail p2p handcash@handcash.io
 ```
 
 ### Options
 
 ```
-  -h, --help            help for p2p
-      --satoshis uint   Amount in satoshis for the the incoming transaction(s)
+  -h, --help[=true|false]                  help for p2p
+      --satoshis uint                      Amount in satoshis to request (default 1000)
+      --skip-public-profile[=true|false]   Skip the public profile request
 ```
 
 ### Options inherited from parent commands
 
 ```
-      --bsvalias string   The bsvalias version (default "1.0")
-      --config string     Custom config file (default is $HOME/paymail/config.yaml)
-      --docs              Generate docs from all commands (./docs/commands)
-      --flush-cache       Flushes ALL cache, empties local database
-      --no-cache          Turn off caching for this specific command
-  -t, --skip-tracing      Turn off request tracing information
+      --bsvalias string             The bsvalias version to expect from providers (default "1.0")
+      --config string               Config file (default: <user config dir>/paymail-inspector/config.yaml)
+      --flush-cache[=true|false]    Empty the local response cache before running
+      --no-cache[=true|false]       Skip cached responses for this command (fresh results are still cached)
+      --no-color[=true|false]       Disable colored output (NO_COLOR is honored too)
+  -t, --skip-tracing[=true|false]   Hide per-request network timing
 ```
 
 ### SEE ALSO
 
-* [paymail](paymail.md)	 - Inspect, validate domains or resolve paymail addresses
+* [paymail](paymail.md)	 - Inspect, validate and resolve paymail addresses and domains
 

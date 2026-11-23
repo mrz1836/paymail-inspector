@@ -1,52 +1,99 @@
-# Code of Merit
+# 🏗️ How We Build Together
 
-1. The project creators, lead developers, core team, constitute
-the managing members of the project and have final say in every decision
-of the project, technical or otherwise, including overruling previous decisions.
-There are no limitations to this decisional power.
+Welcome to our humble Go library. We value good ideas, clear communication, and contributions from people who care about great code. This document sets the tone for how we collaborate.
 
-2. Contributions are an expected result of your membership on the project.
-Don't expect others to do your work or help you with your work forever.
+<br/>
 
-3. All members have the same opportunities to seek any challenge they want
-within the project.
+---
 
-4. Authority or position in the project will be proportional
-to the accrued contribution. Seniority must be earned.
+<br/>
 
-5. Software is evolutive: the better implementations must supersede lesser
-implementations. Technical advantage is the primary evaluation metric.
+### 🧠 Final Decisions
 
-6. This is a space for technical prowess; topics outside of the project
-will not be tolerated.
+Project maintainers make the final call. They can revisit and revise past decisions. It keeps things moving.
 
-7. Non technical conflicts will be discussed in a separate space. Disruption
-of the project will not be allowed.
+<br/>
 
-8. Individual characteristics, including but not limited to,
-body, sex, sexual preference, race, language, religion, nationality,
-or political preferences are irrelevant in the scope of the project and
-will not be taken into account concerning your value or that of your contribution
-to the project.
+### 🧰 Contributions Welcome
 
-9. Discuss or debate the idea, not the person.
+Pitch in! Collaboration is a team sport. Don't leave others carrying your weight forever.
 
-10. There is no room for ambiguity: Ambiguity will be met with questioning;
-further ambiguity will be met with silence. It is the responsibility
-of the originator to provide requested context.
+<br/>
 
-11. If something is illegal outside the scope of the project, it is illegal
-in the scope of the project. This Code of Merit does not take precedence over
-governing law.
+### 🎯 Choose Your Adventure
 
-12. This Code of Merit governs the technical procedures of the project not the
-activities outside of it.
+Everyone can tackle whatever challenge they feel ready for. Grab an issue and go!
 
-13. Participation on the project equates to agreement of this Code of Merit.
+<br/>
 
-14. No objectives beyond the stated objectives of this project are relevant
-to the project. Any intent to deviate the project from its original purpose
-of existence will constitute grounds for remedial action which may include
-expulsion from the project.
+### 🏗️ Earned Roles
 
-This document is the Code of Merit (<del>`http://code-of-merit.org`</del>), version 1.0.
+Project influence is earned through consistent, quality contributions. Titles mean less than impact.
+
+<br/>
+
+### 🧪 Better > Worse
+
+Good code replaces not-so-good code. Technical merit always wins.
+
+<br/>
+
+### 🔒 Keep It On Topic
+
+This is a space for building software. Let's stay focused.
+
+<br/>
+
+### ⚖️ Take It Elsewhere
+
+If something’s not about the project, take it to another channel. Let's not derail progress.
+
+<br/>
+
+### 🫶 We See People, Not Labels
+
+Your identity—race, gender, beliefs, background—is irrelevant here. Code speaks louder.
+
+<br/>
+
+### 💬 Debate Ideas, Not People
+
+Challenge code. Not humans. No exceptions.
+
+<br/>
+
+### 🔍 Be Clear
+
+If your idea isn't clear, expect questions. If it stays unclear, expect crickets. Help us help you.
+
+<br/>
+
+### 🚫 Illegal is Illegal
+
+Anything illegal outside the project is illegal here too. Keep it clean.
+
+<br/>
+
+### 📦 Project-Only Focus
+
+This code of merit only applies to what happens *in* the project.
+
+<br/>
+
+### ✅ Participation = Agreement
+
+By contributing, you're saying, "Yep, I'm in."
+
+<br/>
+
+### 🎯 Stick to the Mission
+
+Trying to shift this project away from its purpose? That's not cool and won't be allowed.
+
+<br/>
+
+---
+
+<br/>
+
+Thanks for keeping things fun, focused, and respectful. Let's build something awesome together!

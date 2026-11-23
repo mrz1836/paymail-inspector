@@ -1,0 +1,1265 @@
+# ------------------------------------------------------------------------------------
+#  Pull Request Management Workflow
+#
+#  Purpose: Comprehensive PR lifecycle management for BOTH same-repo and fork PRs:
+#  automated labeling, assignments, size analysis, welcome messages, cache cleanup,
+#  and branch deletion. All configuration is centralized in modular .github/env/ files.
+#
+#  Triggers:
+#  - pull_request (opened, reopened, ready_for_review, synchronize, closed): same-repo
+#    PRs; `synchronize` only reports the check on the new head (see below)
+#  - workflow_run of "Auto-merge Trigger" (auto-merge-trigger.yml): fork PRs, when
+#    its "📨 Queue fork PR management" job ran for opened, reopened,
+#    ready_for_review or closed
+#  No `pull_request_target`: GitHub disables it by default on public repositories
+#  (workflow execution protections).
+#
+#  Maintainer: @mrz1836
+#
+#  ══════════════════════════════════════════════════════════════════════════════
+#  🔒 SECURITY MODEL — one workflow, two trust paths
+#  ══════════════════════════════════════════════════════════════════════════════
+#
+#  Neither path ever executes PR code: every action goes through the GitHub REST
+#  API. The only checkout is the same-repo job's sparse one of `.github/env` and
+#  the load-env action from the base branch (never the PR head). The fork path
+#  has no checkout: its read-only lookup job reads those files from the default
+#  branch through the API, and the job that writes has no workspace.
+#
+#  ┌─────────────────────────────────────────────────────────────────────────────┐
+#  │ SAME-REPO PRs → `pull_request`, job pr-management-same-repo                 │
+#  │                                                                             │
+#  │  ✅ A same-repo branch can only be pushed by someone with write access (or  │
+#  │     Dependabot), so running the PR's own copy of this file grants nothing   │
+#  │     new. GitHub gives same-repo pull_request runs the write scopes a job    │
+#  │     asks for (Dependabot runs too, when `permissions:` asks explicitly).    │
+#  │  ✅ Checkout uses `ref: github.base_ref` (sparse, config files only).       │
+#  └─────────────────────────────────────────────────────────────────────────────┘
+#  ┌─────────────────────────────────────────────────────────────────────────────┐
+#  │ FORK PRs → `workflow_run`, jobs pr-management-fork-lookup + -fork           │
+#  │                                                                             │
+#  │  ✅ A fork's pull_request runs only ever get a read-only token, so the      │
+#  │     permission-less Auto-merge Trigger queues these jobs instead.           │
+#  │     `workflow_run` always runs this file from the DEFAULT branch: a fork    │
+#  │     cannot change what runs here.                                           │
+#  │  ✅ Nothing from the trigger's run is trusted (its jobs list is only a      │
+#  │     wake-up hint). The PR is looked up from GitHub's payload + the API      │
+#  │     (an ambiguous match is skipped, never guessed), and what to do follows  │
+#  │     the PR's state there (open → labels, assignee, welcome; closed → cache  │
+#  │     cleanup).                                                               │
+#  │  ✅ PR-controlled values (branch, title, author) reach shell/jq only via    │
+#  │     env: and quoted "$VAR"s or jq --arg, never ${{ }} in a script.          │
+#  │  ✅ Only GITHUB_TOKEN is exposed. No custom secrets are referenced.         │
+#  │  ✅ Narrower permissions than same-repo: no `contents: write`.              │
+#  │  ✅ No checkout: the read-only lookup job reads the default branch's        │
+#  │     config through the API and hands it down; the job that writes never     │
+#  │     has a workspace.                                                        │
+#  └─────────────────────────────────────────────────────────────────────────────┘
+#
+#  Job structure (one path does work per PR event, the other skips):
+#    ├─ pr-management-same-repo   → pull_request, head.repo.full_name == github.repository
+#    │     Permissions: actions:write, contents:write, pull-requests:write
+#    │     Work: type labels, default assignee, first-timer welcome, size label,
+#    │           cache cleanup on close, branch deletion on merge.
+#    │
+#    ├─ pr-management-fork-lookup → workflow_run, head repository != github.repository
+#    │     Permissions: actions:read, contents:read, pull-requests:read
+#    │     Work: finds and re-reads the fork PR (or skips, with the reason), then
+#    │           loads the default branch's config through the API (no checkout)
+#    │
+#    └─ pr-management-fork        → needs the lookup to have found the PR
+#          Permissions: actions:write, issues:write, pull-requests:write
+#                       (NO contents at all: no checkout, and fork branches
+#                       can't be deleted from base)
+#          Work: fork+triage labels, default assignee, fork welcome notice,
+#                 cache cleanup on close. NO branch deletion. NO type labels —
+#                 those require pre-merge code review.
+#
+#  Behavior notes:
+#  - GitHub runs no `pull_request` workflow while a PR has a merge conflict, so
+#    neither path runs for a PR event that happens during a conflict.
+#  - A first-time contributor's fork PR runs nothing (the trigger included)
+#    until a maintainer approves its workflows, so its labels and welcome arrive
+#    after that approval.
+#
+# ------------------------------------------------------------------------------------
+
+name: PR Management
+
+# --------------------------------------------------------------------
+# Trigger Configuration
+#
+# `synchronize` runs the same-repo job so that "🔧 PR Management (Same Repo)"
+# reports on every head commit. A check run belongs to one commit, so a ruleset
+# that requires this check would otherwise block any PR pushed to after it was
+# opened (the new head never gets the check). On `synchronize` the job does no
+# work: labels and the default assignee persist from the `opened` run, and not
+# re-applying them lets maintainers override auto-applied labels without the
+# workflow fighting back on the next commit. A fork PR's `pull_request` runs
+# skip the same-repo job, which satisfies a required check, so the trigger's
+# fork PR management job still fires only on the other four events.
+#
+# zizmor's dangerous-triggers audit flags every `workflow_run` trigger. Here it
+# only feeds the fork lookup job, which uses no artifacts, outputs or code from
+# the triggering run: it re-reads the PR from the API, skips anything ambiguous,
+# and reads the default branch's config through the API. No job on this path
+# checks anything out.
+# --------------------------------------------------------------------
+on: # zizmor: ignore[dangerous-triggers] see "Trigger Configuration" above
+  pull_request:
+    types: [opened, reopened, ready_for_review, synchronize, closed]
+  workflow_run:
+    workflows: ["Auto-merge Trigger"]
+    types: [completed]
+
+# Security: Workflow-level permissions are zeroed. Each job below requests
+# only what it strictly needs.
+permissions: {}
+
+# --------------------------------------------------------------------
+# Concurrency Control: per job, one group per PR. A new event for the
+# same PR cancels an in-flight run. It is set on the working jobs, not the
+# workflow, because every Auto-merge Trigger run starts a run here, and a run
+# that has nothing to do must never cancel one that is doing work. The fork
+# lookup job has none for the same reason. For the same reason the same-repo
+# job's `synchronize` runs have a group of their own: a push right after a PR
+# opens must not cancel the run that labels it, and a newer push cancelling an
+# older push's run is fine (that commit is no longer the head).
+# --------------------------------------------------------------------
+
+jobs:
+  # ====================================================================================
+  # Same-Repo PRs
+  #
+  # Runs on `pull_request` when the PR head and base point at the same repository
+  # (trusted contributor: pushing a same-repo branch takes write access).
+  # Performs the full PR management lifecycle including branch deletion on merge.
+  # ====================================================================================
+  pr-management-same-repo:
+    name: 🔧 PR Management (Same Repo)
+    if: |
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.pull_request.number }}${{ github.event.action == 'synchronize' && '-push' || '' }}
+      cancel-in-progress: true
+    # Explicit write scopes: GitHub grants them to same-repo pull_request runs,
+    # including Dependabot's (whose default token is otherwise read-only).
+    permissions:
+      actions: write # Required: Delete GitHub Actions caches for closed PRs
+      contents: write # Required: Delete merged branches from the base repo
+      pull-requests: write # Required: Apply labels, assign reviewers, post comments
+
+    steps:
+      # --------------------------------------------------------------------
+      # SECURITY-CRITICAL CHECKOUT — explicit base-ref + sparse + no fetch-depth
+      #
+      # A pull_request run would check out the PR merge commit by default, so
+      # `ref` points at the base branch explicitly, and only config files are
+      # checked out. PR code is never checked out or executed here.
+      # --------------------------------------------------------------------
+      - name: 📥 Checkout base repo (sparse)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ github.base_ref || github.ref }}
+          fetch-depth: 1
+          sparse-checkout: |
+            .github/env
+            .github/actions/load-env
+
+      - name: 🌍 Load environment variables
+        id: load-env
+        uses: ./.github/actions/load-env
+
+      # --------------------------------------------------------------------
+      # Extract all PR-management configuration up front (single jq pass).
+      # All variables passed downstream via $GITHUB_ENV.
+      # --------------------------------------------------------------------
+      - name: 🔧 Extract configuration
+        env:
+          ENV_JSON: ${{ steps.load-env.outputs.env-json }}
+        run: |
+          echo "📋 Extracting PR management configuration..."
+
+          {
+            echo "SKIP_BOT_USERS=$(echo "$ENV_JSON" | jq -r '.PR_MANAGEMENT_SKIP_BOT_USERS')"
+            echo "APPLY_TYPE_LABELS=$(echo "$ENV_JSON" | jq -r '.PR_MANAGEMENT_APPLY_TYPE_LABELS')"
+            echo "APPLY_SIZE_LABELS=$(echo "$ENV_JSON" | jq -r '.PR_MANAGEMENT_APPLY_SIZE_LABELS')"
+            echo "DEFAULT_ASSIGNEE=$(echo "$ENV_JSON" | jq -r '.PR_MANAGEMENT_DEFAULT_ASSIGNEE')"
+            echo "WELCOME_FIRST_TIME=$(echo "$ENV_JSON" | jq -r '.PR_MANAGEMENT_WELCOME_FIRST_TIME')"
+            echo "SIZE_XS=$(echo "$ENV_JSON" | jq -r '.PR_MANAGEMENT_SIZE_XS_THRESHOLD')"
+            echo "SIZE_S=$(echo "$ENV_JSON" | jq -r '.PR_MANAGEMENT_SIZE_S_THRESHOLD')"
+            echo "SIZE_M=$(echo "$ENV_JSON" | jq -r '.PR_MANAGEMENT_SIZE_M_THRESHOLD')"
+            echo "SIZE_L=$(echo "$ENV_JSON" | jq -r '.PR_MANAGEMENT_SIZE_L_THRESHOLD')"
+            echo "CLEAN_CACHE=$(echo "$ENV_JSON" | jq -r '.PR_MANAGEMENT_CLEAN_CACHE_ON_CLOSE')"
+            echo "DELETE_BRANCH=$(echo "$ENV_JSON" | jq -r '.PR_MANAGEMENT_DELETE_BRANCH_ON_MERGE')"
+            echo "PROTECTED_BRANCHES=$(echo "$ENV_JSON" | jq -r '.PR_MANAGEMENT_PROTECTED_BRANCHES')"
+          } >> "$GITHUB_ENV"
+
+          echo "🔍 Configuration loaded:"
+          echo "  🏷️ Apply type labels: $(echo "$ENV_JSON" | jq -r '.PR_MANAGEMENT_APPLY_TYPE_LABELS')"
+          echo "  📏 Apply size labels: $(echo "$ENV_JSON" | jq -r '.PR_MANAGEMENT_APPLY_SIZE_LABELS')"
+          echo "  👤 Default assignee: $(echo "$ENV_JSON" | jq -r '.PR_MANAGEMENT_DEFAULT_ASSIGNEE')"
+          echo "  👋 Welcome first-time contributors: $(echo "$ENV_JSON" | jq -r '.PR_MANAGEMENT_WELCOME_FIRST_TIME')"
+          echo "  🧹 Clean cache on close: $(echo "$ENV_JSON" | jq -r '.PR_MANAGEMENT_CLEAN_CACHE_ON_CLOSE')"
+          echo "  🌿 Delete branch on merge: $(echo "$ENV_JSON" | jq -r '.PR_MANAGEMENT_DELETE_BRANCH_ON_MERGE')"
+
+      # --------------------------------------------------------------------
+      # Apply branch/title-based labels (chore, feature, bug, etc.)
+      # Not on synchronize: see "Trigger Configuration" above
+      # --------------------------------------------------------------------
+      - name: 🏷️ Apply labels based on patterns
+        id: apply-labels
+        if: github.event.action != 'closed' && github.event.action != 'synchronize' && env.APPLY_TYPE_LABELS == 'true'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const branch = context.payload.pull_request.head.ref;
+            const prTitle = context.payload.pull_request.title;
+            const prNumber = context.payload.pull_request.number;
+            const prAuthor = context.payload.pull_request.user.login;
+
+            // Check if PR author is a bot to skip
+            const skipBotUsers = process.env.SKIP_BOT_USERS.split(',').map(u => u.trim());
+            if (skipBotUsers.includes(prAuthor)) {
+              console.log(`⏭️ Skipping label application for bot user: ${prAuthor}`);
+              core.setOutput('labels-applied', '[]');
+              return;
+            }
+
+            console.log(`🔍 Processing PR #${prNumber}`);
+            console.log(`🌿 Branch: ${branch}`);
+            console.log(`📝 Title: ${prTitle}`);
+            console.log('════════════════════════════════════════════════════════════════');
+
+            // Branch-based label rules (prefix matching)
+            const branchRules = [
+              { pattern: /^(bug)?fix\//i, labels: ['bug-P3'] },
+              { pattern: /^chore\//i, labels: ['chore', 'update'] },
+              { pattern: /^deps\//i, labels: ['chore', 'dependencies'] },
+              { pattern: /^docs\//i, labels: ['documentation', 'update'] },
+              { pattern: /^feat(ure)?\//i, labels: ['feature'] },
+              { pattern: /^hotfix\//i, labels: ['hot-fix'] },
+              { pattern: /^idea\//i, labels: ['idea'] },
+              { pattern: /^proto(type)?\//i, labels: ['prototype', 'idea'] },
+              { pattern: /^question\//i, labels: ['question'] },
+              { pattern: /^refactor\//i, labels: ['refactor'] },
+              { pattern: /^test\//i, labels: ['test'] },
+            ];
+
+            // Title-based label rules (keyword matching)
+            const titleRules = [
+              { pattern: /\b(fix|bug|error|issue|problem|broken)\b/i, labels: ['bug-P3'] },
+              { pattern: /\b(chore|cleanup|maintenance|housekeeping)\b/i, labels: ['chore', 'update'] },
+              { pattern: /\b(deps?|dependencies|dependency|upgrade|update.*deps?)\b/i, labels: ['chore', 'dependencies'] },
+              { pattern: /\b(docs?|documentation|readme|guide|manual)\b/i, labels: ['documentation', 'update'] },
+              { pattern: /\b(feat|feature|add|new|implement|enhancement)\b/i, labels: ['feature'] },
+              { pattern: /\b(hotfix|urgent|critical|emergency)\b/i, labels: ['hot-fix'] },
+              { pattern: /\b(idea|proposal|suggestion|concept)\b/i, labels: ['idea'] },
+              { pattern: /\b(prototype|proto|draft|experiment|poc|proof.of.concept)\b/i, labels: ['prototype', 'idea'] },
+              { pattern: /\b(question|help|how.to|unclear|clarification)\b/i, labels: ['question'] },
+              { pattern: /\b(refactor|restructure|reorganize|cleanup|improve)\b/i, labels: ['refactor'] },
+              { pattern: /\b(test|testing|spec|coverage|unit.test|integration.test)\b/i, labels: ['test'] },
+              { pattern: /\b(security|vulnerability|CVE|exploit|patch)\b/i, labels: ['security'] },
+              { pattern: /\b(performance|perf|optimization|optimize|speed|slow)\b/i, labels: ['performance'] },
+              { pattern: /\b(breaking.change|breaking|major|incompatible)\b/i, labels: ['requires-manual-review'] },
+              { pattern: /\b(wip|work.in.progress|draft|incomplete)\b/i, labels: ['work-in-progress'] },
+            ];
+
+            const labelsToAdd = new Set();
+
+            console.log('🌿 Checking branch patterns...');
+            for (const rule of branchRules) {
+              if (rule.pattern.test(branch)) {
+                rule.labels.forEach(label => labelsToAdd.add(label));
+                console.log(`  ✅ Matched ${rule.pattern} → adding: ${rule.labels.join(', ')}`);
+              }
+            }
+
+            console.log('📝 Checking title patterns...');
+            for (const rule of titleRules) {
+              if (rule.pattern.test(prTitle)) {
+                rule.labels.forEach(label => labelsToAdd.add(label));
+                console.log(`  ✅ Matched ${rule.pattern} → adding: ${rule.labels.join(', ')}`);
+              }
+            }
+
+            const finalLabels = Array.from(labelsToAdd);
+
+            if (finalLabels.length === 0) {
+              console.log('ℹ️ No patterns matched in branch or title');
+              core.setOutput('labels-applied', '[]');
+              return;
+            }
+
+            console.log('════════════════════════════════════════════════════════════════');
+            console.log(`📋 Total labels to apply: ${finalLabels.join(', ')}`);
+
+            try {
+              const { data: existingLabels } = await github.rest.issues.listLabelsOnIssue({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+              });
+
+              const existingLabelNames = existingLabels.map(label => label.name);
+              const newLabels = finalLabels.filter(label => !existingLabelNames.includes(label));
+
+              if (newLabels.length > 0) {
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: prNumber,
+                  labels: newLabels,
+                });
+                console.log(`✅ Added new labels: ${newLabels.join(', ')}`);
+
+                if (existingLabelNames.length > 0) {
+                  console.log(`ℹ️ Labels already present: ${existingLabelNames.join(', ')}`);
+                }
+
+                core.setOutput('labels-applied', JSON.stringify(newLabels));
+              } else {
+                console.log('ℹ️ All matching labels already present, no changes needed');
+                console.log(`  📋 Existing labels: ${existingLabelNames.join(', ')}`);
+                core.setOutput('labels-applied', '[]');
+              }
+            } catch (error) {
+              console.error(`❌ Failed to apply labels: ${error.message}`);
+              core.setOutput('labels-applied', '[]');
+              // Don't fail the entire workflow for label issues
+            }
+
+      # --------------------------------------------------------------------
+      # Assign default assignee if PR has none
+      # Not on synchronize: see "Trigger Configuration" above
+      # --------------------------------------------------------------------
+      - name: 👤 Assign default assignee
+        id: assign-assignee
+        if: github.event.action != 'closed' && github.event.action != 'synchronize'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+            const prAuthor = pr.user.login;
+            const assignees = pr.assignees || [];
+
+            const skipBotUsers = process.env.SKIP_BOT_USERS.split(',').map(u => u.trim());
+            if (skipBotUsers.includes(prAuthor)) {
+              console.log(`⏭️ Skipping assignment for bot user: ${prAuthor}`);
+              core.setOutput('assignee-added', 'false');
+              return;
+            }
+
+            if (assignees.length > 0) {
+              console.log(`ℹ️ PR already has ${assignees.length} assignee(s): ${assignees.map(a => a.login).join(', ')}`);
+              console.log('⏭️ Skipping default assignment');
+              core.setOutput('assignee-added', 'false');
+              return;
+            }
+
+            try {
+              await github.rest.issues.addAssignees({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                assignees: [process.env.DEFAULT_ASSIGNEE],
+              });
+
+              console.log(`✅ Assigned PR to @${process.env.DEFAULT_ASSIGNEE}`);
+              core.setOutput('assignee-added', 'true');
+
+            } catch (error) {
+              console.error(`❌ Failed to assign PR: ${error.message}`);
+              core.setOutput('assignee-added', 'false');
+              // Don't fail the workflow for assignment issues
+            }
+
+      # --------------------------------------------------------------------
+      # Welcome first-time contributors (same-repo only — fork PRs receive
+      # a different, security-focused welcome in the fork job below).
+      # --------------------------------------------------------------------
+      - name: 👋 Welcome new contributor
+        id: welcome-contributor
+        if: |
+          github.event.action == 'opened' &&
+          contains(fromJSON('["FIRST_TIMER", "FIRST_TIME_CONTRIBUTOR"]'), github.event.pull_request.author_association) &&
+          env.WELCOME_FIRST_TIME == 'true'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const author = context.payload.pull_request.user.login;
+            const repoName = context.repo.repo;
+            const repoOwner = context.repo.owner;
+
+            const skipBotUsers = process.env.SKIP_BOT_USERS.split(',').map(u => u.trim());
+            if (skipBotUsers.includes(author)) {
+              console.log(`⏭️ Skipping welcome for bot user: ${author}`);
+              core.setOutput('welcomed', 'false');
+              return;
+            }
+
+            const welcomeMessage = `## 👋 Welcome, @${author}!
+
+            Thank you for opening your first pull request in **${repoOwner}/${repoName}**! 🎉
+
+            Here's what happens next:
+            - 🤖 Automated tests will run to check your changes
+            - 👀 A maintainer will review your contribution
+            - 💬 You might receive feedback or suggestions
+            - ✅ Once approved, your PR will be merged
+
+            **Need help?** Feel free to ask questions in the comments below.
+
+            Thanks for contributing to the project! 🚀`;
+
+            try {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: welcomeMessage,
+              });
+
+              console.log(`✅ Posted welcome comment for new contributor @${author}`);
+              core.setOutput('welcomed', 'true');
+
+            } catch (error) {
+              console.error(`❌ Failed to post welcome comment: ${error.message}`);
+              core.setOutput('welcomed', 'false');
+            }
+
+      # --------------------------------------------------------------------
+      # PR size analysis + size/XS|S|M|L|XL label (opened events only)
+      # --------------------------------------------------------------------
+      - name: 📏 Add size label
+        id: analyze-size
+        if: github.event.action == 'opened' && env.APPLY_SIZE_LABELS == 'true'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+            const additions = pr.additions || 0;
+            const deletions = pr.deletions || 0;
+            const totalChanges = additions + deletions;
+
+            console.log(`📊 PR Statistics:`);
+            console.log(`  ➕ Additions: ${additions}`);
+            console.log(`  ➖ Deletions: ${deletions}`);
+            console.log(`  📈 Total changes: ${totalChanges}`);
+
+            let sizeLabel = '';
+            const thresholds = {
+              XS: parseInt(process.env.SIZE_XS),
+              S: parseInt(process.env.SIZE_S),
+              M: parseInt(process.env.SIZE_M),
+              L: parseInt(process.env.SIZE_L)
+            };
+
+            if (totalChanges <= thresholds.XS) {
+              sizeLabel = 'size/XS';
+            } else if (totalChanges <= thresholds.S) {
+              sizeLabel = 'size/S';
+            } else if (totalChanges <= thresholds.M) {
+              sizeLabel = 'size/M';
+            } else if (totalChanges <= thresholds.L) {
+              sizeLabel = 'size/L';
+            } else {
+              sizeLabel = 'size/XL';
+            }
+
+            try {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                labels: [sizeLabel],
+              });
+
+              console.log(`✅ Added size label: ${sizeLabel}`);
+              core.setOutput('size-label', sizeLabel);
+              core.setOutput('total-changes', totalChanges.toString());
+
+            } catch (error) {
+              console.error(`❌ Failed to add size label: ${error.message}`);
+              core.setOutput('size-label', '');
+              core.setOutput('total-changes', totalChanges.toString());
+            }
+
+      # --------------------------------------------------------------------
+      # Cache cleanup on PR close (frees up GH Actions cache quota)
+      # --------------------------------------------------------------------
+      - name: 🧹 Cleanup caches
+        id: clean-cache
+        if: github.event.action == 'closed' && env.CLEAN_CACHE == 'true'
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          echo "🧹 Cleaning up caches for PR #$PR_NUMBER..."
+          echo "════════════════════════════════════════════════════════════════"
+
+          echo "📋 Fetching cache list for PR #$PR_NUMBER..."
+          allCaches=$(gh cache list --limit 100 --json id,key,ref)
+
+          echo "🔍 Looking for caches with refs:"
+          echo "  - refs/pull/$PR_NUMBER/merge"
+          echo "  - refs/pull/$PR_NUMBER/head"
+          echo "  - refs/heads/$PR_HEAD_REF"
+
+          # PR_HEAD_REF is read from env (not interpolated into the jq filter)
+          # to prevent jq-injection via crafted branch names.
+          cacheKeysForPR=$(echo "$allCaches" | jq -r --arg pr "$PR_NUMBER" --arg branch "$PR_HEAD_REF" \
+            '.[] | select(
+              .ref == "refs/pull/\($pr)/merge" or
+              .ref == "refs/pull/\($pr)/head" or
+              .ref == "refs/heads/\($branch)"
+            ) | .id')
+
+          if [ -z "$cacheKeysForPR" ]; then
+            cacheCount=0
+          else
+            cacheCount=$(echo "$cacheKeysForPR" | wc -l | tr -d ' ')
+          fi
+
+          if [ "$cacheCount" -eq "0" ]; then
+            echo "ℹ️ No caches found for this PR"
+            echo "caches-cleaned=0" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "🗑️ Found $cacheCount cache(s) to clean"
+
+          cleanedCount=0
+          for cacheKey in $cacheKeysForPR; do
+            if gh cache delete "$cacheKey"; then
+              echo "  ✅ Deleted cache: $cacheKey"
+              cleanedCount=$((cleanedCount + 1))
+            else
+              echo "  ⚠️ Failed to delete cache: $cacheKey"
+            fi
+          done
+
+          echo "════════════════════════════════════════════════════════════════"
+          echo "✅ Cleaned $cleanedCount out of $cacheCount cache(s)"
+          echo "caches-cleaned=$cleanedCount" >> "$GITHUB_OUTPUT"
+
+      # --------------------------------------------------------------------
+      # Delete the merged branch (same-repo only — branches in forks can't
+      # be deleted from the base repo, hence this step is absent from the
+      # fork job below).
+      # --------------------------------------------------------------------
+      - name: 🌿 Delete branch
+        id: delete-branch
+        if: |
+          github.event.action == 'closed' &&
+          github.event.pull_request.merged == true &&
+          env.DELETE_BRANCH == 'true'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const branch = context.payload.pull_request.head.ref;
+
+            console.log(`🌿 Processing branch deletion for: ${branch}`);
+
+            const { data: repoData } = await github.rest.repos.get({
+              owner,
+              repo,
+            });
+            const defaultBranch = repoData.default_branch;
+
+            const configProtected = process.env.PROTECTED_BRANCHES.split(',').map(b => b.trim());
+            const protectedBranches = [...new Set([...configProtected, defaultBranch])];
+
+            console.log(`🔒 Protected branches: ${protectedBranches.join(', ')}`);
+
+            if (!protectedBranches.includes(branch)) {
+              try {
+                await github.rest.git.deleteRef({
+                  owner,
+                  repo,
+                  ref: `heads/${branch}`,
+                });
+                console.log(`✅ Deleted branch: ${branch}`);
+                core.setOutput('branch-deleted', 'true');
+              } catch (error) {
+                if (error.status === 422) {
+                  console.log(`ℹ️ Branch ${branch} already deleted or protected`);
+                  core.setOutput('branch-deleted', 'false');
+                } else {
+                  console.error(`❌ Failed to delete branch ${branch}: ${error.message}`);
+                  core.setOutput('branch-deleted', 'false');
+                  core.setFailed(`Failed to delete branch ${branch}: ${error.message}`);
+                }
+              }
+            } else {
+              console.log(`⏭️ Skipping deletion for protected branch: ${branch}`);
+              core.setOutput('branch-deleted', 'skip');
+            }
+
+      # --------------------------------------------------------------------
+      # Workflow summary
+      # --------------------------------------------------------------------
+      - name: 📊 Generate workflow summary
+        if: always()
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_ACTION: ${{ github.event.action }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_MERGED: ${{ github.event.pull_request.merged }}
+          APPLY_LABELS_OUTCOME: ${{ steps.apply-labels.outcome }}
+          APPLY_LABELS_OUTPUT: ${{ steps.apply-labels.outputs.labels-applied }}
+          ASSIGN_OUTCOME: ${{ steps.assign-assignee.outcome }}
+          ASSIGN_OUTPUT: ${{ steps.assign-assignee.outputs.assignee-added }}
+          WELCOME_OUTCOME: ${{ steps.welcome-contributor.outcome }}
+          WELCOME_OUTPUT: ${{ steps.welcome-contributor.outputs.welcomed }}
+          SIZE_OUTCOME: ${{ steps.analyze-size.outcome }}
+          SIZE_LABEL: ${{ steps.analyze-size.outputs.size-label }}
+          TOTAL_CHANGES: ${{ steps.analyze-size.outputs.total-changes }}
+          CACHE_OUTCOME: ${{ steps.clean-cache.outcome }}
+          CACHES_CLEANED: ${{ steps.clean-cache.outputs.caches-cleaned }}
+          DELETE_OUTCOME: ${{ steps.delete-branch.outcome }}
+          BRANCH_DELETED: ${{ steps.delete-branch.outputs.branch-deleted }}
+        run: |
+          echo "📊 Generating workflow summary..."
+
+          {
+            echo "# 🔧 Pull Request Management Summary (Same Repo)"
+            echo ""
+            echo "**⏰ Processed:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+            echo "**📋 PR:** #$PR_NUMBER - $PR_TITLE"
+            echo "**🎬 Action:** $PR_ACTION"
+            echo "**👤 Author:** @$PR_AUTHOR"
+            echo "**🔒 PR Type:** Same-repo (trusted contributor)"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$PR_ACTION" = "synchronize" ]; then
+            {
+              echo "## 📋 Actions Taken"
+              echo ""
+              echo "None: new commits only. Labels and the default assignee were set when the PR opened; this run reports the check on the new head."
+            } >> "$GITHUB_STEP_SUMMARY"
+          elif [ "$PR_ACTION" != "closed" ]; then
+            {
+              echo "## 📋 Actions Taken"
+              echo ""
+              echo "| Action | Result |"
+              echo "|--------|--------|"
+            } >> "$GITHUB_STEP_SUMMARY"
+
+            if [ "$APPLY_LABELS_OUTCOME" = "success" ]; then
+              if [ "$APPLY_LABELS_OUTPUT" != "[]" ] && [ -n "$APPLY_LABELS_OUTPUT" ]; then
+                echo "| 🏷️ Labels Applied | $APPLY_LABELS_OUTPUT |" >> "$GITHUB_STEP_SUMMARY"
+              else
+                echo "| 🏷️ Labels Applied | None needed |" >> "$GITHUB_STEP_SUMMARY"
+              fi
+            elif [ "$APPLY_LABELS_OUTCOME" = "skipped" ]; then
+              echo "| 🏷️ Labels Applied | Skipped (disabled) |" >> "$GITHUB_STEP_SUMMARY"
+            fi
+
+            if [ "$ASSIGN_OUTCOME" = "success" ]; then
+              if [ "$ASSIGN_OUTPUT" = "true" ]; then
+                echo "| 👤 Default Assignee | Added |" >> "$GITHUB_STEP_SUMMARY"
+              else
+                echo "| 👤 Default Assignee | Already assigned |" >> "$GITHUB_STEP_SUMMARY"
+              fi
+            fi
+
+            if [ "$WELCOME_OUTCOME" = "success" ] && [ "$WELCOME_OUTPUT" = "true" ]; then
+              echo "| 👋 Welcome Message | Posted |" >> "$GITHUB_STEP_SUMMARY"
+            fi
+
+            if [ "$SIZE_OUTCOME" = "success" ]; then
+              if [ -n "$SIZE_LABEL" ]; then
+                echo "| 📏 Size Analysis | $SIZE_LABEL ($TOTAL_CHANGES changes) |" >> "$GITHUB_STEP_SUMMARY"
+              fi
+            elif [ "$SIZE_OUTCOME" = "skipped" ]; then
+              echo "| 📏 Size Analysis | Skipped |" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          else
+            {
+              echo "## 🧹 Cleanup Actions"
+              echo ""
+              echo "| Action | Result |"
+              echo "|--------|--------|"
+            } >> "$GITHUB_STEP_SUMMARY"
+
+            if [ "$CACHE_OUTCOME" = "success" ]; then
+              echo "| 🧹 Cache Cleanup | ${CACHES_CLEANED} cache(s) cleaned |" >> "$GITHUB_STEP_SUMMARY"
+            fi
+
+            if [ "$PR_MERGED" = "true" ]; then
+              if [ "$DELETE_OUTCOME" = "success" ]; then
+                if [ "$BRANCH_DELETED" = "true" ]; then
+                  echo "| 🌿 Branch Deletion | Deleted |" >> "$GITHUB_STEP_SUMMARY"
+                elif [ "$BRANCH_DELETED" = "skip" ]; then
+                  echo "| 🌿 Branch Deletion | Skipped (protected) |" >> "$GITHUB_STEP_SUMMARY"
+                else
+                  echo "| 🌿 Branch Deletion | Already deleted |" >> "$GITHUB_STEP_SUMMARY"
+                fi
+              elif [ "$DELETE_OUTCOME" = "skipped" ]; then
+                echo "| 🌿 Branch Deletion | Skipped |" >> "$GITHUB_STEP_SUMMARY"
+              fi
+            fi
+          fi
+
+          {
+            echo ""
+            echo "### 🔧 Configuration"
+            echo ""
+            echo "| Setting | Value |"
+            echo "|---------|-------|"
+            echo "| Default Assignee | @${DEFAULT_ASSIGNEE} |"
+            echo "| Apply Size Labels | ${APPLY_SIZE_LABELS} |"
+            echo "| Apply Type Labels | ${APPLY_TYPE_LABELS} |"
+            echo "| Welcome First-timers | ${WELCOME_FIRST_TIME} |"
+            echo ""
+            echo "---"
+            echo "🤖 _Automated by GitHub Actions_"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # ====================================================================================
+  # Fork PRs
+  #
+  # Run from the DEFAULT branch (workflow_run) after the permission-less Auto-merge
+  # Trigger ran for a fork PR event: a fork's own pull_request runs only ever get a
+  # read-only token. Two jobs, like the Dependabot workflow's verify → analyze:
+  #   pr-management-fork-lookup → finds the PR, read-only and with no concurrency
+  #                               group, so trigger runs that queue nothing never
+  #                               cancel one that does work
+  #   pr-management-fork        → acts on that PR, one run at a time per PR
+  # Performs only the operations that are safe and meaningful for forks:
+  # fork+triage labels, default assignee, security-aware welcome notice, cache
+  # cleanup.
+  #
+  # NOT performed for forks:
+  #   - Type labels (require pre-merge code review to be meaningful)
+  #   - PR size analysis (gated to same-repo by original design)
+  #   - Branch deletion (fork branches live in the contributor's repo)
+  #
+  # Permissions are intentionally narrower than the same-repo job above:
+  # NO `contents: write` since there is no work that requires it.
+  # ====================================================================================
+  pr-management-fork-lookup:
+    name: 🔍 Find fork PR
+    # Pre-filter on GitHub's payload: a successful trigger run for a pull_request
+    # event whose head is another repository. The PR is re-read from the API below.
+    if: |
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_repository &&
+      github.event.workflow_run.head_repository.full_name != github.repository
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    permissions:
+      actions: read # Required: Confirm the trigger's fork PR management job ran (wake-up filter)
+      contents: read # Required: Read the default branch's .github/env configuration through the API
+      pull-requests: read # Required: Find and re-read the fork PR
+    outputs:
+      proceed: ${{ steps.pr.outputs.proceed }}
+      pr-number: ${{ steps.pr.outputs.pr-number }}
+      state: ${{ steps.pr.outputs.state }}
+      author: ${{ steps.pr.outputs.author }}
+      assignee-count: ${{ steps.pr.outputs.assignee-count }}
+      head-repo: ${{ steps.pr.outputs.head-repo }}
+      title: ${{ steps.pr.outputs.title }}
+      # The default branch's .github/env configuration, for the work job (empty
+      # unless it will run)
+      env-json: ${{ steps.load-env.outputs.env-json }}
+
+    steps:
+      # --------------------------------------------------------------------
+      # Find the fork PR. Nothing from the trigger's run is trusted: its jobs
+      # list is only a wake-up hint, and the PR is found from GitHub's payload
+      # (head repository, branch, commit), then re-read from the API.
+      # --------------------------------------------------------------------
+      - name: 🔍 Find the fork PR
+        id: pr
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          # The trigger job that queues this job (auto-merge-trigger.yml)
+          QUEUE_JOB: "📨 Queue fork PR management"
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { owner, repo } = context.repo;
+            const repoFullName = `${owner}/${repo}`;
+            const run = context.payload.workflow_run;
+            const skip = (reason) => {
+              console.log(`⏭️ ${reason}`);
+              core.setOutput('reason', reason);
+              core.setOutput('proceed', 'false');
+            };
+
+            // Wake-up filter (not a security check): the trigger's PR management
+            // job runs only for opened, reopened, ready_for_review and closed.
+            const { data: { jobs: triggerJobs } } = await github.rest.actions.listJobsForWorkflowRun({
+              owner,
+              repo,
+              run_id: run.id,
+            });
+            if (!triggerJobs.some(job => job.name === process.env.QUEUE_JOB && job.conclusion === 'success')) {
+              return skip(`"${process.env.QUEUE_JOB}" did not run for this event`);
+            }
+
+            // workflow_run.pull_requests is empty for fork PRs: look the PR up by its
+            // head (fork owner + branch). A fork branch can back several PRs (other
+            // base branches, or an older closed PR from a reused branch name), so all
+            // of them are listed and an ambiguous match is never guessed.
+            const headRepo = run.head_repository?.full_name;
+            const headOwner = run.head_repository?.owner?.login;
+            if (!headRepo || !headOwner || !run.head_branch) {
+              return skip('The trigger run has no head repository or branch (deleted fork?)');
+            }
+            const candidates = (await github.paginate(github.rest.pulls.list, {
+              owner,
+              repo,
+              state: 'all',
+              head: `${headOwner}:${run.head_branch}`,
+              per_page: 100,
+            })).filter(p => p.head?.repo?.full_name === headRepo);
+            const atHead = candidates.filter(p => p.head?.sha === run.head_sha);
+            const numbers = (list) => `#${list.map(p => p.number).join(', #')}`;
+            let match;
+            if (atHead.length === 1) {
+              [match] = atHead;
+            } else if (atHead.length > 1) {
+              return skip(`Several pull requests (${numbers(atHead)}) come from ${headRepo} at ${run.head_sha}, so none is acted on`);
+            } else if (candidates.length === 1) {
+              // The fork pushed again after the trigger ran: still the only PR from that branch
+              [match] = candidates;
+            } else if (candidates.length === 0) {
+              return skip(`No pull request in ${repoFullName} comes from ${headRepo}:${run.head_branch}`);
+            } else {
+              return skip(`Several pull requests (${numbers(candidates)}) come from ${headRepo}:${run.head_branch}, none at ${run.head_sha}, so none is acted on`);
+            }
+
+            const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: match.number });
+            // Fail closed on a deleted fork, and never handle a same-repo PR here
+            if (!pr.head?.repo) {
+              return skip(`PR #${pr.number}: head repository is gone (deleted fork)`);
+            }
+            if (pr.head.repo.full_name === repoFullName) {
+              return skip(`PR #${pr.number} is not from a fork`);
+            }
+
+            console.log(`📋 Fork PR #${pr.number}: state=${pr.state}, author=${pr.user?.login ?? '<deleted>'}, head=${pr.head.repo.full_name}`);
+            core.setOutput('pr-number', String(pr.number));
+            core.setOutput('state', pr.state);
+            core.setOutput('author', pr.user?.login ?? '');
+            core.setOutput('assignee-count', String((pr.assignees || []).length));
+            core.setOutput('head-repo', pr.head.repo.full_name);
+            core.setOutput('title', pr.title ?? '');
+            core.setOutput('proceed', 'true');
+
+      # --------------------------------------------------------------------
+      # Load the configuration for the work job, here in the read-only job,
+      # and without a checkout: the fork path reads everything through the
+      # API. On workflow_run, context.sha (github.sha) is the latest commit on
+      # the DEFAULT branch, the same commit this workflow file came from. From
+      # it come only the files the load-env action reads (.github/env's loader
+      # and *.env files, and the action itself), written to this job's empty
+      # workspace. Fork code is never fetched or executed.
+      # --------------------------------------------------------------------
+      - name: 📥 Fetch default-branch configuration (API)
+        if: steps.pr.outputs.proceed == 'true'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const { owner, repo } = context.repo;
+            const ref = context.sha;
+            const workspace = process.env.GITHUB_WORKSPACE;
+
+            // One regular file at `ref`, written under the workspace at the same path
+            const fetchFile = async (filePath) => {
+              const { data } = await github.rest.repos.getContent({ owner, repo, path: filePath, ref });
+              if (Array.isArray(data) || data.type !== 'file' || data.encoding !== 'base64') {
+                throw new Error(`${filePath} at ${ref} is not a regular file the API returns in full`);
+              }
+              const target = path.join(workspace, filePath);
+              fs.mkdirSync(path.dirname(target), { recursive: true });
+              fs.writeFileSync(target, Buffer.from(data.content, 'base64'));
+            };
+
+            // The loader and every *.env file in .github/env, as load-env.sh reads them
+            const { data: entries } = await github.rest.repos.getContent({ owner, repo, path: '.github/env', ref });
+            if (!Array.isArray(entries)) {
+              throw new Error(`.github/env at ${ref} is not a directory`);
+            }
+            const names = entries
+              .filter(e => e.type === 'file' && !e.name.includes('/') && e.name !== '.' && e.name !== '..')
+              .map(e => e.name)
+              .filter(name => name === 'load-env.sh' || name.endsWith('.env'));
+            if (!names.includes('load-env.sh')) {
+              throw new Error(`.github/env/load-env.sh not found at ${ref}`);
+            }
+            for (const name of names) {
+              await fetchFile(`.github/env/${name}`);
+            }
+            await fetchFile('.github/actions/load-env/action.yml');
+            console.log(`📥 Fetched ${names.length} file(s) from .github/env and the load-env action at ${ref}`);
+
+      - name: 🌍 Load environment variables
+        id: load-env
+        if: steps.pr.outputs.proceed == 'true'
+        uses: ./.github/actions/load-env
+
+      # --------------------------------------------------------------------
+      # Summary when there is nothing to do (the next job summarizes the rest)
+      # --------------------------------------------------------------------
+      - name: 📊 Generate lookup summary
+        if: always() && steps.pr.outputs.proceed != 'true'
+        env:
+          SKIP_REASON: ${{ steps.pr.outputs.reason }}
+        run: |
+          {
+            echo "# 🔧 Pull Request Management Summary (Fork)"
+            echo ""
+            echo "⏭️ Skipped: ${SKIP_REASON:-the lookup step failed; see its log}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  pr-management-fork:
+    name: 🔧 PR Management (Fork)
+    needs: pr-management-fork-lookup
+    if: needs.pr-management-fork-lookup.outputs.proceed == 'true'
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    # One group per PR (found by the lookup job): a newer event for the same PR
+    # cancels an in-flight run.
+    concurrency:
+      group: ${{ github.workflow }}-fork-${{ needs.pr-management-fork-lookup.outputs.pr-number }}
+      cancel-in-progress: true
+    # No checkout and no workspace: this job can write, so the .github/env
+    # configuration comes from the read-only lookup job as an output.
+    permissions:
+      actions: write # Required: Delete GitHub Actions caches for closed PRs
+      issues: write # Required: Create fork/triage labels lazily if missing
+      pull-requests: write # Required: Apply labels, assign reviewers, post comments
+    env:
+      # Found and re-read from the API by the lookup job
+      PR_NUMBER: ${{ needs.pr-management-fork-lookup.outputs.pr-number }}
+      PR_STATE: ${{ needs.pr-management-fork-lookup.outputs.state }}
+      PR_AUTHOR: ${{ needs.pr-management-fork-lookup.outputs.author }}
+      PR_HEAD_REPO: ${{ needs.pr-management-fork-lookup.outputs.head-repo }}
+
+    steps:
+      # --------------------------------------------------------------------
+      # Extract fork-management configuration (single jq pass) from the
+      # default branch's .github/env, loaded by the lookup job
+      # --------------------------------------------------------------------
+      - name: 🔧 Extract configuration
+        env:
+          ENV_JSON: ${{ needs.pr-management-fork-lookup.outputs.env-json }}
+        run: |
+          echo "📋 Extracting fork PR management configuration..."
+
+          # Fail closed without a configuration (the defaults below are for
+          # unset keys, not for a missing configuration)
+          if [[ -z "$ENV_JSON" ]] || ! jq -e 'type == "object" and length > 0' <<< "$ENV_JSON" > /dev/null 2>&1; then
+            echo "❌ ERROR: no configuration from the lookup job (env-json is empty or not a JSON object)" >&2
+            exit 1
+          fi
+
+          {
+            echo "DEFAULT_ASSIGNEE=$(echo "$ENV_JSON" | jq -r '.PR_MANAGEMENT_DEFAULT_ASSIGNEE // ""')"
+            echo "SKIP_BOT_USERS=$(echo "$ENV_JSON" | jq -r '.PR_MANAGEMENT_SKIP_BOT_USERS // ""')"
+            echo "FORK_LABEL=$(echo "$ENV_JSON" | jq -r '.PR_MANAGEMENT_FORK_LABEL // "fork-pr"')"
+            echo "TRIAGE_LABEL=$(echo "$ENV_JSON" | jq -r '.PR_MANAGEMENT_TRIAGE_LABEL // "requires-manual-review"')"
+            echo "WELCOME_FORKS=$(echo "$ENV_JSON" | jq -r '.PR_MANAGEMENT_WELCOME_FORKS // "true"')"
+            echo "CLEAN_CACHE=$(echo "$ENV_JSON" | jq -r '.PR_MANAGEMENT_CLEAN_CACHE_ON_CLOSE // "true"')"
+          } >> "$GITHUB_ENV"
+
+          echo "🔍 Configuration loaded:"
+          echo "  👤 Default assignee: $(echo "$ENV_JSON" | jq -r '.PR_MANAGEMENT_DEFAULT_ASSIGNEE // ""')"
+          echo "  🏷️ Fork label: $(echo "$ENV_JSON" | jq -r '.PR_MANAGEMENT_FORK_LABEL // "fork-pr"')"
+          echo "  🏷️ Triage label: $(echo "$ENV_JSON" | jq -r '.PR_MANAGEMENT_TRIAGE_LABEL // "requires-manual-review"')"
+          echo "  👋 Welcome forks: $(echo "$ENV_JSON" | jq -r '.PR_MANAGEMENT_WELCOME_FORKS // "true"')"
+          echo "  🧹 Clean cache on close: $(echo "$ENV_JSON" | jq -r '.PR_MANAGEMENT_CLEAN_CACHE_ON_CLOSE // "true"')"
+
+      # --------------------------------------------------------------------
+      # Debug log: confirm fork classification (the lookup job already
+      # enforces this, but logging the values is useful when triaging issues).
+      # --------------------------------------------------------------------
+      - name: 🔍 Fork detection (debug)
+        env:
+          BASE_REPO: ${{ github.repository }}
+        run: |
+          echo "════════════════════════════════════════════════════════════════"
+          echo "🔍 Fork Detection Debug"
+          echo "════════════════════════════════════════════════════════════════"
+          echo "  PR: #${PR_NUMBER} (${PR_STATE})"
+          echo "  PR Head Repo: '${PR_HEAD_REPO}'"
+          echo "  Base Repo: '${BASE_REPO}'"
+          echo "🚨 FORK PR confirmed (the lookup job would have skipped otherwise)"
+          echo "════════════════════════════════════════════════════════════════"
+
+      # --------------------------------------------------------------------
+      # Apply fork + triage labels (lazy-creates the labels if missing)
+      # --------------------------------------------------------------------
+      - name: 🏷️ Add fork + triage labels
+        id: fork-labels
+        if: env.PR_STATE == 'open'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prNumber = Number(process.env.PR_NUMBER);
+            const author = process.env.PR_AUTHOR;
+
+            const skip = (process.env.SKIP_BOT_USERS || '')
+              .split(',').map(s => s.trim()).filter(Boolean);
+            if (skip.includes(author)) {
+              core.info(`Skipping labels for bot user: ${author}`);
+              return;
+            }
+
+            const ensureLabels = async (names) => {
+              // Defense-in-depth: never POST blank labels (GitHub rejects them
+              // with a 422). Guards against an empty/misconfigured FORK_LABEL or
+              // TRIAGE_LABEL slipping through.
+              names = names.map(n => (n || '').trim()).filter(Boolean);
+              if (names.length === 0) {
+                core.warning('No fork/triage labels configured; skipping labeling.');
+                return;
+              }
+              // Create missing labels lazily with safe colors
+              for (const name of names) {
+                try {
+                  await github.rest.issues.getLabel({
+                    owner: context.repo.owner, repo: context.repo.repo, name
+                  });
+                } catch (e) {
+                  if (e.status === 404) {
+                    await github.rest.issues.createLabel({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      name,
+                      color: name === process.env.TRIAGE_LABEL ? "d876e3" : "ededed",
+                    });
+                    core.info(`Created missing label: ${name}`);
+                  } else {
+                    throw e;
+                  }
+                }
+              }
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                labels: names
+              });
+            };
+
+            await ensureLabels([process.env.FORK_LABEL, process.env.TRIAGE_LABEL]);
+
+      # --------------------------------------------------------------------
+      # Assign default assignee if configured (skip when unset)
+      # --------------------------------------------------------------------
+      - name: 👤 Assign default assignee (optional)
+        id: fork-assign
+        if: env.PR_STATE == 'open' && env.DEFAULT_ASSIGNEE != ''
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          ASSIGNEE_COUNT: ${{ needs.pr-management-fork-lookup.outputs.assignee-count }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const author = process.env.PR_AUTHOR;
+
+            const skip = (process.env.SKIP_BOT_USERS || '')
+              .split(',').map(s => s.trim()).filter(Boolean);
+            if (skip.includes(author)) {
+              core.info(`Skipping assignment for bot user: ${author}`);
+              return;
+            }
+
+            if (process.env.ASSIGNEE_COUNT === '0') {
+              await github.rest.issues.addAssignees({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: Number(process.env.PR_NUMBER),
+                assignees: [process.env.DEFAULT_ASSIGNEE],
+              });
+              core.info(`Assigned to @${process.env.DEFAULT_ASSIGNEE}`);
+            } else {
+              core.info('PR already has assignees; skipping.');
+            }
+
+      # --------------------------------------------------------------------
+      # Welcome notice for fork contributors (security-focused; explains why
+      # certain CI checks are restricted on fork PRs). Posted once per PR: the
+      # hidden marker below keeps re-opens and later events from repeating it.
+      # --------------------------------------------------------------------
+      - name: 💬 Welcome fork contributor
+        id: fork-welcome
+        if: env.PR_STATE == 'open' && env.WELCOME_FORKS == 'true'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prNumber = Number(process.env.PR_NUMBER);
+            const author = process.env.PR_AUTHOR;
+            const repoName = context.repo.repo;
+            const repoOwner = context.repo.owner;
+
+            const body = `## 👋 Thanks, @${author}!
+
+            This pull request comes from a **fork**. For security, our CI runs in a restricted mode.
+            A maintainer will triage this shortly and run any additional checks as needed.
+
+            - 🏷️ Labeled: \`${process.env.FORK_LABEL}\`, \`${process.env.TRIAGE_LABEL}\`
+            - 👀 We'll review and follow up here if anything else is needed.
+
+            Thanks for contributing to **${repoOwner}/${repoName}**! 🚀
+
+            <!-- fork-welcome-v1 -->`;
+
+            // Avoid duplicate welcome comments across re-opens / syncs
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              per_page: 100
+            });
+
+            const welcomeExists = comments.some(comment =>
+              comment.body?.includes('<!-- fork-welcome-v1 -->') &&
+              comment.user?.login === 'github-actions[bot]'
+            );
+
+            if (!welcomeExists) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body
+              });
+              core.info(`✅ Posted welcome comment for fork PR from @${author}`);
+            } else {
+              core.info(`ℹ️ Welcome comment already exists, skipping duplicate`);
+            }
+
+      # --------------------------------------------------------------------
+      # Cache cleanup on PR close (fork PR caches live in the BASE repo's
+      # cache pool too, under the PR's refs). Only refs/pull/<n>/* match: a
+      # fork's branch name (often "main"/"master") says nothing about this
+      # repository's refs/heads/*, whose caches must stay.
+      # --------------------------------------------------------------------
+      - name: 🧹 Cleanup caches
+        id: fork-clean-cache
+        if: env.PR_STATE == 'closed' && env.CLEAN_CACHE == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          echo "🧹 Cleaning up caches for fork PR #$PR_NUMBER..."
+          echo "════════════════════════════════════════════════════════════════"
+
+          echo "📋 Fetching cache list for PR #$PR_NUMBER..."
+          allCaches=$(gh cache list --limit 100 --json id,key,ref)
+
+          echo "🔍 Looking for caches with refs:"
+          echo "  - refs/pull/$PR_NUMBER/merge"
+          echo "  - refs/pull/$PR_NUMBER/head"
+
+          cacheKeysForPR=$(echo "$allCaches" | jq -r --arg pr "$PR_NUMBER" \
+            '.[] | select(
+              .ref == "refs/pull/\($pr)/merge" or
+              .ref == "refs/pull/\($pr)/head"
+            ) | .id')
+
+          if [ -z "$cacheKeysForPR" ]; then
+            cacheCount=0
+          else
+            cacheCount=$(echo "$cacheKeysForPR" | wc -l | tr -d ' ')
+          fi
+
+          if [ "$cacheCount" -eq "0" ]; then
+            echo "ℹ️ No caches found for this PR"
+            echo "caches-cleaned=0" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "🗑️ Found $cacheCount cache(s) to clean"
+
+          cleanedCount=0
+          for cacheKey in $cacheKeysForPR; do
+            if gh cache delete "$cacheKey"; then
+              echo "  ✅ Deleted cache: $cacheKey"
+              cleanedCount=$((cleanedCount + 1))
+            else
+              echo "  ⚠️ Failed to delete cache: $cacheKey"
+            fi
+          done
+
+          echo "════════════════════════════════════════════════════════════════"
+          echo "✅ Cleaned $cleanedCount out of $cacheCount cache(s)"
+          echo "caches-cleaned=$cleanedCount" >> "$GITHUB_OUTPUT"
+
+      # --------------------------------------------------------------------
+      # Workflow summary
+      # --------------------------------------------------------------------
+      - name: 📊 Generate workflow summary
+        if: always()
+        env:
+          PR_TITLE: ${{ needs.pr-management-fork-lookup.outputs.title }}
+          BASE_REPO: ${{ github.repository }}
+          CACHE_OUTCOME: ${{ steps.fork-clean-cache.outcome }}
+          CACHES_CLEANED: ${{ steps.fork-clean-cache.outputs.caches-cleaned }}
+        run: |
+          {
+            echo "# 🔧 Pull Request Management Summary (Fork)"
+            echo ""
+            echo "**PR:** #$PR_NUMBER — $PR_TITLE"
+            echo "**Author:** @$PR_AUTHOR"
+            echo "**State:** $PR_STATE"
+            echo ""
+            echo "## 🔍 Fork Detection"
+            echo ""
+            echo "| Property | Value |"
+            echo "|----------|-------|"
+            echo "| PR Head Repo | \`$PR_HEAD_REPO\` |"
+            echo "| Base Repo | \`$BASE_REPO\` |"
+            echo "| Is Fork PR? | **true** |"
+            echo "| Status | ✅ Fork PR — handled with restricted permissions |"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$PR_STATE" = "closed" ]; then
+            {
+              echo "## 🧹 Cleanup Actions"
+              echo ""
+              echo "| Action | Result |"
+              echo "|--------|--------|"
+              if [ "$CACHE_OUTCOME" = "success" ]; then
+                echo "| 🧹 Cache Cleanup | ${CACHES_CLEANED} cache(s) cleaned |"
+              elif [ "$CACHE_OUTCOME" = "skipped" ]; then
+                echo "| 🧹 Cache Cleanup | Skipped (disabled) |"
+              fi
+              echo ""
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          {
+            echo "---"
+            echo "**Security:** This job ran from the default branch via **workflow_run** with **no checkout** (its configuration was read from the default branch through the API by the lookup job). PR code was **not** checked out or executed."
+          } >> "$GITHUB_STEP_SUMMARY"
